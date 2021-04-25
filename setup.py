@@ -4,7 +4,8 @@ setup(name='grammar_ru',
       description='Demo',
       packages=find_packages(),
       install_requires=[
-          'training_grounds'
+        'training_grounds',
+        'slovnet',
       ],
       include_package_data = True,
       zip_safe=False
