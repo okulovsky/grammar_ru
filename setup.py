@@ -5,7 +5,8 @@ setup(name='grammar_ru',
       packages=find_packages(),
       install_requires=[
         'training_grounds',
-        'slovnet',
+        'slovnet==0.5.0',
+        'pyenchant==3.2.0'
       ],
       include_package_data = True,
       zip_safe=False
