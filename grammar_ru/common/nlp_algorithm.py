@@ -1,14 +1,19 @@
 from typing import *
 from .separator import Separator
 import pandas as pd
+from grammar_ru.common import validations
 
 class NlpAlgorithm:
     def __init__(self, status_column: str, suggest_column: Optional[str]):
         self._status_column = status_column
         self._suggest_column = suggest_column
-
-    def run(self, df):
+    
+    def _run_inner(self, df: pd.DataFrame):
         raise NotImplementedError()
+
+    def run(self, df: pd.DataFrame):
+        self.validate_input()
+        self._run_inner(df)
 
     def get_status_column(self):
         return self._status_column
@@ -16,11 +21,8 @@ class NlpAlgorithm:
     def get_suggest_column(self):
         return self._suggest_column
 
-    def validate_input(self, df):
-        for column in ['word','word_id','sentence_id','word_index','check_requested']:
-            if column not in df.columns:
-                raise ValueError(f"Column `{column}` not in dataframe")
-
+    def validate_input(self, df: pd.DataFrame):
+        validations.validate_df_contains(['word','word_id','sentence_id','word_index','check_requested'], df)
 
     def run_on_string(self, s: str):
         df = Separator.separate_string(s)

@@ -1,4 +1,5 @@
 from ..common import NlpAlgorithm
+import pandas as pd
 import enchant
 
 class SpellcheckAlgorithm(NlpAlgorithm):
@@ -6,7 +7,7 @@ class SpellcheckAlgorithm(NlpAlgorithm):
         super(SpellcheckAlgorithm, self).__init__('spellcheck_status', 'spellcheck_suggest')
         self.spellchecker = enchant.Dict('ru_RU')
 
-    def run(self, df):
+    def _run_inner(self, df: pd.DataFrame):
         column = self.get_status_column()
         df[column] = True
         to_check = (df.word_type == 'ru') & (df.check_requested)
