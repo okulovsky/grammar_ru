@@ -11,7 +11,7 @@ class NlpAnalyzer:
     def validate_input(self, df: pd.DataFrame):
         validations.ensure_df_contains(validations.WordCoordinates + self._required_columns, df)
 
-    def _analyze_inner(self, df:  pd.DataFrame) -> pd.DataFrame:
+    def _analyze_inner(self, df: pd.DataFrame) -> pd.DataFrame:
         raise NotImplementedError()
 
     def analyze(self, df: pd.DataFrame):
