@@ -1,7 +1,7 @@
 from typing import *
 import pandas as pd
 from grammar_ru.common import validations
-from ..preprocessing.nlp_preprocessor import NlpPreprocessor
+from .nlp_preprocessor import NlpPreprocessor
 
 
 class NlpAlgorithm:

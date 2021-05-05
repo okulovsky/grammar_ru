@@ -1,8 +1,8 @@
 from typing import *
 from grammar_ru.common import validations
 import pandas as pd
-from ..dataset_pipeline.nlp_analyzer import NlpAnalyzer
-from ..dataset_pipeline.pipeline import run_pipeline
+from .nlp_analyzer import NlpAnalyzer
+from .pipeline import run_pipeline
 
 
 class NlpPreprocessor:
