@@ -10,14 +10,17 @@ class NlpPreprocessor:
         self._analyzers = analyzers
         self._required_columns = required_columns
 
-    def _preprocess_inner(self, df: pd.DataFrame):
+    def _preprocess_dataframe_inner(self, df: pd.DataFrame):
         raise NotImplementedError()
 
-    def preprocess(self, text: List[str]):
-        df = run_pipeline(self._analyzers, text)
+    def preprocess_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         self.validate_input(df)
-        self._preprocess_inner(df)
+        self._preprocess_dataframe_inner(df)
         return df
+
+    def preprocess_text(self, text: List[str]) -> pd.DataFrame:
+        df = run_pipeline(self._analyzers, text)
+        return self.preprocess_dataframe(df)
 
     def validate_input(self, df: pd.DataFrame):
         validations.ensure_df_contains(validations.WordCoordinates + self._required_columns, df)

@@ -28,7 +28,7 @@ class NlpAlgorithm:
         validations.ensure_df_contains(validations.WordCoordinates + ['check_requested'] + self._required_columns, df)
 
     def run_on_text(self, text: List[str]) -> pd.DataFrame:
-        df = self._preprocessor.preprocess(text)
+        df = self._preprocessor.preprocess_text(text)
         df['check_requested'] = True
         self.run(df)
         return df
