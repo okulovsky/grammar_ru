@@ -23,7 +23,7 @@ class NlpAlgorithm:
         return self._suggest_column
 
     def validate_input(self, df: pd.DataFrame):
-        validations.validate_df_contains(['word', 'word_id', 'sentence_id', 'word_index', 'check_requested'], df)
+        validations.ensure_df_contains(['word', 'word_id', 'sentence_id', 'word_index', 'check_requested'], df)
 
     def run_on_string(self, s: str):
         df = Separator.separate_string(s)
