@@ -4,7 +4,8 @@ import pandas as pd
 from .nlp_analyzer import NlpAnalyzer
 from .pipeline import run_pipeline_on_text, run_pipeline_on_dataframe
 
-
+# TODO: What if I want to use multiple preprocessors? 
+# This class is bad and needed to be divided into Preprocessor entity and some kind of big preprocessor aggregator (NlpPipeline?)
 class NlpPreprocessor:
     def __init__(self, analyzers: List[NlpAnalyzer], required_columns=[]):
         self._analyzers = analyzers
