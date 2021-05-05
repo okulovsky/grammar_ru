@@ -6,7 +6,7 @@ import pandas as pd
 
 def run_pipeline_on_dataframe(analyzers: List[NlpAnalyzer], df: pd.DataFrame) -> pd.DataFrame:
     for analyzer in analyzers:
-        df = analyzer.apply(df)
+        analyzer.apply(df)
 
     return df
 

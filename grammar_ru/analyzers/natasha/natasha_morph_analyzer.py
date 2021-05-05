@@ -5,8 +5,8 @@ import pandas as pd
 
 class NatashaMorphAnalyzer(NlpAnalyzer):
     def __init__(self):
-        super(NatashaMorphAnalyzer, self).__init__(["word_id"])
+        super(NatashaMorphAnalyzer, self).__init__()
 
-    def _analyze_inner(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _apply_inner(self, df: pd.DataFrame):
         chunks = create_chunks_from_dataframe(df)
         pass
