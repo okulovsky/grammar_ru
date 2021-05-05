@@ -2,6 +2,7 @@ from ..common import NlpAlgorithm
 import pandas as pd
 import enchant
 
+
 class SpellcheckAlgorithm(NlpAlgorithm):
     def __init__(self):
         super(SpellcheckAlgorithm, self).__init__('spellcheck_status', 'spellcheck_suggest')

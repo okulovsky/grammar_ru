@@ -2,9 +2,10 @@ from typing import *
 import pandas as pd
 from .nlp_algorithm import NlpAlgorithm
 
+
 class CombinedNlpAlgorithm(NlpAlgorithm):
     def __init__(self, algorithms: List[NlpAlgorithm]):
-        super(CombinedNlpAlgorithm, self).__init__('status','suggestion')
+        super(CombinedNlpAlgorithm, self).__init__('status', 'suggestion')
         self._algorithms = algorithms
 
     def run(self, df):
@@ -19,13 +20,8 @@ class CombinedNlpAlgorithm(NlpAlgorithm):
         df['status'] = True
         df['suggestion'] = None
         for i in range(len(statuses)):
-            df.loc[active,'status'] = df.loc[active, statuses[i]]
+            df.loc[active, 'status'] = df.loc[active, statuses[i]]
             current = active & ~df[statuses[i]]
-            df.loc[current,'suggestion'] = df.loc[current, suggestions[i]]
+            df.loc[current, 'suggestion'] = df.loc[current, suggestions[i]]
             df.loc[current & ~df[statuses[i]], 'algorithm'] = self._algorithms[i].get_name()
             active = active & df[statuses[i]]
-
-
-
-
-
