@@ -1,3 +1,4 @@
+from ..preprocessors.dummy_preprocessor import DummyPreprocessor
 from ..common import NlpAlgorithm
 import pandas as pd
 import enchant
@@ -5,7 +6,7 @@ import enchant
 
 class SpellcheckAlgorithm(NlpAlgorithm):
     def __init__(self):
-        super(SpellcheckAlgorithm, self).__init__([], 'spellcheck_status', 'spellcheck_suggestion')
+        super(SpellcheckAlgorithm, self).__init__(DummyPreprocessor(), 'spellcheck_status', 'spellcheck_suggestion')
         self.spellchecker = enchant.Dict('ru_RU')
 
     def _run_inner(self, df: pd.DataFrame):

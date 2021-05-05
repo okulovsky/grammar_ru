@@ -1,3 +1,4 @@
+from ..preprocessors.dummy_preprocessor import DummyPreprocessor
 from typing import *
 import pandas as pd
 from .nlp_algorithm import NlpAlgorithm
@@ -5,7 +6,7 @@ from .nlp_algorithm import NlpAlgorithm
 
 class CombinedNlpAlgorithm(NlpAlgorithm):
     def __init__(self, algorithms: List[NlpAlgorithm]):
-        super(CombinedNlpAlgorithm, self).__init__([], 'status', 'suggestion')
+        super(CombinedNlpAlgorithm, self).__init__(DummyPreprocessor(), 'status', 'suggestion')
         self._algorithms = algorithms
 
     def run(self, df):

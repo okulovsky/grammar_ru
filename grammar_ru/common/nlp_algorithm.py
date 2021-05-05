@@ -1,16 +1,15 @@
 from typing import *
 import pandas as pd
 from grammar_ru.common import validations
-from ..dataset_pipeline.nlp_analyzer import NlpAnalyzer
-from ..dataset_pipeline.pipeline import run_pipeline
+from ..preprocessing.nlp_preprocessor import NlpPreprocessor
 
 
 class NlpAlgorithm:
-    def __init__(self, analyzers: List[NlpAnalyzer], status_column: str, suggest_column: Optional[str], additional_columns=[]):
-        self.analyzers = analyzers
+    def __init__(self, preprocessor: NlpPreprocessor, status_column: str, suggest_column: Optional[str], additional_columns=[]):
+        self._preprocessor = preprocessor
         self._status_column = status_column
         self._suggest_column = suggest_column
-        self.additional_columns = additional_columns
+        self._additional_columns = additional_columns
 
     def _run_inner(self, df: pd.DataFrame):
         raise NotImplementedError()
@@ -27,10 +26,10 @@ class NlpAlgorithm:
 
     def validate_input(self, df: pd.DataFrame):
         validations.ensure_df_contains(['word', 'word_id', 'sentence_id', 'word_index',
-                                        'check_requested'] + self.additional_columns, df)
+                                        'check_requested'] + self._additional_columns, df)
 
     def run_on_text(self, text: List[str]) -> pd.DataFrame:
-        df = run_pipeline(self.analyzers, text)
+        df = self._preprocessor.preprocess(text)
         df['check_requested'] = True
         self.run(df)
         return df
