@@ -5,7 +5,7 @@ import pandas as pd
 
 class FakeNlpAlgorithm(NlpAlgorithm):
     def __init__(self, n):
-        super(FakeNlpAlgorithm, self).__init__(f'status_{n}', f'suggestion_{n}')
+        super(FakeNlpAlgorithm, self).__init__([], f'status_{n}', f'suggestion_{n}')
         self.n = n
 
     def run(self, df):
@@ -33,7 +33,6 @@ class NlpCombinedAlgorithmTestCase(TestCase):
             FakeNlpAlgorithm(2)
         ])
         df = alg.run_on_string('a b c d e f g')
-        print(df)
         self.assertListEqual([False, True, False, False, False, True, False], list(df.status))
         self.assertListEqual(['3', None, '2', '3', '2', None, '3'], list(df.suggestion))
         self.assertListEqual(['3', None, '2', '3', '2', None, '3'], list(df.algorithm))
