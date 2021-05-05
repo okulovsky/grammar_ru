@@ -5,11 +5,11 @@ from ..preprocessing.nlp_preprocessor import NlpPreprocessor
 
 
 class NlpAlgorithm:
-    def __init__(self, preprocessor: NlpPreprocessor, status_column: str, suggest_column: Optional[str], additional_columns=[]):
+    def __init__(self, preprocessor: NlpPreprocessor, status_column: str, suggest_column: Optional[str], required_columns=[]):
         self._preprocessor = preprocessor
         self._status_column = status_column
         self._suggest_column = suggest_column
-        self._additional_columns = additional_columns
+        self._required_columns = required_columns
 
     def _run_inner(self, df: pd.DataFrame):
         raise NotImplementedError()
@@ -25,8 +25,7 @@ class NlpAlgorithm:
         return self._suggest_column
 
     def validate_input(self, df: pd.DataFrame):
-        validations.ensure_df_contains(['word', 'word_id', 'sentence_id', 'word_index',
-                                        'check_requested'] + self._additional_columns, df)
+        validations.ensure_df_contains(validations.WordCoordinates + ['check_requested'] + self._required_columns, df)
 
     def run_on_text(self, text: List[str]) -> pd.DataFrame:
         df = self._preprocessor.preprocess(text)

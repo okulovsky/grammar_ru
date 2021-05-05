@@ -6,9 +6,9 @@ from ..dataset_pipeline.pipeline import run_pipeline
 
 
 class NlpPreprocessor:
-    def __init__(self, analyzers: List[NlpAnalyzer], additional_columns=[]):
+    def __init__(self, analyzers: List[NlpAnalyzer], required_columns=[]):
         self._analyzers = analyzers
-        self._additional_columns = additional_columns
+        self._required_columns = required_columns
 
     def _preprocess_inner(self, df: pd.DataFrame):
         raise NotImplementedError()
@@ -20,4 +20,4 @@ class NlpPreprocessor:
         return df
 
     def validate_input(self, df: pd.DataFrame):
-        validations.ensure_df_contains(['word', 'word_id', 'sentence_id', 'word_index'] + self._additional_columns, df)
+        validations.ensure_df_contains(validations.WordCoordinates + self._required_columns, df)
