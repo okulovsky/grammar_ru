@@ -21,7 +21,6 @@ class NlpAlgorithm:
             if column not in df.columns:
                 raise ValueError(f"Column `{column}` not in dataframe")
 
-
     def run_on_string(self, s: str):
         df = Separator.separate_string(s)
         df['check_requested'] = True
