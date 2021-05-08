@@ -1,4 +1,4 @@
-from grammar_ru.algorithms.repetitions import RepetitionsAlgorithm
+from grammar_ru import RepetitionsAlgorithm
 from unittest import TestCase
 import pandas as pd
 

@@ -1,6 +1,7 @@
-from ..common.nlp_algorithm import NlpAlgorithm
+from ..common.architecture.nlp_algorithm import NlpAlgorithm
+from ..common.externals import TikhonovDict, PyMorphyFeaturizer
 import pandas as pd
-from ..externals import TikhonovDict, PyMorphyFeaturizer
+
 
 
 

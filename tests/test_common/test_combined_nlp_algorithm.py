@@ -1,6 +1,6 @@
 from unittest import TestCase
-from grammar_ru.common import NlpAlgorithm, CombinedNlpAlgorithm
-import pandas as pd
+from grammar_ru import NlpAlgorithm, CombinedNlpAlgorithm
+
 
 class FakeNlpAlgorithm(NlpAlgorithm):
     def __init__(self, n):

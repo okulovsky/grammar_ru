@@ -1,5 +1,5 @@
 from unittest import TestCase
-from grammar_ru.algorithms.spellcheck import SpellcheckAlgorithm
+from grammar_ru import SpellcheckAlgorithm
 
 class SpellcheckTestCase(TestCase):
     def test_spellcheck(self):

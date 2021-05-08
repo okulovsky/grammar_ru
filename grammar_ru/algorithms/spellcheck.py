@@ -1,4 +1,4 @@
-from ..common import NlpAlgorithm
+from ..common.architecture import NlpAlgorithm
 import enchant
 
 class SpellcheckAlgorithm(NlpAlgorithm):

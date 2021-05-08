@@ -1,6 +1,6 @@
 from unittest import TestCase
-from grammar_ru.common.separator import Separator
-import pandas as pd
+from grammar_ru import Separator
+
 
 class SeparatorTestCase(TestCase):
     def test_separation(self):
