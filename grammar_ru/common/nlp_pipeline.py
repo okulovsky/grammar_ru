@@ -26,6 +26,7 @@ import pandas as pd
 
 
 class NlpPipeline:
+    @staticmethod
     def empty():
         return NlpPipeline(NlpAnalyzationPipeline([]), dft.DataFrameTransformer([DummyPreprocessor()]))
 

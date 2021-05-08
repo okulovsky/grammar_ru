@@ -1,6 +1,5 @@
 from unittest import TestCase
-from grammar_ru.common.separator import Separator
-import pandas as pd
+from grammar_ru import Separator
 
 
 class SeparatorTestCase(TestCase):
@@ -12,6 +11,11 @@ class SeparatorTestCase(TestCase):
 
     def test_separation_multi(self):
         df = Separator.separate_paragraphs(['первое предожение. Второе.', 'Второй параграф'])
+        #pd.set_option('max_columns',None); pd.set_option('display.width', 1000);print(df)
         self.assertListEqual([0, 0, 0, 1, 1, 2, 2], list(df.sentence_id))
         self.assertListEqual([0, 1, 2, 3, 4, 5, 6], list(df.word_id))
         self.assertListEqual([0, 0, 0, 0, 0, 1, 1], list(df.paragraph_id))
+
+    def test_separation_string_with_nl(self):
+        df = Separator.separate_string('Строка\nВторая строка')
+        self.assertListEqual([0, 1, 1], list(df.paragraph_id))
