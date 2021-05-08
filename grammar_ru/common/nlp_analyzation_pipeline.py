@@ -3,6 +3,7 @@ from tg.common.datasets.featurization import FeaturizationJob
 from tg.common.datasets.access import DataSource, MockDfDataSource
 from typing import *
 import pandas as pd
+from grammar_ru.common.separator import Separator
 
 
 class NlpAnalyzationPipeline:
@@ -31,3 +32,11 @@ class NlpAnalyzationPipeline:
     def analyze(self, source: DataSource) -> Dict[str, pd.DataFrame]:
         df = pd.DataFrame(source.get_data())
         return self.analyze_dataframe(df)
+
+    def analyze_text(self, text: List[str]) -> Dict[str, pd.DataFrame]:
+        parsed_text_df = Separator.separate_paragraphs(text)
+
+        return self.analyze_dataframe(parsed_text_df)
+
+    def analyze_string(self, string: str) -> Dict[str, pd.DataFrame]:
+        return self.analyze_text([string])
