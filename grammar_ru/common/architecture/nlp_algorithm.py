@@ -21,9 +21,12 @@ class NlpAlgorithm:
             if column not in df.columns:
                 raise ValueError(f"Column `{column}` not in dataframe")
 
-    def run_on_string(self, s: str):
+    def run_on_string(self, s: str, paragraphs_to_check = None):
         df = Separator.separate_string(s)
-        df['check_requested'] = True
+        if paragraphs_to_check is None:
+            df['check_requested'] = True
+        else:
+            df['check_requested'] = df.paragraph_id.isin(paragraphs_to_check)
         self.run(df)
         return df
     

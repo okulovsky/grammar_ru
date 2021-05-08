@@ -38,6 +38,8 @@ class RepetitionsAlgorithm(NlpAlgorithm):
         cdf = merge_df.merge(word_df, left_on='word_id', right_index=True)
         cdf = cdf.merge(word_df, left_on='another_id', right_index=True)
         cdf['match'] = cdf.value_x == cdf.value_y
+        if cdf.shape[0] == 0:
+            return []
         errors = cdf.groupby('word_id').match.any()
         return list(errors.loc[errors].index)
 

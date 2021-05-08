@@ -20,3 +20,15 @@ class RepetitionsAlgorithmTestCase(TestCase):
     def test_tikhonov(self):
         df = RepetitionsAlgorithm(50, False, False, True).run_on_string(text)
         self.assertListEqual([2,5, 7, 10, 12, 14], list(df.loc[~df.repetition_status].word_id))
+
+    def test_all(self):
+        df = RepetitionsAlgorithm(50, True, True, True).run_on_string(text)
+        self.assertListEqual([2, 5, 7, 10, 12, 14], list(df.loc[~df.repetition_status].word_id))
+
+    def test_multiline(self):
+        df = RepetitionsAlgorithm(50, True, True, True).run_on_string("Повтор\nЕще повтор")
+        self.assertListEqual([True,True, False], list(df.repetition_status))
+
+    def test_on_empty(self):
+        df = RepetitionsAlgorithm(50, True, True, True).run_on_string("Здесь нет ошибок", [])
+        print(df)

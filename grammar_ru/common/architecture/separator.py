@@ -21,7 +21,7 @@ russianRegex = re.compile('^[абвгдеёжзийклмнопрстуфхцч�
 
 class Separator:
     @staticmethod
-    def separate_string(s: str, word_id_start = 0, sentence_id_start = 0):
+    def _separate_string(s: str, word_id_start = 0, sentence_id_start = 0):
         result = []
         sentences = sentenize(s)
         offset = 0
@@ -41,11 +41,15 @@ class Separator:
         return df
 
     @staticmethod
+    def separate_string(s: str):
+        return Separator.separate_paragraphs(s.split('\n'))
+
+    @staticmethod
     def separate_paragraphs(strings: List[str]):
         result = []
         word_id_start, sentence_id_start = 0, 0
         for i, s in enumerate(strings):
-            df = Separator.separate_string(s, word_id_start, sentence_id_start)
+            df = Separator._separate_string(s, word_id_start, sentence_id_start)
             if df.shape[0]>0:
                 word_id_start = df.iloc[-1].word_id+1
                 sentence_id_start = df.iloc[-1].sentence_id+1

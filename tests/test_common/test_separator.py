@@ -16,3 +16,7 @@ class SeparatorTestCase(TestCase):
         self.assertListEqual([0,0,0,1,1,2,2], list(df.sentence_id))
         self.assertListEqual([0,1,2,3,4,5,6], list(df.word_id))
         self.assertListEqual([0,0,0,0,0,1,1], list(df.paragraph_id))
+
+    def test_separation_string_with_nl(self):
+        df = Separator.separate_string('Строка\nВторая строка')
+        self.assertListEqual([0,1,1], list(df.paragraph_id))
