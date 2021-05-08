@@ -3,7 +3,7 @@ from tg.common.datasets.featurization import FeaturizationJob
 from tg.common.datasets.access import DataSource, MockDfDataSource
 from typing import *
 import pandas as pd
-from grammar_ru.common.separator import Separator
+from grammar_ru.common.architecture.separator import Separator
 
 
 class NlpAnalyzationPipeline:

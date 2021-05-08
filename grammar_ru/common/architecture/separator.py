@@ -50,7 +50,7 @@ class Separator:
         result = []
         word_id_start, sentence_id_start = 0, 0
         for i, s in enumerate(strings):
-            df = Separator.separate_string(s, word_id_start, sentence_id_start)
+            df = Separator._separate_string(s, word_id_start, sentence_id_start)
             if df.shape[0] > 0:
                 word_id_start = df.iloc[-1].word_id+1
                 sentence_id_start = df.iloc[-1].sentence_id+1

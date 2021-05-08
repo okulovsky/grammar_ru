@@ -1,18 +1,17 @@
+from grammar_ru.common.nlp_pipeline import NlpPipeline
 from ..common.architecture.nlp_algorithm import NlpAlgorithm
 from ..common.externals import TikhonovDict, PyMorphyFeaturizer
 import pandas as pd
 
 
-
-
 class RepetitionsAlgorithm(NlpAlgorithm):
     def __init__(self,
                  vicinity: int = 50,
-                 allow_simple_check = True,
-                 allow_normal_form_check = True,
-                 allow_tikhonov_check = True
+                 allow_simple_check=True,
+                 allow_normal_form_check=True,
+                 allow_tikhonov_check=True
                  ):
-        super(RepetitionsAlgorithm, self).__init__('repetition_status', None)
+        super(RepetitionsAlgorithm, self).__init__(NlpPipeline.empty(), 'repetition_status', None)
         self.vicinity = vicinity
         tic = TikhonovDict.read_as_df()
         tic = tic.loc[tic.morpheme_type == 'ROOT']
@@ -20,7 +19,6 @@ class RepetitionsAlgorithm(NlpAlgorithm):
         self.allow_simple_check = allow_simple_check
         self.allow_normal_form_check = allow_normal_form_check
         self.allow_tikhonov_check = allow_tikhonov_check
-
 
     def generate_merge_index(self, df):
         ldf = df.loc[df.check_requested]
@@ -56,16 +54,13 @@ class RepetitionsAlgorithm(NlpAlgorithm):
             normal_df = PyMorphyFeaturizer().create_features(rdf).set_index('word_id').normal_form.to_frame('value')
 
             if self.allow_normal_form_check:
-                errors+= self.compare(mdf, normal_df)
+                errors += self.compare(mdf, normal_df)
 
             if self.allow_tikhonov_check:
 
-                tik_df =  normal_df.rename(columns={'value':'word'}).merge(self.tic, left_on='word', right_index=True).drop('word',axis=1)
+                tik_df = normal_df.rename(columns={'value': 'word'}).merge(
+                    self.tic, left_on='word', right_index=True).drop('word', axis=1)
                 errors += self.compare(mdf, tik_df)
 
         df[self.get_status_column()] = True
         df.loc[df.word_id.isin(errors), self.get_status_column()] = False
-
-
-
-
