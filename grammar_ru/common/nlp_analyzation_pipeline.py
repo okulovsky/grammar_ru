@@ -7,7 +7,7 @@ from grammar_ru.common.separator import Separator
 
 
 class NlpAnalyzationPipeline:
-    def __init__(self, analyzers: List[(str, NlpAnalyzer)]):
+    def __init__(self, analyzers: List[Tuple[str, NlpAnalyzer]]):
         self._analyzers = analyzers
 
     def df_to_featurization_job(self, df: pd.DataFrame, **kwargs) -> FeaturizationJob:

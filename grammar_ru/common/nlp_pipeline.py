@@ -18,6 +18,7 @@
 # flexible and convenient enough for testing and experimenting with data.
 # So the user should be careful when analyzing and applying its results.
 
+from ..preprocessors.dummy_preprocessor import DummyPreprocessor
 from .nlp_analyzation_pipeline import NlpAnalyzationPipeline
 from tg.common.ml import dft
 from typing import *
@@ -25,8 +26,8 @@ import pandas as pd
 
 
 class NlpPipeline:
-    def empty() -> NlpPipeline:
-        return NlpPipeline(NlpAnalyzationPipeline(), dft.DataFrameTransformer())
+    def empty():
+        return NlpPipeline(NlpAnalyzationPipeline([]), dft.DataFrameTransformer([DummyPreprocessor()]))
 
     def __init__(self, analyzation_pipeline: NlpAnalyzationPipeline, preprocessing_pipeline: dft.DataFrameTransformer):
         self._analyzation_pipeline = analyzation_pipeline

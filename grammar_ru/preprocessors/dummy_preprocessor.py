@@ -7,4 +7,4 @@ class DummyPreprocessor(NlpPreprocessor):
         super(DummyPreprocessor, self).__init__()
 
     def _preprocess_dataframe_inner(self, df: pd.DataFrame):
-        pass
+        yield df
