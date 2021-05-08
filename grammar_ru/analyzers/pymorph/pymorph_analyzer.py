@@ -6,5 +6,5 @@ class PyMorphAnalyzer(NlpAnalyzer):
     def __init__(self):
         super(PyMorphAnalyzer, self).__init__()
 
-    def _apply_inner(self, df: pd.DataFrame):
+    def _analyze_inner(self, df: pd.DataFrame):
         pass
