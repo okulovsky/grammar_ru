@@ -2,7 +2,6 @@ from unittest import TestCase
 from grammar_ru import NlpAlgorithm, CombinedNlpAlgorithm
 
 
-
 class FakeNlpAlgorithm(NlpAlgorithm):
     def __init__(self, n):
         super(FakeNlpAlgorithm, self).__init__([], f'status_{n}', f'suggestion_{n}')
