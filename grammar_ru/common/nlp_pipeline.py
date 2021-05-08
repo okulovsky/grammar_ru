@@ -25,13 +25,16 @@ import pandas as pd
 
 
 class NlpPipeline:
+    def empty() -> NlpPipeline:
+        return NlpPipeline(NlpAnalyzationPipeline(), dft.DataFrameTransformer())
+
     def __init__(self, analyzation_pipeline: NlpAnalyzationPipeline, preprocessing_pipeline: dft.DataFrameTransformer):
         self._analyzation_pipeline = analyzation_pipeline
         self._preprocessing_pipeline = preprocessing_pipeline
 
     def run_on_text(self, text: List[str]) -> pd.DataFrame:
         analyzed_text = self._analyzation_pipeline.analyze_text(text)
-        return self._preprocessing_pipeline.transform(analyzed_text)  # Data is not fitted. How to handle this?
+        return self._preprocessing_pipeline.transform(analyzed_text)  # TODO: Data is not fitted. How to handle this?
 
     def run_on_string(self, string: str) -> pd.DataFrame:
         return self.run_on_text([string])

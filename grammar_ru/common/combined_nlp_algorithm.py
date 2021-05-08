@@ -1,12 +1,14 @@
-from ..preprocessors.dummy_preprocessor import DummyPreprocessor
 from typing import *
 import pandas as pd
 from .nlp_algorithm import NlpAlgorithm
+from .nlp_pipeline import NlpPipeline
+from .nlp_analyzation_pipeline import NlpAnalyzationPipeline
+from tg.common.ml import dft
 
 
 class CombinedNlpAlgorithm(NlpAlgorithm):
     def __init__(self, algorithms: List[NlpAlgorithm]):
-        super(CombinedNlpAlgorithm, self).__init__(DummyPreprocessor(), 'status', 'suggestion')
+        super(CombinedNlpAlgorithm, self).__init__(NlpPipeline.empty(), 'status', 'suggestion')
         self._algorithms = algorithms
 
     def run(self, df):

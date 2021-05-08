@@ -23,20 +23,21 @@ class NlpAnalyzationPipeline:
             **kwargs
         )
 
-    def analyze_dataframe(self, df: pd.DataFrame) -> Dict[str, pd.DataFrame]:
-        results = {}
+    def analyze_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        result = df
         for (name, analyzer) in self._analyzers:
-            results[name] = analyzer.apply(df)
-        return results
+            result = result.merge(analyzer.analyze(df).add_prefix(name + '_'))
 
-    def analyze(self, source: DataSource) -> Dict[str, pd.DataFrame]:
+        return result
+
+    def analyze(self, source: DataSource) -> pd.DataFrame:
         df = pd.DataFrame(source.get_data())
         return self.analyze_dataframe(df)
 
-    def analyze_text(self, text: List[str]) -> Dict[str, pd.DataFrame]:
+    def analyze_text(self, text: List[str]) -> pd.DataFrame:
         parsed_text_df = Separator.separate_paragraphs(text)
 
         return self.analyze_dataframe(parsed_text_df)
 
-    def analyze_string(self, string: str) -> Dict[str, pd.DataFrame]:
+    def analyze_string(self, string: str) -> pd.DataFrame:
         return self.analyze_text([string])

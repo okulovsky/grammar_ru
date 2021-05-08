@@ -4,7 +4,7 @@ import pandas as pd
 
 class DummyPreprocessor(NlpPreprocessor):
     def __init__(self):
-        super(DummyPreprocessor, self).__init__([])
+        super(DummyPreprocessor, self).__init__()
 
     def _preprocess_dataframe_inner(self, df: pd.DataFrame):
         pass
