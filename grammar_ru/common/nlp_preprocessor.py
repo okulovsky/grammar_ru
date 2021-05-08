@@ -1,30 +1,35 @@
 from typing import *
+from tg.common.ml.dft.architecture import DataFrameColumnsTransformer
 from grammar_ru.common import validations
 import pandas as pd
-from .nlp_analyzer import NlpAnalyzer
-from .pipeline import run_pipeline_on_text, run_pipeline_on_dataframe
 
-# TODO: What if I want to use multiple preprocessors? 
-# This class is bad and needed to be divided into Preprocessor entity and some kind of big preprocessor aggregator (NlpPipeline?)
-class NlpPreprocessor:
-    def __init__(self, analyzers: List[NlpAnalyzer], required_columns=[]):
-        self._analyzers = analyzers
+
+class NlpPreprocessor(DataFrameColumnsTransformer):
+    def __init__(self, required_columns=[]):
+        super(DataFrameColumnsTransformer, self).__init__()
         self._required_columns = required_columns
 
-    def _preprocess_dataframe_inner(self, df: pd.DataFrame):
+    def fit(self, df: pd.DataFrame):
+        # Can be overriden
+        return None
+
+    def get_columns(self):
+        return self._required_columns
+
+    def _preprocess_dataframe_inner(self, df: pd.DataFrame) -> Iterable[Union[pd.DataFrame, pd.Series]]:
         raise NotImplementedError()
 
-    def preprocess_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, df: pd.DataFrame):
         self.validate_input(df)
-        self._preprocess_dataframe_inner(df)
-        return df
+        return self._preprocess_dataframe_inner(df)
 
-    def run_pipeline_and_preprocess_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        return self.preprocess_dataframe(run_pipeline_on_dataframe(self._analyzers, df))
-
-    def run_pipeline_and_preprocess_text(self, text: List[str]) -> pd.DataFrame:
-        df = run_pipeline_on_text(self._analyzers, text)
-        return self.preprocess_dataframe(df)
+    def preprocess_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
+        result = pd.DataFrame(index=df.index)
+        self.validate_input(df)
+        for df in self._preprocess_dataframe_inner(df):
+            for column in df.columns:
+                result[column] = df[column]
+        return result
 
     def validate_input(self, df: pd.DataFrame):
         validations.ensure_df_contains(validations.WordCoordinates + self._required_columns, df)
