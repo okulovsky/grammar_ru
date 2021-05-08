@@ -1,0 +1,2 @@
+from .repetitions import RepetitionsAlgorithm
+from .spellcheck import SpellcheckAlgorithm
