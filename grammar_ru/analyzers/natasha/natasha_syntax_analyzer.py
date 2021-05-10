@@ -24,5 +24,4 @@ class NatashaSyntaxAnalyzer(NatashaAnalyzer):
                 syntax_chunks[-1]["parent_id"] = absolute_parent_id
                 syntax_chunks[-1]["rel"] = syntax_token.rel
 
-        # TODO: List of dictionaries to rows
-        raise NotImplementedError()
+        return pd.DataFrame(df)

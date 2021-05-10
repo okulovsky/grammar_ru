@@ -18,5 +18,4 @@ class NatashaMorphAnalyzer(NatashaAnalyzer):
                 for feat in morph_token.feats.keys():
                     morph_chunks[-1][feat] = morph_token.feats[feat]
 
-        # TODO: List of dictionaries to rows
-        raise NotImplementedError()
+        return pd.DataFrame(df)

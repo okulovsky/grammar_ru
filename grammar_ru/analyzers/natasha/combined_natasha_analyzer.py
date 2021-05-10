@@ -15,8 +15,6 @@ class CombinedNatashaAnalyzer(NlpAnalyzer):
         results = {}
 
         for analyzer in self._analyzers:
-            results[analyzer.get_name()] = analyzer.analyze_chunks(df, chunks)
+            results[analyzer.get_name()] = analyzer.analyze_chunks(df, chunks).add_prefix(analyzer.get_name())
 
-        # TODO: Merge results
-
-        raise NotImplementedError()
+        return pd.DataFrame(results)
