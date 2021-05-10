@@ -1,7 +1,7 @@
 from typing import *
 import pandas as pd
-from grammar_ru.common import validations
-from ..nlp_pipeline import NlpPipeline
+from .validations import validations
+from .nlp_pipeline import NlpPipeline
 
 
 class NlpAlgorithm:
@@ -25,7 +25,8 @@ class NlpAlgorithm:
         return self._suggest_column
 
     def validate_input(self, df: pd.DataFrame):
-        validations.ensure_df_contains(validations.WordCoordinates + ['check_requested'] + self._required_columns, df)
+        validations.ensure_df_contains(
+            validations.WordCoordinates + ['check_requested'] + self._required_columns, df)
 
     def run_on_text(self, text: List[str], paragraphs_to_check=None) -> pd.DataFrame:
         df = self._pipeline.run_on_text(text)

@@ -1,4 +1,4 @@
-from grammar_ru.common.nlp_analyzer import NlpAnalyzer
+from .nlp_analyzer import NlpAnalyzer
 from tg.common.datasets.featurization import FeaturizationJob
 from tg.common.datasets.access import DataSource, MockDfDataSource
 from typing import *

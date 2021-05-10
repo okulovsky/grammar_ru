@@ -1,8 +1,6 @@
 from typing import *
 import pandas as pd
 from .nlp_algorithm import NlpAlgorithm
-from ..nlp_pipeline import NlpPipeline
-from ..nlp_analyzation_pipeline import NlpAnalyzationPipeline
 from tg.common.ml import dft
 
 

@@ -1,6 +1,6 @@
 from typing import *
 from tg.common.ml.dft.architecture import DataFrameColumnsTransformer
-from grammar_ru.common import validations
+from .validations import validations
 import pandas as pd
 
 
@@ -32,4 +32,5 @@ class NlpPreprocessor(DataFrameColumnsTransformer):
         return result
 
     def validate_input(self, df: pd.DataFrame):
-        validations.ensure_df_contains(validations.WordCoordinates + self._required_columns, df)
+        validations.ensure_df_contains(
+            validations.WordCoordinates + self._required_columns, df)

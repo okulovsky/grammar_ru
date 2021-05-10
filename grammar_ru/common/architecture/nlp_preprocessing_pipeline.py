@@ -1,4 +1,4 @@
-from grammar_ru.common.nlp_preprocessor import NlpPreprocessor
+from .nlp_preprocessor import NlpPreprocessor
 from tg.common.ml import dft
 from typing import *
 

@@ -1,4 +1,3 @@
-from grammar_ru.common.nlp_pipeline import NlpPipeline
 from ..common.architecture.nlp_algorithm import NlpAlgorithm
 from ..common.externals import TikhonovDict, PyMorphyFeaturizer
 import pandas as pd

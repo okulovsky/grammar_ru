@@ -1,4 +1,4 @@
-from ..common.nlp_preprocessor import NlpPreprocessor
+from ..common.architecture.nlp_preprocessor import NlpPreprocessor
 import pandas as pd
 
 

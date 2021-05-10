@@ -1,4 +1,4 @@
-from grammar_ru.common.nlp_analyzer import NlpAnalyzer
+from grammar_ru.common.architecture.nlp_analyzer import NlpAnalyzer
 from grammar_ru.common.natasha import create_chunks_from_dataframe
 import pandas as pd
 

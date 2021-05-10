@@ -1,6 +1,6 @@
 from typing import *
 import pandas as pd
-from grammar_ru.common import validations
+from .architecture.validations import validations
 
 
 def make_dataframe_from_nerus() -> pd.DataFrame:

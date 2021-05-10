@@ -1,4 +1,3 @@
-from grammar_ru.common.nlp_pipeline import NlpPipeline
 import pandas as pd
 from ..common.architecture import NlpAlgorithm
 import enchant
