@@ -40,7 +40,7 @@ class RepetitionsAlgorithm(NlpAlgorithm):
         errors = cdf.groupby('word_id').match.any()
         return list(errors.loc[errors].index)
 
-    def run(self, df):
+    def _run_inner(self, df):
         mdf = self.generate_merge_index(df)
         rdf = df.loc[df.word_id.isin(mdf.word_id) | df.word_id.isin(mdf.another_id)]
         errors = []

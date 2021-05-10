@@ -9,7 +9,7 @@ class CombinedNlpAlgorithm(NlpAlgorithm):
         super(CombinedNlpAlgorithm, self).__init__('status', 'suggestion')
         self._algorithms = algorithms
 
-    def run(self, df):
+    def _run_inner(self, df):
         statuses = []
         suggestions = []
         for alg in self._algorithms:

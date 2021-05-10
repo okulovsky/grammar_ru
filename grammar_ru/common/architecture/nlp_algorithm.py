@@ -27,18 +27,24 @@ class NlpAlgorithm:
         validations.ensure_df_contains(
             validations.WordCoordinates + ['check_requested'] + self._required_columns, df)
 
-    def run_on_text(self, text: List[str], paragraphs_to_check=None) -> pd.DataFrame:
-        df = Separator.separate_paragraphs(text)
+    def put_check_requested(self, df: pd.DataFrame, paragraphs_to_check=None):
         if paragraphs_to_check is None:
             df['check_requested'] = True
         else:
             df['check_requested'] = df.paragraph_id.isin(paragraphs_to_check)
+        return df
+
+    def run_on_text(self, text: List[str], paragraphs_to_check=None) -> pd.DataFrame:
+        df = Separator.separate_paragraphs(text)
+        self.put_check_requested(df, paragraphs_to_check)
         self.run(df)
         return df
 
     def run_on_string(self, s: str, paragraphs_to_check=None) -> pd.DataFrame:
-        # TODO: [s] should be replaced with Separator.separate_string, but tests fail.
-        return self.run_on_text([s], paragraphs_to_check)
+        df = Separator.separate_string(s)
+        self.put_check_requested(df, paragraphs_to_check)
+        self.run(df)
+        return df
 
     def get_name(self):
         return type(self).__name__
