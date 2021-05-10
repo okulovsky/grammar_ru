@@ -1,5 +1,5 @@
 from .nlp_analyzer import NlpAnalyzer
-from tg.common.datasets.access import DataSource, MockDfDataSource
+from tg.common.datasets.access import DataSource
 from typing import *
 import pandas as pd
 from grammar_ru.common.architecture.separator import Separator
