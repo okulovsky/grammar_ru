@@ -1,6 +1,6 @@
 from typing import *
 import pandas as pd
-from .validations import validations
+from . import validations
 from .separator import Separator
 
 
@@ -37,6 +37,7 @@ class NlpAlgorithm:
         return df
 
     def run_on_string(self, s: str, paragraphs_to_check=None) -> pd.DataFrame:
+        # TODO: [s] should be replaced with Separator.separate_string, but tests fail.
         return self.run_on_text([s], paragraphs_to_check)
 
     def get_name(self):
