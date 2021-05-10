@@ -6,7 +6,6 @@ from typing import *
 
 class NatashaMorphAnalyzer(NatashaAnalyzer):
     def __init__(self):
-        # TODO: Add required columns
         self.morph = Morph.load('models/slovnet_morph_news_v1.tar', batch_size=4)
         super(NatashaMorphAnalyzer, self).__init__()
 

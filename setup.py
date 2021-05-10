@@ -9,6 +9,5 @@ setup(name='grammar_ru',
           'pyenchant==3.2.0',
           'pymorphy2==0.9.1'
       ],
-      include_package_data=True,
       zip_safe=False
       )
