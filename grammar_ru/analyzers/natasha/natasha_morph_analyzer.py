@@ -7,8 +7,7 @@ from typing import *
 class NatashaMorphAnalyzer(NatashaAnalyzer):
     def __init__(self):
         # TODO: Add required columns
-        # TODO: Specify load path
-        self.morph = Morph.load('slovnet_morph_news_v1.tar', batch_size=4)
+        self.morph = Morph.load('models/slovnet_morph_news_v1.tar', batch_size=4)
         super(NatashaMorphAnalyzer, self).__init__()
 
     def analyze_chunks(self, df: pd.DataFrame, chunks: List[List[str]]) -> pd.DataFrame:

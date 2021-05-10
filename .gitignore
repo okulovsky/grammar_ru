@@ -5,4 +5,6 @@ __pycache__/
 build/
 dist/
 
+grammar_ru/analyzers/natasha/models
+
 grammar_ru\.egg-info/

@@ -9,8 +9,8 @@ class NatashaSyntaxAnalyzer(NatashaAnalyzer):
     def __init__(self):
         # TODO: Specify paths
         # TODO: Add required columns
-        self.navec = Navec.load('navec_news_v1_1B_250K_300d_100q.tar')
-        self.syntax = Syntax.load('slovnet_syntax_news_v1.tar')
+        self.navec = Navec.load('models/navec_news_v1_1B_250K_300d_100q.tar')
+        self.syntax = Syntax.load('models/slovnet_syntax_news_v1.tar')
         self.syntax.navec(self.navec)
         super(NatashaAnalyzer, self).__init__()
 

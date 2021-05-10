@@ -15,8 +15,8 @@ jobs:
     - name: Run setup.py
       run: python setup.py install
     
-    - name: Install additional dependencies
-      run: sudo apt-get install myspell-ru
+    - name: Download additional dependencies
+      run: ./setup.sh
     
     - name: Run build
       run: python setup.py build
