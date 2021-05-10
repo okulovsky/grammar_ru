@@ -16,7 +16,7 @@ jobs:
       run: python setup.py install
     
     - name: Download additional dependencies
-      run: ./setup.sh
+      run: sudo bash setup.sh
     
     - name: Run build
       run: python setup.py build
