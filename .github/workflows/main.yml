@@ -9,10 +9,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+
     - name: Run setup.py
-      run: python3 setup.py install & python3 setup.py build      
-      shell: bash
-        
+      run: python setup.py install
+    
+    - name: Run build
+      run: python setup.py build
+
     - name: Test
-      run: python3 -m unittest
-      shell: bash
+      run: python -m unittest
