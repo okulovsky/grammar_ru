@@ -10,7 +10,7 @@ class RepetitionsAlgorithm(NlpAlgorithm):
                  allow_normal_form_check=True,
                  allow_tikhonov_check=True
                  ):
-        super(RepetitionsAlgorithm, self).__init__(NlpPipeline.empty(), 'repetition_status', None)
+        super(RepetitionsAlgorithm, self).__init__('repetition_status', None)
         self.vicinity = vicinity
         tic = TikhonovDict.read_as_df()
         tic = tic.loc[tic.morpheme_type == 'ROOT']

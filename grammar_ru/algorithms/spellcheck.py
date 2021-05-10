@@ -6,7 +6,7 @@ import pandas as pd
 
 class SpellcheckAlgorithm(NlpAlgorithm):
     def __init__(self):
-        super(SpellcheckAlgorithm, self).__init__(NlpPipeline.empty(), 'spellcheck_status', 'spellcheck_suggestion')
+        super(SpellcheckAlgorithm, self).__init__('spellcheck_status', 'spellcheck_suggestion')
         self.spellchecker = enchant.Dict('ru_RU')
 
     def _run_inner(self, df: pd.DataFrame):

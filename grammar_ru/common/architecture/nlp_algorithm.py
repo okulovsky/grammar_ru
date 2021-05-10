@@ -1,12 +1,11 @@
 from typing import *
 import pandas as pd
 from .validations import validations
-from .nlp_pipeline import NlpPipeline
+from .separator import Separator
 
 
 class NlpAlgorithm:
-    def __init__(self, pipeline: NlpPipeline, status_column: str, suggest_column: Optional[str], required_columns=[]):
-        self._pipeline = pipeline
+    def __init__(self, status_column: str, suggest_column: Optional[str], required_columns=[]):
         self._status_column = status_column
         self._suggest_column = suggest_column
         self._required_columns = required_columns
@@ -29,7 +28,7 @@ class NlpAlgorithm:
             validations.WordCoordinates + ['check_requested'] + self._required_columns, df)
 
     def run_on_text(self, text: List[str], paragraphs_to_check=None) -> pd.DataFrame:
-        df = self._pipeline.run_on_text(text)
+        df = Separator.separate_paragraphs(text)
         if paragraphs_to_check is None:
             df['check_requested'] = True
         else:

@@ -6,7 +6,7 @@ from tg.common.ml import dft
 
 class CombinedNlpAlgorithm(NlpAlgorithm):
     def __init__(self, algorithms: List[NlpAlgorithm]):
-        super(CombinedNlpAlgorithm, self).__init__(NlpPipeline.empty(), 'status', 'suggestion')
+        super(CombinedNlpAlgorithm, self).__init__('status', 'suggestion')
         self._algorithms = algorithms
 
     def run(self, df):
