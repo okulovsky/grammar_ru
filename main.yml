@@ -1,0 +1,18 @@
+name: PythonTests
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Run setup.py
+      run: python3 setup.py install & python3 setup.py build      
+      shell: bash
+        
+    - name: Test
+      run: python3 -m unittest
+      shell: bash
