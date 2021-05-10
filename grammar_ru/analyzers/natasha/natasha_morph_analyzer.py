@@ -11,7 +11,7 @@ class NatashaMorphAnalyzer(NatashaAnalyzer):
         self.morph = Morph.load('slovnet_morph_news_v1.tar', batch_size=4)
         super(NatashaMorphAnalyzer, self).__init__()
 
-    def analyze_chunks(self, chunks: List[List[str]]):
+    def analyze_chunks(self, df: pd.DataFrame, chunks: List[List[str]]) -> pd.DataFrame:
         morph_chunks = []
         for i, morph_res in enumerate(self.morph.map(chunks)):
             morph_chunks.append({})

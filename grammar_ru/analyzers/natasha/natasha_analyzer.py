@@ -10,7 +10,10 @@ class NatashaAnalyzer(NlpAnalyzer):
 
     def _analyze_inner(self, df: pd.DataFrame) -> pd.DataFrame:
         chunks = create_chunks_from_dataframe(df)
-        return self.analyze_chunks(chunks)
+        return self.analyze_chunks(df, chunks)
 
-    def analyze_chunks(self, chunks: List[List[str]]) -> pd.DataFrame:
+    def analyze_chunks(self, df: pd.DataFrame, chunks: List[List[str]]) -> pd.DataFrame:
         raise NotImplementedError()
+
+    def get_name(self):
+        return type(self).__name__
