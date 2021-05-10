@@ -14,6 +14,7 @@ class NlpAlgorithm:
         raise NotImplementedError()
 
     def run(self, df: pd.DataFrame):
+        self.put_check_requested(df)
         self.validate_input(df)
         self._run_inner(df)
 
@@ -36,13 +37,11 @@ class NlpAlgorithm:
 
     def run_on_text(self, text: List[str], paragraphs_to_check=None) -> pd.DataFrame:
         df = Separator.separate_paragraphs(text)
-        self.put_check_requested(df, paragraphs_to_check)
         self.run(df)
         return df
 
     def run_on_string(self, s: str, paragraphs_to_check=None) -> pd.DataFrame:
         df = Separator.separate_string(s)
-        self.put_check_requested(df, paragraphs_to_check)
         self.run(df)
         return df
 

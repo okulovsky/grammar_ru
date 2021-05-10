@@ -4,10 +4,10 @@ from grammar_ru import NlpAlgorithm, CombinedNlpAlgorithm
 
 class FakeNlpAlgorithm(NlpAlgorithm):
     def __init__(self, n):
-        super(FakeNlpAlgorithm, self).__init__([], f'status_{n}', f'suggestion_{n}')
+        super(FakeNlpAlgorithm, self).__init__(f'status_{n}', f'suggestion_{n}')
         self.n = n
 
-    def run(self, df):
+    def _run_inner(self, df):
         df[self.get_status_column()] = df.index % self.n != 0
         df[self.get_suggest_column()] = str(self.n)
 
