@@ -7,7 +7,8 @@ setup(name='grammar_ru',
           'slovnet==0.5.0',
           'pyenchant==3.2.0',
           'pymorphy2==0.9.1',
-          'training_grounds'
+          'training_grounds',
+          'nerus'
       ],
       include_package_data=True,
       zip_safe=False
