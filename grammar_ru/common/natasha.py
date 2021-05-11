@@ -3,7 +3,7 @@ import pandas as pd
 from .architecture import validations
 from .architecture import Separator
 from nerus import NerusDoc, load_nerus
-from itertools import reduce
+from functools import reduce
 
 
 def get_text_from_nerus_doc(doc: NerusDoc) -> str:
