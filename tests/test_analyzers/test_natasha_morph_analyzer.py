@@ -1,7 +1,7 @@
 from grammar_ru.analyzers.natasha.natasha_morph_analyzer import NatashaMorphAnalyzer
 from grammar_ru.common.architecture.separator import Separator
 from grammar_ru.common.natasha import create_chunks_from_dataframe
-from grammar_ru.common.architecture.validations import ensure_df_contains, WordCoordinates
+from grammar_ru.common.architecture.validations import ensure_df_contains
 from unittest import TestCase
 import pandas as pd
 
@@ -19,15 +19,12 @@ class NatashaMorphAnalyzerTestCase(TestCase):
         print(cls.result)
 
     def test_morph_general(self):
-        self.assertEqual(self.result.loc[(self.result['sentence_id'] == 0) &
-                                         (self.result['word_index'] == 2)]["POS"].item(), "ADJ")
-        self.assertEqual(self.result.loc[(self.result['sentence_id'] == 1) &
-                                         (self.result['word_index'] == 1)]["POS"].item(), "VERB")
-        self.assertEqual(self.result.loc[(self.result['sentence_id'] == 0) &
-                                         (self.result['word_index'] == 0)]["Gender"].item(), "Fem")
+        self.assertEqual(self.result.loc[(self.result['word_id'] == 2)]["POS"].item(), "ADJ")
+        self.assertEqual(self.result.loc[(self.result['word_id'] == 5)]["POS"].item(), "VERB")
+        self.assertEqual(self.result.loc[(self.result['word_id'] == 0)]["Gender"].item(), "Fem")
 
     def test_morph_preserve_coordinates(self):
         try:
-            ensure_df_contains(WordCoordinates, self.result)
+            ensure_df_contains(["word_id"], self.result)
         except BaseException:
             self.fail("Morph analyzer does not preserve coordinates")

@@ -25,4 +25,4 @@ class NatashaMorphAnalyzer(NatashaAnalyzer):
                     morph_chunks[-1][feat] = morph_token.feats[feat]
                 counter += 1
 
-        return pd.merge(df, pd.DataFrame(morph_chunks), on=['word_id'])
+        return pd.DataFrame(morph_chunks)

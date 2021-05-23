@@ -32,4 +32,4 @@ class NatashaSyntaxAnalyzer(NatashaAnalyzer):
                 syntax_chunks[-1]['word_id'] = counter
                 counter += 1
 
-        return pd.merge(df, pd.DataFrame(syntax_chunks), on=['word_id'])
+        return pd.DataFrame(syntax_chunks)
