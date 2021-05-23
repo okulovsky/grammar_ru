@@ -34,14 +34,10 @@ def create_chunks_from_dataframe(df: pd.DataFrame) -> List[List[str]]:
     validations.ensure_df_contains(validations.WordCoordinates, df)
     chunks = []
 
-    print(df)
-
     for index, row in df.iterrows():
         if row['sentence_id'] == len(chunks):
             chunks.append([])
 
         chunks[row['sentence_id']].append(row['word'])
-
-    print(chunks)
 
     return chunks
