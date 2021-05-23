@@ -9,12 +9,14 @@ text = 'Она была красива. Он любил красивые вещ�
 
 
 class NatashaMorphAnalyzerTestCase(TestCase):
-    def setUp(self) -> None:
-        self.morph = NatashaMorphAnalyzer()
+    @classmethod
+    def setUpClass(cls) -> None:
+        super(NatashaMorphAnalyzerTestCase, cls).setUpClass()
+        cls.morph = NatashaMorphAnalyzer()
         df = Separator.separate_string(text)
-        chunks = create_chunks_from_dataframe(self.df)
-        self.result = self.morph.analyze_chunks(df, chunks)
-        print(self.result)
+        chunks = create_chunks_from_dataframe(df)
+        cls.result = cls.morph.analyze_chunks(df, chunks)
+        print(cls.result)
 
     def test_morph_general(self):
         self.assertEqual(self.result.loc[(self.result['sentence_id'] == 0) &
@@ -29,4 +31,3 @@ class NatashaMorphAnalyzerTestCase(TestCase):
             ensure_df_contains(WordCoordinates, self.result)
         except BaseException:
             self.fail("Morph analyzer does not preserve coordinates")
-    

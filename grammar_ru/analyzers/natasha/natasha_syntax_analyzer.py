@@ -15,14 +15,21 @@ class NatashaSyntaxAnalyzer(NatashaAnalyzer):
 
     def analyze_chunks(self, df: pd.DataFrame, chunks: List[List[str]]) -> pd.DataFrame:
         syntax_chunks = []
+        counter = 0
         for i, syntax_res in enumerate(self.syntax.map(chunks)):
-            syntax_chunks.append({})
             for j, syntax_token in enumerate(syntax_res.tokens):
-                relative_parent_id = int(syntax_token.head_id) - 1
-                absolute_parent_id = df.loc[
-                    (df['sentence_id'] == i) & (df['word_index'] == relative_parent_id)
-                ].at['word_id']
-                syntax_chunks[-1]["parent_id"] = absolute_parent_id
-                syntax_chunks[-1]["rel"] = syntax_token.rel
+                syntax_chunks.append({})
 
-        return pd.DataFrame(df)
+                relative_parent_id = int(syntax_token.head_id) - 1
+                if relative_parent_id >= 0:
+                    absolute_parent_id = df.loc[
+                        (df['sentence_id'] == i) & (df['word_index'] == relative_parent_id)
+                    ]['word_id'].item()
+
+                    syntax_chunks[-1]["parent_id"] = absolute_parent_id
+                    syntax_chunks[-1]["rel"] = syntax_token.rel
+
+                syntax_chunks[-1]['word_id'] = counter
+                counter += 1
+
+        return pd.merge(df, pd.DataFrame(syntax_chunks), on=['word_id'])
