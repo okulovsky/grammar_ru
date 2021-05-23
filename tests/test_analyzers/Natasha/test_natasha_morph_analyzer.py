@@ -27,4 +27,4 @@ class NatashaMorphAnalyzerTestCase(TestCase):
         try:
             ensure_df_contains(["word_id"], self.result)
         except BaseException:
-            self.fail("Morph analyzer does not preserve coordinates")
+            self.fail("Morph analyzer does not preserve word_id")

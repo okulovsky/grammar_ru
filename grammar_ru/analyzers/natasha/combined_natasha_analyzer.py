@@ -3,6 +3,7 @@ from .natasha_analyzer import NatashaAnalyzer
 from grammar_ru.common.natasha import create_chunks_from_dataframe
 from typing import *
 import pandas as pd
+from functools import reduce
 
 
 class CombinedNatashaAnalyzer(NlpAnalyzer):
@@ -12,9 +13,9 @@ class CombinedNatashaAnalyzer(NlpAnalyzer):
 
     def _analyze_inner(self, df: pd.DataFrame) -> pd.DataFrame:
         chunks = create_chunks_from_dataframe(df)
-        results = {}
+        results = []
 
         for analyzer in self._analyzers:
-            results[analyzer.get_name()] = analyzer.analyze_chunks(df, chunks).add_prefix(analyzer.get_name())
+            results.append(analyzer.analyze_chunks(df, chunks))
 
-        return pd.DataFrame(results)
+        return reduce(lambda df1, df2: pd.merge(df1, df2, on='word_id'), results)

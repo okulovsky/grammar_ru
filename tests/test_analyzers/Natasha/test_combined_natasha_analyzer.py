@@ -1,31 +1,36 @@
+from grammar_ru.analyzers.natasha.natasha_morph_analyzer import NatashaMorphAnalyzer
 from grammar_ru.analyzers.natasha.natasha_syntax_analyzer import NatashaSyntaxAnalyzer
+from grammar_ru.analyzers.natasha.combined_natasha_analyzer import CombinedNatashaAnalyzer
 from grammar_ru.common.architecture.separator import Separator
 from grammar_ru.common.natasha import create_chunks_from_dataframe
-from unittest import TestCase
-import numpy as np
 from grammar_ru.common.architecture.validations import ensure_df_contains
+from unittest import TestCase
+import pandas as pd
+import numpy as np
 
 text = 'Она была красива. Он любил красивые вещи. Вещи, нитрокраситель и нитроэмаль!'
 
 
-class NatashaSyntaxAnalyzerTestCase(TestCase):
+class CombinedNatashaAnalyzerTestCase(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        super(NatashaSyntaxAnalyzerTestCase, cls).setUpClass()
-        cls.syntax = NatashaSyntaxAnalyzer()
+        super(CombinedNatashaAnalyzerTestCase, cls).setUpClass()
+        cls.analyzer = CombinedNatashaAnalyzer([NatashaMorphAnalyzer(), NatashaSyntaxAnalyzer()])
         df = Separator.separate_string(text)
-        chunks = create_chunks_from_dataframe(df)
-        cls.result = cls.syntax.analyze_chunks(df, chunks)
+        cls.result = cls.analyzer._analyze_inner(df)
         print(cls.result)
 
-    def test_syntax_general(self):
+    def test_morph_and_syntax_general(self):
+        self.assertEqual(self.result.loc[(self.result['word_id'] == 2)]["POS"].item(), "ADJ")
+        self.assertEqual(self.result.loc[(self.result['word_id'] == 5)]["POS"].item(), "VERB")
+        self.assertEqual(self.result.loc[(self.result['word_id'] == 0)]["Gender"].item(), "Fem")
         self.assertTrue(np.isnan(self.result.loc[(self.result['word_id'] == 5)]["parent_id"].item()))
         self.assertTrue(np.isnan(self.result.loc[(self.result['word_id'] == 5)]["rel"].item()))
         self.assertEqual(self.result.loc[(self.result['word_id'] == 4)]["parent_id"].item(), 5)
         self.assertEqual(self.result.loc[(self.result['word_id'] == 4)]["rel"].item(), "nsubj")
 
-    def test_syntax_preserve_coordinates(self):
+    def test_combined_preserve_coordinates(self):
         try:
             ensure_df_contains(["word_id"], self.result)
         except BaseException:
-            self.fail("Morph analyzer does not preserve coordinates")
+            self.fail("Combined analyzer does not preserve word_id")
