@@ -1,5 +1,5 @@
 from typing import *
-from grammar_ru.common import validations
+from grammar_ru.common.architecture import validations
 import pandas as pd
 
 

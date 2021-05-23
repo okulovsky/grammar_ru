@@ -1,16 +1,17 @@
 from .natasha_analyzer import NatashaAnalyzer
+from .natasha_navec import NatashaNavec
 import pandas as pd
 from slovnet import Syntax
-from navec import Navec
 from typing import *
+import os
 
 
 class NatashaSyntaxAnalyzer(NatashaAnalyzer):
     def __init__(self):
-        self.navec = Navec.load('models/navec_news_v1_1B_250K_300d_100q.tar')
-        self.syntax = Syntax.load('models/slovnet_syntax_news_v1.tar')
-        self.syntax.navec(self.navec)
         super(NatashaAnalyzer, self).__init__()
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models/slovnet_syntax_news_v1.tar')
+        self.syntax = Syntax.load(path)
+        self.syntax.navec(NatashaNavec.get_navec())
 
     def analyze_chunks(self, df: pd.DataFrame, chunks: List[List[str]]) -> pd.DataFrame:
         syntax_chunks = []
