@@ -10,6 +10,7 @@ class CombinedNatashaAnalyzer(NlpAnalyzer):
     def __init__(self, analyzers: List[NatashaAnalyzer]):
         super(NlpAnalyzer, self).__init__()
         self._analyzers = analyzers
+        self._required_columns = []
 
     def _analyze_inner(self, df: pd.DataFrame) -> pd.DataFrame:
         chunks = create_chunks_from_dataframe(df)

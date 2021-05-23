@@ -6,7 +6,7 @@ from typing import *
 
 class NatashaAnalyzer(NlpAnalyzer):
     def __init__(self, required_columns=[]):
-        super(NlpAnalyzer, self).__init__(required_columns=required_columns)
+        super(NlpAnalyzer, self).__init__(required_columns)
 
     def _analyze_inner(self, df: pd.DataFrame) -> pd.DataFrame:
         chunks = create_chunks_from_dataframe(df)

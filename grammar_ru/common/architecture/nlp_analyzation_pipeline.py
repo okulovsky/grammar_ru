@@ -12,7 +12,8 @@ class NlpAnalyzationPipeline:
     def analyze_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         result = df
         for (name, analyzer) in self._analyzers:
-            result = result.merge(analyzer.analyze(df).add_prefix(name + '_'))
+            result = result.merge(analyzer.analyze(df).add_prefix(name + '_'),
+                                  left_on='word_id', right_on=(name + '_word_id'))
 
         return result
 
@@ -26,4 +27,6 @@ class NlpAnalyzationPipeline:
         return self.analyze_dataframe(parsed_text_df)
 
     def analyze_string(self, string: str) -> pd.DataFrame:
-        return self.analyze_text(Separator.separate_string(string))
+        parsed_text_df = Separator.separate_string(string)
+
+        return self.analyze_dataframe(parsed_text_df)
