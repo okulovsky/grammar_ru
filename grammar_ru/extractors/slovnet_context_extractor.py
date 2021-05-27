@@ -1,9 +1,9 @@
 import pandas as pd
 from tg.common.ml import batched_training as bt
-from tg.common.ml import DataBundle
+import numpy as np
 
 
-class ContextTransformer(bt.Extractor):
+class ContextExtractor(bt.Extractor):
     """
     This extractor should be applied to dataframes created by NatashaSyntaxAnalyzer.
     Extracts contexts of syntax tree by calculating shifts: brothers, parents, children...
@@ -22,21 +22,22 @@ class ContextTransformer(bt.Extractor):
         self.dataframe_name = custom_dataframe_name
         self.index_column = custom_index_column
 
-    def fit(self, bundle: DataBundle):
+    def fit(self, bundle: bt.DataBundle):
         pass
 
-    def extract(self, index_frame: pd.DataFrame, bundle: DataBundle):
+    def extract(self, index_frame: pd.DataFrame, bundle: bt.DataBundle):
         syntax_df = bundle.data_frames[self.dataframe_name]
         index_column = index_frame[self.index_column]
 
-        df = pd.DataFrame(syntax_df[syntax_df["word_in"].isin(index_column)][["word_id"]])
+        df = pd.DataFrame(syntax_df[syntax_df["word_id"].isin(index_column)][["word_id"]])
         df["shift"] = 0
         df["relative_word_id"] = df["word_id"]
 
         new_rows = []
 
-        for row in df.iterrows():
+        for _, row in df.iterrows():
             word_id = row["word_id"]
+            parent_id = syntax_df[(syntax_df["word_id"] == word_id)]["parent_id"].item()
             shift = 0
             relative_id = word_id
 
@@ -44,30 +45,32 @@ class ContextTransformer(bt.Extractor):
             for _ in range(self.max_shift):
                 shift += 1
                 relative_id = syntax_df[(syntax_df["word_id"] == relative_id)]["parent_id"].item()
+                if np.isnan(relative_id):
+                    break
                 new_rows.append({'word_id': word_id, 'shift': shift, 'relative_word_id': relative_id})
 
             # Seeking for brothers, sisters ...
-            for brother_row in syntax_df[(syntax_df["word_id"] == row["parent_id"])].iterrows():
+            for _, brother_row in syntax_df[(syntax_df["word_id"] == parent_id)].iterrows():
                 new_rows.append({'word_id': word_id, 'shift': 0, 'relative_word_id': brother_row['word_id']})
 
             def extract_child_rows(ids, iteration, max_shift, syntax_df):
                 if iteration > max_shift:
-                    break
+                    return
                 child_ids = []
 
                 for i in ids:
-                    for child_row in syntax_df[(syntax_df["parent_id"] == i)].iterrows():
+                    for _, child_row in syntax_df[(syntax_df["parent_id"] == i)].iterrows():
                         child_ids.append(child_row['word_id'])
 
                 for i in child_ids:
-                    new_rows.append({'word_id': word_id, 'shift': iteration, 'relative_word_id': i})
+                    new_rows.append({'word_id': word_id, 'shift': -iteration, 'relative_word_id': i})
 
                 extract_child_rows(child_ids, iteration + 1, max_shift, syntax_df)
 
             # Seeking for children and below ...
             extract_child_rows([word_id], 1, self.max_shift, syntax_df)
 
-        return pd.concat([df, pd.DataFrame(new_rows)])
+        return pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
 
     def get_name(self):
         return self.name
