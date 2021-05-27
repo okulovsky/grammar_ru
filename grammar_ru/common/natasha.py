@@ -33,11 +33,13 @@ def make_dataframe_from_nerus(doc_amount: int, skip: int = 0) -> pd.DataFrame:
 def create_chunks_from_dataframe(df: pd.DataFrame) -> List[List[str]]:
     validations.ensure_df_contains(validations.WordCoordinates, df)
     chunks = []
+    last_sent_id = -1
 
     for index, row in df.iterrows():
-        if row['sentence_id'] == len(chunks):
+        if last_sent_id < row['sentence_id']:
             chunks.append([])
+            last_sent_id = row['sentence_id']
 
-        chunks[row['sentence_id']].append(row['word'])
+        chunks[-1].append(row['word'])
 
     return chunks

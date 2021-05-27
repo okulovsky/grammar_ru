@@ -1,48 +1,82 @@
 import pandas as pd
-from tg.common.ml import dft
 from tg.common.ml import batched_training as bt
-import numpy as np
+from tg.common.ml import DataBundle
 
 
-def add_new_shift(word_id, df):
-
-
-class ContextTransformer(dft.DataFrameTransformer):
+class ContextTransformer(bt.Extractor):
     """
-    This transformer should be applied to dataframes created by NatashaSyntaxAnalyzer.
+    This extractor should be applied to dataframes created by NatashaSyntaxAnalyzer.
     Extracts contexts of syntax tree by calculating shifts: brothers, parents, children...
     """
 
-    def __init__(self, selector=None, max_shift=2):
-        """
+    """
+    Args:
+        max_shift: Specifies the maximum shift relative to the selected object.
+        custom_dataframe_name: Specifies bundle name of dataframe that was created by NatashaSyntaxAnalyzer.
+        custom_index_name: Specifies column name in index row.
+    """
 
-        Args:
-            selector: A function that returns either true or false depending on the object properties. Default value falls back to always return True.
-            max_shift: Specifies max shift relative to the selected object.
-        """
-        if not selector:
-            def default_selector(_): return True
-            selector = default_selector
-        self.selector = selector
+    def __init__(self, name: str, max_shift=2, custom_dataframe_name="syntax", custom_index_column="word_id"):
+        self.name = name
         self.max_shift = max_shift
+        self.dataframe_name = custom_dataframe_name
+        self.index_column = custom_index_column
 
-    def fit(self, df):
+    def fit(self, bundle: DataBundle):
         pass
 
-    def transform(self, df):
-        if "shift" in df.columns or "relative_word_id" in df.columns:
-            raise ValueError("Dataframe already contains either 'shift' or 'relative_word_id' column")
+    def extract(self, index_frame: pd.DataFrame, bundle: DataBundle):
+        syntax_df = bundle.data_frames[self.dataframe_name]
+        index_column = index_frame[self.index_column]
 
-        result = pd.DataFrame(df)
-        result["shift"] = 1
-        result[result["parent_id"].isna()]["shift"] = np.nan
-        result["relative_word_id"] = result["parent_id"]
+        df = pd.DataFrame(syntax_df[syntax_df["word_in"].isin(index_column)][["word_id"]])
+        df["shift"] = 0
+        df["relative_word_id"] = df["word_id"]
 
-        return something(df)
+        new_rows = []
+
+        for row in df.iterrows():
+            word_id = row["word_id"]
+            shift = 0
+            relative_id = word_id
+
+            # Seeking for parent -> grandparent -> ...
+            for _ in range(self.max_shift):
+                shift += 1
+                relative_id = syntax_df[(syntax_df["word_id"] == relative_id)]["parent_id"].item()
+                new_rows.append({'word_id': word_id, 'shift': shift, 'relative_word_id': relative_id})
+
+            # Seeking for brothers, sisters ...
+            for brother_row in syntax_df[(syntax_df["word_id"] == row["parent_id"])].iterrows():
+                new_rows.append({'word_id': word_id, 'shift': 0, 'relative_word_id': brother_row['word_id']})
+
+            def extract_child_rows(ids, iteration, max_shift, syntax_df):
+                if iteration > max_shift:
+                    break
+                child_ids = []
+
+                for i in ids:
+                    for child_row in syntax_df[(syntax_df["parent_id"] == i)].iterrows():
+                        child_ids.append(child_row['word_id'])
+
+                for i in child_ids:
+                    new_rows.append({'word_id': word_id, 'shift': iteration, 'relative_word_id': i})
+
+                extract_child_rows(child_ids, iteration + 1, max_shift, syntax_df)
+
+            # Seeking for children and below ...
+            extract_child_rows([word_id], 1, self.max_shift, syntax_df)
+
+        return pd.concat([df, pd.DataFrame(new_rows)])
+
+    def get_name(self):
+        return self.name
 
 
-# TODO: I need to make extractor out of this.
-# An extractor is a transformer + selector of columns
-# In our case we also have a selector of rows.
-# Firstly, we need to find row using selector. Secondly, we need to process it (find it's parents, brothers, children)
-# Thirdly, we just return found values
+# To get parents of list of values, we can selectmany of parent_id of values
+# To get children of list of values, we go through all values and select values parent_id of which inside of our list of values.
+# In order to boost performance drastically, we can constrain the area of current word. For example, we can consider only 50 left and 50 right words.
+
+# So the algorithm should look like this: we get parents until we hit shift.
+# We also get all other children of parent
+# Lastly, we extract children `shift` times.
