@@ -26,11 +26,10 @@ class ContextExtractor(bt.Extractor):
 
     def extract(self, index_frame: pd.DataFrame, bundle: bt.DataBundle):
         syntax_df = bundle.data_frames[self.dataframe_name]
-        index_column = index_frame[self.index_column]
 
         new_rows = []
 
-        for word_id, _ in index_column.iteritems():
+        for word_id in index_frame.index:
             parent_id = syntax_df[(syntax_df[self.index_column] == word_id)]["parent_id"].item()
             shift = 0
             relative_id = word_id
