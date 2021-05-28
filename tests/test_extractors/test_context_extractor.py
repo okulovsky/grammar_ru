@@ -23,16 +23,18 @@ class ContextExtractorTestCase(TestCase):
             syntax=cls.syntax_df
         ))
         cls.extractor = ContextExtractor("Syntax")
-        cls.result = cls.extractor.extract(index_df, cls.bundle)
+        cls.result = cls.extractor.extract(index_df, cls.bundle).value
         print(cls.result)
 
     def test_syntax_general(self):
-        self.assertEqual(self.result[(self.result["word_id"] == 0) & (self.result["relative_word_id"] == 0)]["shift"].item(), 0)
-        self.assertEqual(self.result[(self.result["word_id"] == 0) & (self.result["relative_word_id"] == 2)]["shift"].item(), 1)
-        self.assertEqual(self.result[(self.result["word_id"] == 1) & (self.result["relative_word_id"] == 2)]["shift"].item(), 1)
+        self.assertEqual(self.result[(self.result["word_id"] == 0) & (
+            self.result["relative_word_id"] == 0)]["shift"].item(), 0)
+        self.assertEqual(self.result[(self.result["word_id"] == 0) & (
+            self.result["relative_word_id"] == 2)]["shift"].item(), 1)
+        self.assertEqual(self.result[(self.result["word_id"] == 1) & (
+            self.result["relative_word_id"] == 2)]["shift"].item(), 1)
         try:
             self.result[(self.result["word_id"] == 2) & (self.result["shift"] == 1)]["relative_word_id"].item()
             self.fail()
         except BaseException:
             pass
-

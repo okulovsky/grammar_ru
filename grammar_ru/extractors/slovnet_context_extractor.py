@@ -1,5 +1,6 @@
 import pandas as pd
 from tg.common.ml import batched_training as bt
+from yo_fluq_ds import KeyValuePair
 
 
 class ContextExtractor(bt.Extractor):
@@ -63,7 +64,7 @@ class ContextExtractor(bt.Extractor):
             # Seeking for children and below ...
             extract_child_rows([word_id], 1, self.max_shift, syntax_df)
 
-        return pd.DataFrame(new_rows)
+        return KeyValuePair(self.name, pd.DataFrame(new_rows))
 
     def get_name(self):
         return self.name
