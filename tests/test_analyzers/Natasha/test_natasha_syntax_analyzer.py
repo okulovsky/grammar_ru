@@ -19,7 +19,7 @@ class NatashaSyntaxAnalyzerTestCase(TestCase):
         print(cls.result)
 
     def test_syntax_general(self):
-        self.assertTrue(np.isnan(self.result.loc[(self.result['word_id'] == 5)]["parent_id"].item()))
+        self.assertEqual(self.result.loc[(self.result['word_id'] == 5)]["parent_id"].item(), -1)
         self.assertTrue(np.isnan(self.result.loc[(self.result['word_id'] == 5)]["rel"].item()))
         self.assertEqual(self.result.loc[(self.result['word_id'] == 4)]["parent_id"].item(), 5)
         self.assertEqual(self.result.loc[(self.result['word_id'] == 4)]["rel"].item(), "nsubj")

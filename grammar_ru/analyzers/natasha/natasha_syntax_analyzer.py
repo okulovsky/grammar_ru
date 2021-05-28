@@ -28,6 +28,8 @@ class NatashaSyntaxAnalyzer(NatashaAnalyzer):
 
                     syntax_chunks[-1]["parent_id"] = absolute_parent_id
                     syntax_chunks[-1]["rel"] = syntax_token.rel
+                else:
+                    syntax_chunks[-1]["parent_id"] = -1
 
                 syntax_chunks[-1]['word_id'] = counter
                 counter += 1

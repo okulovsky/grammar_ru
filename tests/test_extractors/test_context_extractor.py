@@ -27,4 +27,12 @@ class ContextExtractorTestCase(TestCase):
         print(cls.result)
 
     def test_syntax_general(self):
-        pass
+        self.assertEqual(self.result[(self.result["word_id"] == 0) & (self.result["relative_word_id"] == 0)]["shift"].item(), 0)
+        self.assertEqual(self.result[(self.result["word_id"] == 0) & (self.result["relative_word_id"] == 2)]["shift"].item(), 1)
+        self.assertEqual(self.result[(self.result["word_id"] == 1) & (self.result["relative_word_id"] == 2)]["shift"].item(), 1)
+        try:
+            self.result[(self.result["word_id"] == 2) & (self.result["shift"] == 1)]["relative_word_id"].item()
+            self.fail()
+        except BaseException:
+            pass
+

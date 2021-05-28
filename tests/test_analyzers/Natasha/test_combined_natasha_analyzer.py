@@ -24,7 +24,7 @@ class CombinedNatashaAnalyzerTestCase(TestCase):
         self.assertEqual(self.result.loc[(self.result['word_id'] == 2)]["POS"].item(), "ADJ")
         self.assertEqual(self.result.loc[(self.result['word_id'] == 5)]["POS"].item(), "VERB")
         self.assertEqual(self.result.loc[(self.result['word_id'] == 0)]["Gender"].item(), "Fem")
-        self.assertTrue(np.isnan(self.result.loc[(self.result['word_id'] == 5)]["parent_id"].item()))
+        self.assertEqual(self.result.loc[(self.result['word_id'] == 5)]["parent_id"].item(), -1)
         self.assertTrue(np.isnan(self.result.loc[(self.result['word_id'] == 5)]["rel"].item()))
         self.assertEqual(self.result.loc[(self.result['word_id'] == 4)]["parent_id"].item(), 5)
         self.assertEqual(self.result.loc[(self.result['word_id'] == 4)]["rel"].item(), "nsubj")
