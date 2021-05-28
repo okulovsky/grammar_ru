@@ -4,6 +4,7 @@ from .architecture import validations
 from .architecture import Separator
 from nerus import NerusDoc, load_nerus
 from functools import reduce
+import os
 
 
 def get_text_from_nerus_doc(doc: NerusDoc) -> str:
@@ -11,7 +12,8 @@ def get_text_from_nerus_doc(doc: NerusDoc) -> str:
 
 
 def make_dataframe_from_nerus(doc_amount: int, skip: int = 0) -> pd.DataFrame:
-    docs = load_nerus('../analyzers/natasha/models/nerus_lenta.conllu.gz')
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../analyzers/natasha/models/nerus_lenta.conllu.gz')
+    docs = load_nerus(path)
 
     paragraphs = []
 
