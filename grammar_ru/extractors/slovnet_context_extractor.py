@@ -69,12 +69,3 @@ class ContextExtractor(bt.Extractor):
 
     def get_name(self):
         return self.name
-
-
-# To get parents of list of values, we can selectmany of parent_id of values
-# To get children of list of values, we go through all values and select values parent_id of which inside of our list of values.
-# In order to boost performance drastically, we can constrain the area of current word. For example, we can consider only 50 left and 50 right words.
-
-# So the algorithm should look like this: we get parents until we hit shift.
-# We also get all other children of parent
-# Lastly, we extract children `shift` times.
