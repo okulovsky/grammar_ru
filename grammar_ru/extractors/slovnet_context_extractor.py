@@ -30,22 +30,22 @@ class ContextExtractor(bt.Extractor):
 
         new_rows = []
 
-        for _, word_id in index_column.iteritems():
-            parent_id = syntax_df[(syntax_df["word_id"] == word_id)]["parent_id"].item()
+        for word_id, _ in index_column.iteritems():
+            parent_id = syntax_df[(syntax_df[self.index_column] == word_id)]["parent_id"].item()
             shift = 0
             relative_id = word_id
 
             # Seeking for parent -> grandparent -> ...
             for _ in range(self.max_shift):
                 shift += 1
-                relative_id = syntax_df[(syntax_df["word_id"] == relative_id)]["parent_id"].item()
+                relative_id = syntax_df[(syntax_df[self.index_column] == relative_id)]["parent_id"].item()
                 if relative_id == -1:
                     break
                 new_rows.append({'word_id': word_id, 'shift': shift, 'relative_word_id': relative_id})
 
             # Seeking for brothers, sisters ...
             for _, brother_row in syntax_df[(syntax_df["parent_id"] == parent_id)].iterrows():
-                new_rows.append({'word_id': word_id, 'shift': 0, 'relative_word_id': brother_row['word_id']})
+                new_rows.append({'word_id': word_id, 'shift': 0, 'relative_word_id': brother_row[self.index_column]})
 
             def extract_child_rows(ids, iteration, max_shift, syntax_df):
                 if iteration > max_shift:
@@ -54,7 +54,7 @@ class ContextExtractor(bt.Extractor):
 
                 for i in ids:
                     for _, child_row in syntax_df[(syntax_df["parent_id"] == i)].iterrows():
-                        child_ids.append(child_row['word_id'])
+                        child_ids.append(child_row[self.index_column])
 
                 for i in child_ids:
                     new_rows.append({'word_id': word_id, 'shift': -iteration, 'relative_word_id': i})

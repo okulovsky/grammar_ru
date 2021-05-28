@@ -18,7 +18,7 @@ class ContextExtractorTestCase(TestCase):
         chunks = create_chunks_from_dataframe(cls.df)
         cls.syntax_df = cls.syntax.analyze_chunks(cls.df, chunks)
         print(cls.syntax_df)
-        index_df = pd.DataFrame(cls.df["word_id"], columns=["word_id"])
+        index_df = pd.DataFrame(cls.df["word_id"], columns=["word_id"]).set_index("word_id")
         cls.bundle = bt.DataBundle(index_df, dict(
             syntax=cls.syntax_df
         ))
