@@ -2,10 +2,8 @@ from grammar_ru.analyzers.natasha.natasha_morph_analyzer import NatashaMorphAnal
 from grammar_ru.analyzers.natasha.natasha_syntax_analyzer import NatashaSyntaxAnalyzer
 from grammar_ru.analyzers.natasha.combined_natasha_analyzer import CombinedNatashaAnalyzer
 from grammar_ru.common.architecture.separator import Separator
-from grammar_ru.common.natasha import create_chunks_from_dataframe
 from grammar_ru.common.architecture.validations import ensure_df_contains
 from unittest import TestCase
-import pandas as pd
 import numpy as np
 
 text = 'Она была красива. Он любил красивые вещи. Вещи, нитрокраситель и нитроэмаль!'

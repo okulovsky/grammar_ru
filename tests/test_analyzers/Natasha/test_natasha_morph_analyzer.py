@@ -3,7 +3,6 @@ from grammar_ru.common.architecture.separator import Separator
 from grammar_ru.common.natasha import create_chunks_from_dataframe
 from grammar_ru.common.architecture.validations import ensure_df_contains
 from unittest import TestCase
-import pandas as pd
 
 text = 'Она была красива. Он любил красивые вещи. Вещи, нитрокраситель и нитроэмаль!'
 

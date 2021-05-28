@@ -1,6 +1,5 @@
 import pandas as pd
 from tg.common.ml import batched_training as bt
-import numpy as np
 
 
 class ContextExtractor(bt.Extractor):
