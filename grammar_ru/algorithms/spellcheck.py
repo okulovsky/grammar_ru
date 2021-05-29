@@ -1,13 +1,15 @@
+import pandas as pd
 from ..common.architecture import NlpAlgorithm
 import enchant
 import pandas as pd
+
 
 class SpellcheckAlgorithm(NlpAlgorithm):
     def __init__(self):
         super(SpellcheckAlgorithm, self).__init__('spellcheck_status', 'spellcheck_suggestion')
         self.spellchecker = enchant.Dict('ru_RU')
 
-    def run(self, df):
+    def _run_inner(self, df: pd.DataFrame):
         column = self.get_status_column()
         df[column] = True
         to_check = (df.word_type == 'ru') & df.check_requested
@@ -17,7 +19,7 @@ class SpellcheckAlgorithm(NlpAlgorithm):
         suggest_column = self.get_suggest_column()
         df[suggest_column] = None
 
-        to_suggest = df[column]==False
+        to_suggest = df[column] == False
 
         values = df.loc[to_suggest].word.apply(self.spellchecker.suggest)
         df.loc[to_suggest, suggest_column] = values

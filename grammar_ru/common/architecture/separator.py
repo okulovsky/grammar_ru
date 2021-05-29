@@ -9,19 +9,20 @@ def _generate_offsets(string: str, substrings: List[str]):
     result = []
     for s in substrings:
         while not string.startswith(s, offset):
-            offset+=1
-            if offset>=len(string):
+            offset += 1
+            if offset >= len(string):
                 raise ValueError(f'Substring failed for {string}, {s}')
         result.append(offset)
-        offset+=len(s)
+        offset += len(s)
     return result, offset
+
 
 russianRegex = re.compile('^[абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ-]+$')
 
 
 class Separator:
     @staticmethod
-    def _separate_string(s: str, word_id_start = 0, sentence_id_start = 0):
+    def _separate_string(s: str, word_id_start=0, sentence_id_start=0):
         result = []
         sentences = sentenize(s)
         offset = 0
@@ -33,10 +34,10 @@ class Separator:
             for word_index, (word, word_offset) in enumerate(zip(tokens, offsets)):
                 word_type = 'ru' if russianRegex.match(word) else 'unk'
                 result.append((word_id, sentence_id, word_index, offset+word_offset, word, word_type))
-                word_id+=1
+                word_id += 1
             offset += delta
-            sentence_id+=1
-        df = pd.DataFrame(result, columns=['word_id','sentence_id','word_index','word_offset','word','word_type'])
+            sentence_id += 1
+        df = pd.DataFrame(result, columns=['word_id', 'sentence_id', 'word_index', 'word_offset', 'word', 'word_type'])
         df['word_length'] = df.word.str.len()
         return df
 
@@ -50,10 +51,9 @@ class Separator:
         word_id_start, sentence_id_start = 0, 0
         for i, s in enumerate(strings):
             df = Separator._separate_string(s, word_id_start, sentence_id_start)
-            if df.shape[0]>0:
+            if df.shape[0] > 0:
                 word_id_start = df.iloc[-1].word_id+1
                 sentence_id_start = df.iloc[-1].sentence_id+1
             df['paragraph_id'] = i
             result.append(df)
         return pd.concat(result, ignore_index=True)
-

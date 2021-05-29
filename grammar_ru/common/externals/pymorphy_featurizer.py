@@ -2,6 +2,7 @@ import pymorphy2
 from yo_fluq_ds import *
 from .featurizer import Featurizer
 
+
 class PyMorphyFeaturizer(Featurizer):
 
     def create_features(self, df):
@@ -16,6 +17,5 @@ class PyMorphyFeaturizer(Featurizer):
             for t in pymorphy_tags:
                 rrow.append(getattr(result.tag, t))
             rrows.append(rrow)
-        pdf = pd.DataFrame(rrows, columns=['word_id','normal_form'] + pymorphy_tags)
+        pdf = pd.DataFrame(rrows, columns=['word_id', 'normal_form'] + pymorphy_tags)
         return pdf
-

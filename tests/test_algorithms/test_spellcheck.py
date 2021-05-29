@@ -6,6 +6,7 @@ pd.options.display.max_columns = None
 pd.options.display.width = None
 
 
+
 class SpellcheckTestCase(TestCase):
     def test_spellcheck(self):
         df = SpellcheckAlgorithm().run_on_string('В этом придложении есть ашипки')
