@@ -26,43 +26,44 @@ class ContextExtractor(bt.Extractor):
         pass
 
     def extract(self, index_frame: pd.DataFrame, bundle: bt.DataBundle):
-        syntax_df = bundle.data_frames[self.dataframe_name]
+        syntax_df = bundle.data_frames[self.dataframe_name].set_index(self.index_column)
+        parent_df = bundle.data_frames[self.dataframe_name].sort_values(by=["parent_id", self.index_column]).set_index(["parent_id", self.index_column])
 
         new_rows = []
 
         for word_id in index_frame.index:
-            parent_id = syntax_df[(syntax_df[self.index_column] == word_id)]["parent_id"].item()
+            parent_id = syntax_df.at[word_id, "parent_id"]
             shift = 0
             relative_id = word_id
 
             # Seeking for parent -> grandparent -> ...
             for _ in range(self.max_shift):
                 shift += 1
-                relative_id = syntax_df[(syntax_df[self.index_column] == relative_id)]["parent_id"].item()
+                relative_id = syntax_df.at[relative_id, "parent_id"]
                 if relative_id == -1:
                     break
                 new_rows.append({'word_id': word_id, 'shift': shift, 'relative_word_id': relative_id})
 
             # Seeking for brothers, sisters ...
-            for _, brother_row in syntax_df[(syntax_df["parent_id"] == parent_id)].iterrows():
-                new_rows.append({'word_id': word_id, 'shift': 0, 'relative_word_id': brother_row[self.index_column]})
+            for idx, brother_row in parent_df.loc[parent_id].iterrows() if parent_id in parent_df.index else []:
+                new_rows.append({'word_id': word_id, 'shift': 0, 'relative_word_id': idx})
 
-            def extract_child_rows(ids, iteration, max_shift, syntax_df):
+            def extract_child_rows(ids, iteration, max_shift):
                 if iteration > max_shift:
                     return
                 child_ids = []
 
                 for i in ids:
-                    for _, child_row in syntax_df[(syntax_df["parent_id"] == i)].iterrows():
-                        child_ids.append(child_row[self.index_column])
+                    for idx, child_row in parent_df.loc[i].iterrows() if i in parent_df.index else []:
+                        child_ids.append(idx)
 
                 for i in child_ids:
                     new_rows.append({'word_id': word_id, 'shift': -iteration, 'relative_word_id': i})
 
-                extract_child_rows(child_ids, iteration + 1, max_shift, syntax_df)
+                extract_child_rows(child_ids, iteration + 1, max_shift)
 
             # Seeking for children and below ...
-            extract_child_rows([word_id], 1, self.max_shift, syntax_df)
+            extract_child_rows([word_id], 1, self.max_shift)
 
         return KeyValuePair(self.name, pd.DataFrame(new_rows))
 
