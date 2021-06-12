@@ -29,6 +29,9 @@ class ContextExtractor(bt.Extractor):
         syntax_df = bundle.data_frames[self.dataframe_name].set_index(self.index_column)
         parent_df = bundle.data_frames[self.dataframe_name].set_index("parent_id")
 
+        print(syntax_df)
+        print(parent_df)
+
         new_rows = []
 
         for word_id in index_frame.index:
