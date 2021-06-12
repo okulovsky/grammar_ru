@@ -27,7 +27,7 @@ class ContextExtractor(bt.Extractor):
 
     def extract(self, index_frame: pd.DataFrame, bundle: bt.DataBundle):
         syntax_df = bundle.data_frames[self.dataframe_name].set_index(self.index_column)
-        sentences_df = bundle.data_frames[self.dataframe_name].set_index(["sentence_id", "word_index"])
+        parent_df = bundle.data_frames[self.dataframe_name].set_index("parent_id")
 
         new_rows = []
 
@@ -35,7 +35,6 @@ class ContextExtractor(bt.Extractor):
             parent_id = syntax_df[word_id]["parent_id"]
             shift = 0
             relative_id = word_id
-            sentence_id = syntax_df[word_id]["sentence_id"]
 
             # Seeking for parent -> grandparent -> ...
             for _ in range(self.max_shift):
@@ -46,7 +45,7 @@ class ContextExtractor(bt.Extractor):
                 new_rows.append({'word_id': word_id, 'shift': shift, 'relative_word_id': relative_id})
 
             # Seeking for brothers, sisters ...
-            for _, brother_row in sentences_df[sentence_id].loc[(sentences_df[sentence_id]["parent_id"] == parent_id)].iterrows():
+            for _, brother_row in parent_df[parent_id].iterrows():
                 new_rows.append({'word_id': word_id, 'shift': 0, 'relative_word_id': brother_row[self.index_column]})
 
             def extract_child_rows(ids, iteration, max_shift, syntax_df):
@@ -55,7 +54,7 @@ class ContextExtractor(bt.Extractor):
                 child_ids = []
 
                 for i in ids:
-                    for idx, child_row in sentences_df[sentence_id].loc[(sentences_df[sentence_id]["parent_id"] == i)].iterrows():
+                    for idx, child_row in parent_df[i].iterrows():
                         child_ids.append(idx)
 
                 for i in child_ids:
