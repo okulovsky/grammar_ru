@@ -23,7 +23,7 @@ class NatashaSyntaxAnalyzer(NatashaAnalyzer):
 
                 relative_parent_id = int(syntax_token.head_id) - 1
                 if relative_parent_id >= 0:
-                    absolute_parent_id = df.loc[(i, relative_parent_id), 'word_id']
+                    absolute_parent_id = df.at[(i, relative_parent_id), 'word_id']
 
                     syntax_chunks[-1]["parent_id"] = absolute_parent_id
                     syntax_chunks[-1]["rel"] = syntax_token.rel
