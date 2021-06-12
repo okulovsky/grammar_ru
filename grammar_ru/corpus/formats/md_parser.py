@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import *
 from yo_fluq_ds import FileIO, Query, Queryable
 from ..corpus_writer import CorpusFragment
-from ....common.architecture import Separator
+from ...common.architecture import Separator
 
 class HeaderParseResponse(Enum):
     ContinueTextBlock = 0
