@@ -45,7 +45,7 @@ class ContextExtractor(bt.Extractor):
                 new_rows.append({'word_id': word_id, 'shift': shift, 'relative_word_id': relative_id})
 
             # Seeking for brothers, sisters ...
-            for _, brother_row in parent_df[parent_id].iterrows():
+            for _, brother_row in parent_df[parent_id].iterrows() if parent_id in parent_df else []:
                 new_rows.append({'word_id': word_id, 'shift': 0, 'relative_word_id': brother_row[self.index_column]})
 
             def extract_child_rows(ids, iteration, max_shift, syntax_df):
@@ -54,7 +54,7 @@ class ContextExtractor(bt.Extractor):
                 child_ids = []
 
                 for i in ids:
-                    for idx, child_row in parent_df[i].iterrows():
+                    for idx, child_row in parent_df[i].iterrows() if i in parent_df else []:
                         child_ids.append(idx)
 
                 for i in child_ids:
