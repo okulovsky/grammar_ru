@@ -28,8 +28,6 @@ class ContextExtractor(bt.Extractor):
     def extract(self, index_frame: pd.DataFrame, bundle: bt.DataBundle):
         syntax_df = bundle.data_frames[self.dataframe_name].set_index(self.index_column)
         parent_df = bundle.data_frames[self.dataframe_name].sort_values(by=["parent_id", self.index_column]).set_index(["parent_id", self.index_column])
-        print(syntax_df)
-        print(parent_df)
 
         new_rows = []
 
@@ -47,7 +45,7 @@ class ContextExtractor(bt.Extractor):
                 new_rows.append({'word_id': word_id, 'shift': shift, 'relative_word_id': relative_id})
 
             # Seeking for brothers, sisters ...
-            for idx, brother_row in parent_df.loc[parent_id].iterrows():
+            for idx, brother_row in parent_df.loc[parent_id].iterrows() if parent_id in parent_df.index else []:
                 new_rows.append({'word_id': word_id, 'shift': 0, 'relative_word_id': idx})
 
             def extract_child_rows(ids, iteration, max_shift):
@@ -56,7 +54,7 @@ class ContextExtractor(bt.Extractor):
                 child_ids = []
 
                 for i in ids:
-                    for idx, child_row in parent_df.loc[i].iterrows():
+                    for idx, child_row in parent_df.loc[i].iterrows() if i in parent_df.index else []:
                         child_ids.append(idx)
 
                 for i in child_ids:
