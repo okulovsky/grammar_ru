@@ -6,6 +6,8 @@ from datetime import datetime
 from io import BytesIO
 import os
 from uuid import uuid4
+from ..common.externals import PyMorphyFeaturizer
+import json
 
 class CorpusFragment:
     def __init__(self,
@@ -30,9 +32,11 @@ class CorpusWriter:
         self.file = zipfile.ZipFile(filename,'w',zipfile.ZIP_DEFLATED)
         self.toc = []
         self.indices = {}
+        self.ordinal = 0
 
-        self.shifts = dict(word_id=0, sentence_id=0, paragraph_id=0)
+        self.columns_to_shift=['word_id','sentence_id','paragraph_id']
         self.id_span = id_span
+
 
 
 
@@ -42,9 +46,11 @@ class CorpusWriter:
         self.file.writestr(name, bytes.getbuffer())
 
     def _update_indices(self, df):
-        for key in list(self.shifts):
-            df[key]+=self.shifts[key]
-            self.shifts[key] = df[key].max()+self.id_span
+        delta = 0
+        if len(self.toc)>0:
+            delta = self.toc[-1]['max_id'] + self.id_span
+        for key in self.columns_to_shift:
+            df[key]+=delta
         df.index = list(df['word_id'])
 
     def add_fragment(self, fragment: CorpusFragment):
@@ -60,13 +66,17 @@ class CorpusWriter:
         row['file_id'] = file_id
         row['token_count'] = fragment.df.shape[0]
         row['character_count'] = fragment.df.word_length.sum()
+        row['ordinal'] = self.ordinal
+        self.ordinal += 1
 
         for key, value in fragment.additional_columns.items():
             row[key] = value
-        self.toc.append(row)
 
         self._update_indices(fragment.df)
-        self._write_parquet(f'raw/{file_id}.parquet', fragment.df)
+        row['max_id'] = fragment.df[['word_id', 'sentence_id', 'paragraph_id']].max().max()
+
+        self._write_parquet(f'src/{file_id}.parquet', fragment.df)
+        self.toc.append(row)
 
 
     def finalize(self):
@@ -74,3 +84,7 @@ class CorpusWriter:
         toc = toc.set_index('file_id')
         self._write_parquet('toc.parquet',toc)
         self.file.close()
+
+
+
+
