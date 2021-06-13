@@ -1,4 +1,4 @@
-from grammar_ru.corpus import CorpusWriter, Corpus
+from grammar_ru.corpus import CorpusWriter, CorpusReader
 from grammar_ru.corpus.formats import MdParser
 from unittest import TestCase
 from pathlib import Path
@@ -13,14 +13,14 @@ class CorpusTestCase(TestCase):
         for f in fragments:
             writer.add_fragment(f)
         writer.finalize()
-        reader = Corpus(corpus_file)
+        reader = CorpusReader(corpus_file)
         toc = reader.get_toc()
         self.assertListEqual(['h1 / h1.1']*2, list(toc.header_0))
         self.assertListEqual(['h2','h22'], list(toc.header_1))
 
         dfs = reader.get_frames(toc.index).to_list()
         self.assertListEqual([0,0,0,1,1], list(dfs[0].sentence_id))
-        self.assertListEqual([10001,10001], list(dfs[1].sentence_id))
+        self.assertListEqual([10004,10004], list(dfs[1].sentence_id))
 
 
 

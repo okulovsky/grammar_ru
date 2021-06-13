@@ -47,7 +47,7 @@ class RepetitionsAlgorithm(NlpAlgorithm):
         return cdf
 
     def _create_normal_table(self, rdf):
-        return PyMorphyFeaturizer().create_features(rdf).set_index('word_id').normal_form.to_frame('value')
+        return PyMorphyFeaturizer().create_features(rdf).normal_form.to_frame('value')
 
     def _create_tikhonov_table(self, normal_df):
         return normal_df.rename(columns={'value':'word'}).merge(self.tic, left_on='word', right_index=True).drop('word',axis=1)
