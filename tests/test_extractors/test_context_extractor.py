@@ -16,7 +16,7 @@ class ContextExtractorTestCase(TestCase):
         cls.syntax = NatashaSyntaxAnalyzer()
         cls.df = Separator.separate_string(text)
         chunks = create_chunks_from_dataframe(cls.df)
-        cls.syntax_df = cls.syntax.analyze_chunks(cls.df, chunks)
+        cls.syntax_df = cls.syntax.analyze_chunks(cls.df, chunks).set_index('word_id')
         print(cls.syntax_df)
         index_df = pd.DataFrame(cls.df["word_id"], columns=["word_id"]).set_index("word_id")
         cls.bundle = bt.DataBundle(index_df, dict(
