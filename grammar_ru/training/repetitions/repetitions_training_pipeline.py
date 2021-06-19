@@ -28,7 +28,7 @@ class Experiment(bt.BatchedTrainingTask):
         super(Experiment, self).__init__(settings = train_settings, late_initialization=Experiment.init)
         self.model_settings = settings
         self.info['name'] = self.model_settings.to_name()
-        self.splitter = bt.FoldSplitter(1,0.3)
+        self.splitter = bt.CompositionSplit(bt.FoldSplitter(1,0.2), bt.FoldSplitter(1, 0.2, 'display', decorate=True))
         self.metric_pool = bt.MetricPool().add_sklearn(roc_auc_score)
 
 
