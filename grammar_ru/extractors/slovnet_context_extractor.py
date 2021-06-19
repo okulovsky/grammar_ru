@@ -28,8 +28,8 @@ class ContextExtractor(bt.Extractor):
         pass
 
     def extract(self, index_frame: pd.DataFrame, bundle: bt.DataBundle):
-        syntax_df = bundle.data_frames[self.dataframe_name].set_index(self.index_column)
-        parent_df = bundle.data_frames[self.dataframe_name].sort_values(by=["parent_id", self.index_column]).set_index(["parent_id", self.index_column])
+        syntax_df = bundle.data_frames[self.dataframe_name]
+        parent_df = bundle.data_frames[self.dataframe_name].reset_index().sort_values(by=["parent_id", self.index_column]).set_index(["parent_id", self.index_column])
 
         new_rows = []
 
