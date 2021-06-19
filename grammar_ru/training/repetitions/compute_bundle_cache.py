@@ -1,5 +1,5 @@
 from grammar_ru.algorithms import RepetitionsAlgorithm
-from research.amenities import *
+from grammar_ru.training.amenities import *
 from copy import deepcopy
 
 
