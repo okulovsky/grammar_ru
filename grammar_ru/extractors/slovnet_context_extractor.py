@@ -14,13 +14,15 @@ class ContextExtractor(bt.Extractor):
         max_shift: Specifies the maximum shift relative to the selected object.
         custom_dataframe_name: Specifies bundle name of dataframe that was created by NatashaSyntaxAnalyzer.
         custom_index_name: Specifies column name in index row.
+        aggregation_func: Delegate that accepts (Context: pd.DataFrame, IndexFrame: pd.DataFrame, Bundle: bt.DataBundle) and aggregates context, returning pd.DataFrame.
     """
 
-    def __init__(self, name: str, max_shift=2, custom_dataframe_name="syntax", custom_index_column="word_id"):
+    def __init__(self, name: str, max_shift=2, custom_dataframe_name="syntax", custom_index_column="word_id", aggregation_func=None):
         self.name = name
         self.max_shift = max_shift
         self.dataframe_name = custom_dataframe_name
         self.index_column = custom_index_column
+        self.aggregation_func = aggregation_func
 
     def fit(self, bundle: bt.DataBundle):
         pass
@@ -61,7 +63,12 @@ class ContextExtractor(bt.Extractor):
                 
                 ids = child_ids
 
-        return KeyValuePair(self.name, pd.DataFrame(new_rows))
+        result = pd.DataFrame(new_rows)
+        
+        if self.aggregation_func:
+            result = self.aggregation_func(result, index_frame, bundle)
+
+        return KeyValuePair(self.name, result)
 
     def get_name(self):
         return self.name
