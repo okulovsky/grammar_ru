@@ -1,6 +1,6 @@
 from unittest import TestCase
 from grammar_ru import Separator
-
+import pandas as pd
 
 class SeparatorTestCase(TestCase):
     def test_separation(self):
@@ -19,3 +19,8 @@ class SeparatorTestCase(TestCase):
     def test_separation_string_with_nl(self):
         df = Separator.separate_string('Строка\nВторая строка')
         self.assertListEqual([0, 1, 1], list(df.paragraph_id))
+
+
+    def test_separator_types(self):
+        df = Separator.separate_string('Слово сло'+chr(8242)+'во! Qwe')
+        self.assertListEqual(['ru','ru','punct','unk'], list(df.word_type))

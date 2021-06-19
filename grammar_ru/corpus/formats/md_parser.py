@@ -3,7 +3,9 @@ from pathlib import Path
 from typing import *
 from yo_fluq_ds import FileIO, Query, Queryable
 from ..corpus_writer import CorpusFragment
-from ...common.architecture import Separator
+from ...common.architecture.separator import Separator, Symbols
+import re
+
 
 class HeaderParseResponse(Enum):
     ContinueTextBlock = 0
@@ -82,7 +84,8 @@ class HeaderParser:
 
 
 
-
+_apos_regex = re.compile('([{0}])[{1}]([{0}])'.format(re.escape(Symbols.RUSSIAN_LETTERS),re.escape(Symbols.APOSTROPHS)))
+_apos_subs = '\\1{0}\\2'.format(chr(8242))
 
 class MdParser:
     def __init__(self, folder: Path, file_path: Path, naming_schema: List[str], mock: Optional[str] = None):
@@ -108,6 +111,13 @@ class MdParser:
         return {k:v for k,v in zip(self.naming_schema,tags)}
 
 
+    @staticmethod
+    def _circumvent_separator_problems(line):
+        line = line.replace(chr(173), '')
+        line = _apos_regex.sub(_apos_subs,line)
+        return line
+
+
     def _parse_base(self):
         text = self.mock
         if self.mock is None:
@@ -115,6 +125,7 @@ class MdParser:
         current = None
         parser = HeaderParser()
         for line in text.split('\n'):
+            line = MdParser._circumvent_separator_problems(line)
             resp = parser.observe(line)
             if resp == HeaderParseResponse.Ignore:
                 continue

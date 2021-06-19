@@ -1,69 +1,11 @@
-from typing import *
-from grammar_ru.corpus.formats.md_parser import HeaderParser, HeaderParseResponse
+from grammar_ru.corpus.formats.md_parser import MdParser
 from unittest import TestCase
+import re
 
-
-
-class Sz:
-    def __init__(self, tc: 'HeaderTestCase'):
-        self.tc = tc
-        self.parser = HeaderParser()
-
-    def test(self, input, resp: Optional[HeaderParseResponse] = None, expected_stack = None) -> 'Sz':
-        result = self.parser.observe(input)
-        if resp is not None:
-            self.tc.assertEqual(resp, result)
-        if expected_stack is not None:
-            self.tc.assertListEqual(expected_stack, [z[1] for z in self.parser.stack])
-        return self
-
-    def test1(self, input, expected_stack = None) -> 'Sz':
-        return self.test(input, None, expected_stack)
-
-
-class HeaderTestCase(TestCase):
-    def test_blocks(self):
-        (Sz(self)
-         .test('x', HeaderParseResponse.NewTextBlock, [])
-         .test('x', HeaderParseResponse.ContinueTextBlock, [])
-         .test('# a', HeaderParseResponse.Ignore, ['a'])
-         .test('   ', HeaderParseResponse.Ignore, ['a'])
-         .test('# b', HeaderParseResponse.Ignore, ['a','b'])
-         .test('xx', HeaderParseResponse.NewTextBlock, ['a','b'])
-         .test('yy', HeaderParseResponse.ContinueTextBlock, ['a','b'])
-        )
-
-    def test_cont_header(self):
-        (Sz(self)
-         .test('#a', HeaderParseResponse.Ignore, ['a'])
-         .test('#b', HeaderParseResponse.Ignore, ['a','b'])
-         .test(' ', HeaderParseResponse.Ignore,['a','b'])
-         .test('#c', HeaderParseResponse.Ignore, ['a', 'b', 'c'])
-
-         )
-
-    def test_next_header(self):
-        (Sz(self)
-         .test('# a', HeaderParseResponse.Ignore, ['a'])
-         .test(' xx ', HeaderParseResponse.NewTextBlock, ['a'])
-         .test('# b', HeaderParseResponse.Ignore, ['b'])
-        )
-
-
-    def test_multi_header(self):
-        (Sz(self)
-         .test1('#a', ['a'])
-         .test1('## b', ['a', 'b'])
-         .test1('x')
-         .test1('## c', ['a', 'c'])
-         .test1('z')
-         .test1('#n', ['n'])
-        )
-
-    def test_skipped_levels(self):
-        (Sz(self)
-         .test1('#a', ['a'])
-         .test1('### b', ['a','b'])
-         .test1('x')
-         .test1('## c', ['a','c'])
-         )
+from grammar_ru.common.architecture.separator import Symbols
+class MdParserTestCase(TestCase):
+    def test_circumvention(self):
+        f = MdParser._circumvent_separator_problems
+        self.assertEqual('Тест тест',f('Тест тест'))
+        self.assertEqual('Тест', f('Те'+chr(173)+'ст'))
+        self.assertEqual("It's not й′цц′у", f("It's not й'цц'у"))

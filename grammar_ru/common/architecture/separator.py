@@ -17,10 +17,23 @@ def _generate_offsets(string: str, substrings: List[str]):
     return result, offset
 
 
-russianRegex = re.compile('^[абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ-]+$')
+class Symbols:
+    RUSSIAN_LETTERS = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
+    RUSSIAN_WORD_SYMBOLS = RUSSIAN_LETTERS+'-'+chr(8242)
+    PUNCTUATION = ',.–?!—…:«»";()“”„-'
+    APOSTROPHS = "'"+chr(8217)
+
+
 
 
 class Separator:
+    russianRegex = re.compile('^[{0}]+$'.format(re.escape(Symbols.RUSSIAN_WORD_SYMBOLS)))
+    punctuation = re.compile('^[{0}]+$'.format(re.escape(Symbols.PUNCTUATION)))
+
+    @staticmethod
+    def _classify_word(word):
+        return 'ru' if Separator.russianRegex.match(word) else ('punct' if Separator.punctuation.match(word) else'unk')
+
     @staticmethod
     def _separate_string(s: str, word_id_start=0, sentence_id_start=0):
         result = []
@@ -32,7 +45,7 @@ class Separator:
             tokens = [token.text for token in tokenize(sentence.text)]
             offsets, delta = _generate_offsets(s[offset:], tokens)
             for word_index, (word, word_offset) in enumerate(zip(tokens, offsets)):
-                word_type = 'ru' if russianRegex.match(word) else 'unk'
+                word_type = Separator._classify_word(word)
                 result.append((word_id, sentence_id, word_index, offset+word_offset, word, word_type))
                 word_id += 1
             offset += delta
