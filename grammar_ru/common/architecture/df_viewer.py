@@ -31,7 +31,7 @@ class DfViewer:
         result_strs = []
         for pid in df.paragraph_id.sort_values().unique():
             result_strs.append(self._paragraph_to_html(df.loc[df.paragraph_id == pid]))
-        result = ' '.join(result_strs)
+        result = '<br>'.join(result_strs)
         if self.as_htlm_object:
             return HTML(result)
         return result
