@@ -34,14 +34,14 @@ class ContextExtractor(bt.Extractor):
         new_rows = []
 
         for word_id in index_frame.index:
-            parent_id = syntax_df.at[word_id, "parent_id"]
+            parent_id = syntax_df.loc[word_id, "parent_id"]
             shift = 0
             relative_id = word_id
 
             # Seeking for parent -> grandparent -> ...
             for _ in range(self.max_shift):
                 shift += 1
-                relative_id = syntax_df.at[relative_id, "parent_id"]
+                relative_id = syntax_df.loc[relative_id, "parent_id"]
                 if relative_id == -1:
                     break
                 new_rows.append({'word_id': word_id, 'shift': shift, 'relative_word_id': relative_id})
