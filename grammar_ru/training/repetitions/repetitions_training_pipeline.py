@@ -3,6 +3,7 @@ from grammar_ru.training import amenities
 from tg.common.ml import batched_training as bt
 from sklearn.metrics import roc_auc_score
 from functools import partial
+import pandas as pd
 
 class ModelSettings:
     def __init__(self,
@@ -33,20 +34,21 @@ class Experiment(bt.BatchedTrainingTask):
 
 
     def correct_bundle(self, db):
-        idf = db.index_frame[['word_id','another_word_id']]
+        idf = db.index_frame
         idf = idf.merge(db.data_frames['src'][['sentence_id', 'paragraph_id']], left_on='word_id', right_index=True)
-        idf = idf.merge(db.data_frames['src'][['sentence_id', 'paragraph_id']], left_on='another_word_id',
-                        right_index=True)
+
+        another_ids = db.data_frames['src'][['sentence_id', 'paragraph_id']].rename(
+            columns=dict(sentence_id='another_sentence_id', paragraph_id = 'another_paragraph_id'))
+
+        idf = idf.merge(another_ids, left_on='another_word_id', right_index=True)
 
         idf['delta_word_id'] = idf.word_id - idf.another_word_id
-        idf['delta_sentence_id'] = idf.sentence_id_x - idf.sentence_id_y
-        idf['delta_paragraph_id'] = idf.paragraph_id_x - idf.paragraph_id_y
+        idf['delta_sentence_id'] = idf.sentence_id - idf.another_sentence_id
+        idf['delta_paragraph_id'] = idf.paragraph_id - idf.another_paragraph_id
 
-        idf = idf.drop(['sentence_id_x', 'sentence_id_y', 'paragraph_id_x', 'paragraph_id_y', 'another_word_id'], axis=1)
-        idf = idf.set_index('word_id')
-        db.data_frames['distance'] = idf
+        distance_df = idf[['word_id','delta_word_id','delta_sentence_id','delta_paragraph_id']].set_index('word_id')
+        db.data_frames['distance'] = distance_df
 
-        idf = db.index_frame
         label = db.data_frames['toc'].source == 'books'
         idf = idf.merge(label.to_frame('label'), left_on='file_id', right_index=True)
         idf['priority'] = bt.PriorityRandomBatcherStrategy.make_priorities_for_even_representation(idf, 'label')

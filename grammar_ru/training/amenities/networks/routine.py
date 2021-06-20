@@ -3,15 +3,17 @@ import datetime
 from uuid import uuid4
 from tg.common.delivery.training.architecture import FileCacheTrainingEnvironment, ResultPickleReader
 
+TRAINING_RESULTS = Loc.data_path/'training'
+
 def _create_id(prefix):
     dt = datetime.datetime.now()
     uid = str(uuid4()).replace('-', '')
-    id = f'{prefix}_{dt.year:04d}{dt.month:02d}{dt.day:02d}_{dt.hour:02d}{dt.minute:02d}{dt.second:02d}_{uid}'
+    id = f'{dt.year:04d}{dt.month:02d}{dt.day:02d}_{dt.hour:02d}{dt.minute:02d}{dt.second:02d}_{prefix}_{uid}'
     return id
 
 class LocalTrainingRoutine:
     def __init__(self):
-        self.training_result_location = Loc.data_path/'training'
+        self.training_result_location = TRAINING_RESULTS
         self.bundles_location = Loc.bundles_path
 
     def execute(self, task, dataset_version: str, wait=True) -> str:

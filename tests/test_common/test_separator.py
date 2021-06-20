@@ -22,5 +22,5 @@ class SeparatorTestCase(TestCase):
 
 
     def test_separator_types(self):
-        df = Separator.separate_string('Слово сло'+chr(8242)+'во! Qwe')
-        self.assertListEqual(['ru','ru','punct','unk'], list(df.word_type))
+        df = Separator.separate_string('Слово сло'+chr(8242)+'во! Qwe - йцу '+"it's")
+        self.assertListEqual(['ru','ru','punct','unk', 'punct', 'ru','unk','unk','unk'], list(df.word_type))

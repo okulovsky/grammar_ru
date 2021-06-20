@@ -9,7 +9,7 @@ folder = Loc.data_path/'training_result'
 if __name__ == '__main__':
     task = stage.Experiment(
         TrainingSettings(50),
-        stage.ModelSettings(200000, [], 10),
+        stage.ModelSettings(100000, [10], 10),
     )
     routine = LocalTrainingRoutine()
     routine.execute(task,'repetitions/bundle')

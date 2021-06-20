@@ -32,7 +32,7 @@ class Separator:
 
     @staticmethod
     def _classify_word(word):
-        return 'ru' if Separator.russianRegex.match(word) else ('punct' if Separator.punctuation.match(word) else'unk')
+        return 'punct' if Separator.punctuation.match(word) else ('ru' if Separator.russianRegex.match(word) else 'unk')
 
     @staticmethod
     def _separate_string(s: str, word_id_start=0, sentence_id_start=0):
