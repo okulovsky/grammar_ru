@@ -1,13 +1,13 @@
-from grammar_ru.corpus import CorpusWriter, CorpusReader
-from grammar_ru.corpus.formats import MdParser
+from grammar_ru.ml.corpus import CorpusWriter, CorpusReader
+from grammar_ru.ml.corpus.formats import InterFormatParser
 from unittest import TestCase
 from pathlib import Path
 import os
-import pandas as pd
+
 
 class CorpusTestCase(TestCase):
     def test_corpus(self):
-        fragments = MdParser(Path('/test'), Path('/test/a/b.md'), ['folder','name'], mock = text).parse().to_list()
+        fragments = InterFormatParser(Path('/test'), Path('/test/a/b.md'), ['folder', 'name'], mock = text).parse().to_list()
         corpus_file = Path(__file__).parent/'temp_corpus.zip'
         writer = CorpusWriter(corpus_file, overwrite=True)
         for f in fragments:
@@ -21,8 +21,6 @@ class CorpusTestCase(TestCase):
         dfs = reader.get_frames(toc.index).to_list()
         self.assertListEqual([0,0,0,1,1], list(dfs[0].sentence_id))
         self.assertListEqual([10004,10004], list(dfs[1].sentence_id))
-
-
 
         os.remove(corpus_file)
 

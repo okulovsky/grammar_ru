@@ -1,5 +1,5 @@
 from unittest import TestCase
-from grammar_ru import SpellcheckAlgorithm
+from grammar_ru.algorithms import SpellcheckAlgorithm
 import pandas as pd
 
 pd.options.display.max_columns = None

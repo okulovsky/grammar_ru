@@ -1,4 +1,5 @@
-from grammar_ru import RepetitionsAlgorithm
+from grammar_ru.algorithms import RepetitionsAlgorithm
+from grammar_ru.common import Separator, DataBundle
 from unittest import TestCase
 import pandas as pd
 
@@ -40,3 +41,29 @@ class RepetitionsAlgorithmTestCase(TestCase):
     def test_tikhonov_join(self):
         df = RepetitionsAlgorithm(50,True,True,True,True).run_on_string('двуединое единообразие')
         self.assertListEqual([True,False], list(df.repetition_status))
+        
+    def test_usage_of_provided_pymorphy_column(self):
+        df = Separator.separate_string("окно открыто")
+        df['check_requested'] = True
+
+        df1 = df.copy()
+        alg = RepetitionsAlgorithm(50, False, True, False)
+        alg.run_on_bundle(DataBundle(src=df1))
+        self.assertTrue(df1.repetition_status.all())
+
+        df2 = df.copy()
+        pym = df2[['word_id']].copy()
+        pym['normal_form'] = 'окно'
+        pym = pym.set_index('word_id')
+        alg = RepetitionsAlgorithm(50, False, True, False)
+        alg.run_on_bundle(DataBundle(src=df2, pymorphy=pym))
+        self.assertFalse(df2.repetition_status.all())
+
+        df3 = df.copy()
+        pym = df3[['word_id']].copy()
+        pym['normal_form'] = ['двуединый','единообразие']
+        pym = pym.set_index('word_id')
+        alg = RepetitionsAlgorithm(50, False, False, True)
+        alg.run_on_bundle(DataBundle(src=df3, pymorphy=pym))
+        self.assertFalse(df3.repetition_status.all())
+
