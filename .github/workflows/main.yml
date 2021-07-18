@@ -13,13 +13,13 @@ jobs:
     - uses: actions/setup-python@v2
 
     - name: Run setup.py
-      run: python setup.py install
+      run: sudo python3 setup.py install
     
     - name: Download additional dependencies
       run: sudo bash setup.sh
     
     - name: Run build
-      run: python setup.py build
+      run: sudo python3 setup.py build
 
     - name: Test
-      run: python -m unittest
+      run: sudo python3 -m unittest
