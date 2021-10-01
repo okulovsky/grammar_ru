@@ -1,8 +1,14 @@
 from unittest import TestCase
-from grammar_ru import Separator
+from grammar_ru.common import Separator
 import pandas as pd
 
 class SeparatorTestCase(TestCase):
+    def test_separation_columns(self):
+        text = '«Какой-нибудь»   текст —  с знаками… И еще словами!.. Вот так.'
+        df = Separator.separate_string(text)
+        self.assertListEqual(Separator.COLUMNS, list(df.columns))
+
+
     def test_separation(self):
         text = '«Какой-нибудь»   текст —  с знаками… И еще словами!.. Вот так.'
         df = Separator.separate_string(text)

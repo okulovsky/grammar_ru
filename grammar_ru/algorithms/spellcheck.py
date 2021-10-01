@@ -1,5 +1,5 @@
 import pandas as pd
-from ..common.architecture import NlpAlgorithm
+from .architecture import NlpAlgorithm
 import enchant
 import pandas as pd
 

@@ -1,6 +1,6 @@
-from ..common.architecture.nlp_algorithm import NlpAlgorithm
-from ..common.externals import TikhonovDict, PyMorphyFeaturizer
-import pandas as pd
+from .architecture import NlpAlgorithm
+from ..ml.features import PyMorphyFeaturizer, MorphemeTikhonovEnricher
+from ..common import DataBundle
 from yo_fluq_ds import *
 
 
@@ -15,13 +15,15 @@ class RepetitionsAlgorithm(NlpAlgorithm):
                  ):
         super(RepetitionsAlgorithm, self).__init__('repetition_status', None)
         self.vicinity = vicinity
-        tic = TikhonovDict.read_as_df()
-        tic = tic.loc[tic.morpheme_type == 'ROOT']
-        self.tic = tic.set_index('word').morpheme.to_frame('value')
         self.allow_simple_check = allow_simple_check
         self.allow_normal_form_check = allow_normal_form_check
         self.allow_tikhonov_check = allow_tikhonov_check
         self.add_service_info = add_service_info
+        if self.allow_normal_form_check or self.allow_tikhonov_check:
+            self.pymorphy = PyMorphyFeaturizer().as_enricher()
+        if self.allow_tikhonov_check:
+            self.tikhonov = MorphemeTikhonovEnricher(['ROOT'])
+
 
     def generate_merge_index(self, df):
         ldf = df.loc[df.check_requested]
@@ -46,11 +48,6 @@ class RepetitionsAlgorithm(NlpAlgorithm):
         cdf = cdf[['word_id', 'another_id']]
         return cdf
 
-    def _create_normal_table(self, rdf):
-        return PyMorphyFeaturizer().create_features(rdf).normal_form.to_frame('value')
-
-    def _create_tikhonov_table(self, normal_df):
-        return normal_df.rename(columns={'value':'word'}).merge(self.tic, left_on='word', right_index=True).drop('word',axis=1)
 
     def _add_algorithm(self, df, merge_df, word_df, algorithm_name):
         cdf = self.compare(merge_df, word_df)
@@ -65,11 +62,10 @@ class RepetitionsAlgorithm(NlpAlgorithm):
             for id in ids:
                 df.loc[df.word_id==id,'repetition_reference'] = ref[id]
 
-
-    def _run_inner(self, df):
+    def run_on_bundle(self, db: DataBundle):
+        df = db.src
         mdf = self.generate_merge_index(df)
         rdf = df.loc[df.word_id.isin(mdf.word_id) | df.word_id.isin(mdf.another_id)]
-        errors = []
 
         df[self.get_status_column()] = True
         if self.add_service_info:
@@ -81,13 +77,19 @@ class RepetitionsAlgorithm(NlpAlgorithm):
             self._add_algorithm(df, mdf, word_df, 'simple')
 
         if self.allow_normal_form_check or self.allow_tikhonov_check:
-            normal_df = self._create_normal_table(rdf)
+            if self.pymorphy.get_df_name() not in db:
+                self.pymorphy.enrich(db)
 
             if self.allow_normal_form_check:
+                normal_df = db.pymorphy.normal_form.to_frame('value')
                 self._add_algorithm(df, mdf, normal_df, 'normal')
 
             if self.allow_tikhonov_check:
+                self.tikhonov.enrich(db)
+                tikhonov_df = db[self.tikhonov.get_df_name()].morpheme.to_frame('value')
+                self._add_algorithm(df, mdf, tikhonov_df, 'tikhonov')
 
-                tik_df = self._create_tikhonov_table(normal_df)
-                self._add_algorithm(df, mdf, tik_df, 'tikhonov')
+
+    def _run_inner(self, df):
+        self.run_on_bundle(DataBundle(src=df))
 

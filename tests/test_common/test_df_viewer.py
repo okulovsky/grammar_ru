@@ -1,4 +1,4 @@
-from grammar_ru import DfViewer, Separator
+from grammar_ru.common import DfViewer, Separator
 from unittest import TestCase
 
 class DfViewerTestCase(TestCase):

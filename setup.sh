@@ -10,7 +10,7 @@ wget https://storage.yandexcloud.net/natasha-slovnet/packs/slovnet_syntax_news_v
 wget https://github.com/yutkin/Lenta.Ru-News-Dataset/releases/download/v1.0/lenta-ru-news.csv.gz -q # Dataset
 wget https://storage.yandexcloud.net/natasha-nerus/data/nerus_lenta.conllu.gz                    -q # Training dataset
 
-mkdir ./grammar_ru/analyzers/natasha/models
+mkdir -p ./grammar_ru/data/external_models
 
-mv *.tar ./grammar_ru/analyzers/natasha/models
-mv *.gz ./grammar_ru/analyzers/natasha/models
+mv *.tar ./grammar_ru/data/external_models
+mv *.gz ./grammar_ru/data/external_models

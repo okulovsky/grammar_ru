@@ -1,4 +1,4 @@
-from grammar_ru.corpus import CorpusCombined, CorpusReader
+from grammar_ru.ml.corpus import CorpusCombined, CorpusReader
 from pathlib import Path
 
 class LocHolder:

@@ -10,3 +10,4 @@ grammar_ru/analyzers/natasha/models
 grammar_ru\.egg-info/
 
 data/
+grammar_ru/data/
