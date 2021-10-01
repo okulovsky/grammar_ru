@@ -67,3 +67,6 @@ class PyMorphyFeaturizer(Featurizer):
         pdf = pdf[columns].set_index('word_id')
         pdf.POS = pdf.POS.fillna('NONE')
         return pdf
+
+    def supports_update_on_column(self) -> Optional[str]:
+        return 'word_id'
