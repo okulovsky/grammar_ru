@@ -26,8 +26,8 @@ class Enricher:
     def get_df_name(self) -> str:
         raise NotImplementedError()
 
-    def _update_enrich(self, on_column: str, old_bundle: DataBundle, new_bundle: DataBundle):
-        if on_column is None:
+    def _update_enrich(self, on_column: str, old_bundle: Optional[DataBundle], new_bundle: DataBundle):
+        if on_column is None or old_bundle is None:
             self.enrich(new_bundle)
             return
 
@@ -52,7 +52,7 @@ class Enricher:
         df = pd.concat([old_df, new_df], axis=0)
         new_bundle[name] = df
 
-    def update_enrich(self, old_bundle: DataBundle, new_bundle: DataBundle):
+    def update_enrich(self, old_bundle: Optional[DataBundle], new_bundle: DataBundle):
         self._update_enrich(
             self.supports_updates_on_column(),
             old_bundle,

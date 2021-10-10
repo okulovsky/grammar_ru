@@ -32,6 +32,13 @@ class DataBundle:
     def __contains__(self, item):
         return item in self.data_frames
 
+    def __getstate__(self):
+        return (self.data_frames, self.additional_information)
+
+
+    def __setstate__(self, state):
+        self.data_frames, self.additional_information = state
+
     def describe(self, index_sample_length = 5):
         return {
             key: dict(
