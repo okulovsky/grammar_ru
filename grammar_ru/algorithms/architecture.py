@@ -4,9 +4,10 @@ from ..common import Separator
 
 
 class NlpAlgorithm:
-    def __init__(self, status_column: str, suggest_column: Optional[str]):
+    def __init__(self, status_column: str, suggest_column: Optional[str], hint_column: Optional[str]):
         self._status_column = status_column
         self._suggest_column = suggest_column
+        self._hint_column = hint_column
 
     def _run_inner(self, df: pd.DataFrame):
         raise NotImplementedError()
@@ -23,6 +24,9 @@ class NlpAlgorithm:
 
     def get_suggest_column(self):
         return self._suggest_column
+
+    def get_hint_column(self):
+        return self._hint_column
 
 
     def put_check_requested(self, df: pd.DataFrame, paragraphs_to_check=None):

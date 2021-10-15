@@ -11,14 +11,12 @@ class RepetitionsAlgorithm(NlpAlgorithm):
                  allow_simple_check = True,
                  allow_normal_form_check = True,
                  allow_tikhonov_check = True,
-                 add_service_info = False
                  ):
-        super(RepetitionsAlgorithm, self).__init__('repetition_status', None)
+        super(RepetitionsAlgorithm, self).__init__('repetition_status', None, 'repetition_hint')
         self.vicinity = vicinity
         self.allow_simple_check = allow_simple_check
         self.allow_normal_form_check = allow_normal_form_check
         self.allow_tikhonov_check = allow_tikhonov_check
-        self.add_service_info = add_service_info
         if self.allow_normal_form_check or self.allow_tikhonov_check:
             self.pymorphy = PyMorphyFeaturizer().as_enricher()
         if self.allow_tikhonov_check:
@@ -55,12 +53,12 @@ class RepetitionsAlgorithm(NlpAlgorithm):
             return
         condition = df[self.get_status_column()] & df.word_id.isin(cdf.word_id)
         df.loc[condition,self.get_status_column()] = False
-        if self.add_service_info:
-            df.loc[condition,'repetition_algorithm'] = algorithm_name
-            ids = list(df.loc[condition].word_id)
-            ref = cdf.set_index('word_id').another_id
-            for id in ids:
-                df.loc[df.word_id==id,'repetition_reference'] = ref[id]
+
+        df.loc[condition,'repetition_algorithm'] = algorithm_name
+        ids = list(df.loc[condition].word_id)
+        ref = cdf.set_index('word_id').another_id
+        for id in ids:
+            df.loc[df.word_id==id,'repetition_reference'] = ref[id]
 
     def run_on_bundle(self, db: DataBundle):
         df = db.src
@@ -68,9 +66,9 @@ class RepetitionsAlgorithm(NlpAlgorithm):
         rdf = df.loc[df.word_id.isin(mdf.word_id) | df.word_id.isin(mdf.another_id)]
 
         df[self.get_status_column()] = True
-        if self.add_service_info:
-            df['repetition_reference'] = -1
-            df['repetition_algorithm'] = None
+
+        df['repetition_reference'] = -1
+        df['repetition_algorithm'] = None
 
         if self.allow_simple_check:
             word_df = rdf.set_index('word_id').word.str.lower().to_frame('value')
@@ -88,6 +86,20 @@ class RepetitionsAlgorithm(NlpAlgorithm):
                 self.tikhonov.enrich(db)
                 tikhonov_df = db[self.tikhonov.get_df_name()].morpheme.to_frame('value')
                 self._add_algorithm(df, mdf, tikhonov_df, 'tikhonov')
+
+        err = ~df.repetition_status
+        df['repetition_hint'] = ''
+        ref_df = df.loc[err].repetition_reference.to_frame().merge(df.set_index('word_id').word, left_on='repetition_reference', right_index=True).word
+
+        df.loc[err, 'repetition_hint'] = (
+                'On algorithm `'+
+                df.loc[err,'repetition_algorithm']+
+                '` collides with word `'+
+                ref_df+
+                '` located '+
+                (df.loc[err,'word_id'] - df.loc[err,'repetition_reference']).astype(str)
+
+        )
 
 
     def _run_inner(self, df):

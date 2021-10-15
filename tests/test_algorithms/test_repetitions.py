@@ -34,13 +34,14 @@ class RepetitionsAlgorithmTestCase(TestCase):
         self.assertListEqual([True,True,True], list(df.repetition_status))
 
     def test_extended_mode(self):
-        df = RepetitionsAlgorithm(50,True,True,True,True).run_on_string('Един един единый двуединый')
+        df = RepetitionsAlgorithm(50,True,True,True).run_on_string('Един един единый двуединый')
         self.assertListEqual([-1,0,1,2], list(df.repetition_reference))
         self.assertListEqual([None,'simple','normal','tikhonov'], list(df.repetition_algorithm))
 
     def test_tikhonov_join(self):
-        df = RepetitionsAlgorithm(50,True,True,True,True).run_on_string('двуединое единообразие')
+        df = RepetitionsAlgorithm(50,True,True,True).run_on_string('двуединое единообразие')
         self.assertListEqual([True,False], list(df.repetition_status))
+        
         
     def test_usage_of_provided_pymorphy_column(self):
         df = Separator.separate_string("окно открыто")
