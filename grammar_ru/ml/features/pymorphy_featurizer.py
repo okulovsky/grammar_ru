@@ -26,7 +26,7 @@ class PyMorphyFeaturizer(Featurizer):
             lst = list(getattr(self.an.TagClass, cat_field))
             for value in lst:
                 if value in self.map:
-                    raise (f'{value} is in key {self.map[v]} and in {cat_field}')
+                    raise (f'{value} is in key {self.map[value]} and in {cat_field}')
                 self.map[value] = cat_name
         self.cache = {}
 
