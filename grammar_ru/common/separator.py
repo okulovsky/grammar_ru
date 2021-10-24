@@ -24,6 +24,7 @@ class Symbols:
     RUSSIAN_WORD_SYMBOLS = RUSSIAN_LETTERS+'-'+chr(8242)
     PUNCTUATION = ',.–?!—…:«»";()“”„-'
     APOSTROPHS = "'"+chr(8217)
+    PUNCTUATION_OR_SPACE = PUNCTUATION+' \n\t'
 
 
 
