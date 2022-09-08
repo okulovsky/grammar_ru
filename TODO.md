@@ -58,3 +58,5 @@
 * https://www.reddit.com/r/GPT3/comments/j57pn8/best_gpt3_text_rewriting_and_summarization/g7qzpug/
 
 Как это сделано? Можно ли повторить? Может ли это быть применено к литературе?
+
+

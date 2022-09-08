@@ -1,2 +1,1 @@
-# grammar_ru
-NLP algorithms for Russian grammar and style check
+# grammar_ru_dev

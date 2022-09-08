@@ -1,0 +1,44 @@
+class Algorithm(NlpAlgorithm):
+    def __init__(self, good_words, featurizers, model, borderline):
+        self.good_words = good_words
+        self.featurizers = featurizers
+        self.model = model
+        self.borderline = borderline
+
+    def _run_inner(self, db: DataBundle, index: Optional[pd.Index]) -> pd.DataFrame:
+        idx = db.src.loc[index]
+        idx = idx.loc[idx.word.str.lower().isin(self.good_words)].copy()
+        idx['label'] = -1
+        sentences = idx.sentence_id.unique()
+        src = db.src.loc[db.src.sentence_id.isin(sentences)]
+        if src.shape[0] == 0:
+            return pd.DataFrame({})
+        db = Separator.build_bundle(src, self.featurizers)
+        db['index'] = idx
+        idx.index.name = 'sample_id'
+        prediction = self.model.predict(db.index.index, db, None)
+        prediction = prediction.loc[prediction.predicted > self.borderline]
+        prediction[NlpAlgorithm.Error] = True
+        prediction[NlpAlgorithm.Algorithm] = 'тся/ться'
+        prediction[NlpAlgorithm.Suggest] = [[_another(w)] for w in prediction.word]
+        prediction[NlpAlgorithm.ErrorType] = NlpAlgorithm.ErrorTypes.Grammatic
+        return prediction
+
+    @staticmethod
+    def build(job_id):
+        task = TsaTsaTask()
+        result = download_and_open_sagemaker_result('ps-data-science-sandbox', 'tsatsa', job_id, True)
+
+        rdf = pd.read_parquet(result.get_path('output/result_df.parquet'))
+
+        borderline = roc_optimal_threshold(rdf.loc[rdf.stage == 'display'].true,
+                                           rdf.loc[rdf.stage == 'display'].predicted)
+
+        model = result.unpickle('output/training_task.pkl')
+        algorithm = TsaTsaTask.Algorithm(
+            task.good_words_,
+            task.get_featurizers(),
+            model,
+            borderline
+        )
+        return algorithm

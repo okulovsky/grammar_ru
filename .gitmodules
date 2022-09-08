@@ -1,0 +1,3 @@
+[submodule "tg/common"]
+	path = tg/common
+	url = git@github.com:okulovsky/training_grounds.git
