@@ -1,6 +1,6 @@
 from typing import *
 from tg.amenities import create_sagemaker_routine
-from tg.grammar_ru.ml.components import GrammarMirrorSettings
+from tg.grammar_ru.ml.components import GrammarMirrorSettings, ContextualNetworkType
 from tg.common.ml import batched_training as bt
 from tg.common.ml.batched_training import torch as btt
 from tg.common.ml.batched_training import mirrors as btm
@@ -29,7 +29,7 @@ def build_task(
         plain_context_length: int = 10,
         plain_context_left_shift: float = 0.5,
         plain_net_size = [20],
-        plain_network_mode = btm.ContextualNetworkType.Plain,
+        plain_network_mode = ContextualNetworkType.Plain,
         plain_context_reverse = False,
         feature_allow_list = None
 ):
@@ -65,7 +65,7 @@ autonamer = Autonamer(build_task)
 
 
 def run_local():
-    task = build_task(plain_network_mode=btm.ContextualNetworkType.Plain)
+    task = build_task(plain_network_mode=ContextualNetworkType.Plain)
     task.settings.batch_size = 1000
     task.settings.training_batch_limit = 2
     task.settings.evaluation_batch_limit = 2
@@ -86,10 +86,8 @@ if __name__ == '__main__':
     #run_local()
 
     tasks = autonamer.build_tasks(
-        plain_context_length=[15, 21],
-        feature_allow_list = ['P'],
-        plain_context_left_shift = [0, 0.25, 0.5]
+        #TODO: plain_network_type = ContextualNetworkType.Attention
     )
     # print(tasks[0].info['name'])
-    execute_tasks(tasks)
+    run_local()
 

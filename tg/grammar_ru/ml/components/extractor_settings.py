@@ -1,5 +1,6 @@
 from ....common.ml import dft
 from ....common.ml.batched_training import mirrors as btm
+from .contextual_bunding import ContextualBinding
 from ....common.ml.batched_training import torch as btt
 from ....common.ml import batched_training as bt
 from .plain_context_builder import PlainContextBuilder
@@ -11,7 +12,7 @@ class GrammarMirrorSettings(btm.MirrorSettings):
                  apply_transformer_to_labels = False
 
                  ):
-        self.plain_context = btm.ContextualBinding(
+        self.plain_context = ContextualBinding(
             'plain_context',
             10,
             btm.ContextualNetworkType.Plain,

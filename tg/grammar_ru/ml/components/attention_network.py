@@ -1,0 +1,1 @@
+## By analogy with LSTMNetwork
