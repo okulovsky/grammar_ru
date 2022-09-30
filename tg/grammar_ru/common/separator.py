@@ -1,5 +1,6 @@
 from typing import *
 from .data_bundle import DataBundle
+from .df_viewer import DfViewer
 from razdel import sentenize, tokenize
 import pandas as pd
 import re
@@ -205,6 +206,6 @@ class Separator:
         if df.word_id.isnull().any():
             raise ValueError(f'Null word_id at {list(df.loc[df.word_id.isnull()])}')
 
-
+    Viewer = DfViewer
 
 
