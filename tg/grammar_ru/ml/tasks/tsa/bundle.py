@@ -55,9 +55,10 @@ def build_dictionary(dfs):
 
 
 class TrainIndexBuilder:
-    def __init__(self, good_words):
+    def __init__(self, good_words, add_negative_samples = True):
         self.good_words = good_words
         self.ref_id = 0
+        self.add_negative_samples = add_negative_samples
 
     def build_train_index(self, df):
         ddf = df.iloc[[0]]
@@ -73,18 +74,22 @@ class TrainIndexBuilder:
         positive['reference_sentence_id'] = positive.sentence_id.replace(ref_map)
         self.ref_id += 1 + len(positive.sentence_id.unique())
 
-        negative = positive.copy()
-        negative.word = np.where(
-            ~negative.is_target,
-            negative.word,
-            np.where(
-                negative.word.str.endswith('тся'),
-                negative.word.str.replace('тся', 'ться'),
-                negative.word.str.replace('ться', 'тся')
+        ar = [positive]
+
+        if self.add_negative_samples:
+            negative = positive.copy()
+            negative.word = np.where(
+                ~negative.is_target,
+                negative.word,
+                np.where(
+                    negative.word.str.endswith('тся'),
+                    negative.word.str.replace('тся', 'ться'),
+                    negative.word.str.replace('ться', 'тся')
+                )
             )
-        )
-        negative['label'] = 1
-        ar = [positive, negative]
+            negative['label'] = 1
+            ar = [positive, negative]
+
         for f in ar:
             if f.sentence_id.isnull().any():
                 raise ValueError(f"Null sentence id when processing, uid {description}")
