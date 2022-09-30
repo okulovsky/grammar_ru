@@ -33,9 +33,8 @@ class TsaAlgorithm(NlpAlgorithm):
                     SyntaxStatsFeaturizer()
                 ]
 
-    def _run_inner(self, db: DataBundle, index: pd.Index) -> Optional[pd.DataFrame]:
+    def _build_prediction_frame(self, df):
         self._lazy_init()
-        df = db.src.loc[index]
         idf = df.loc[df.word.str.lower().isin(self.words)].copy()
         idf['label'] = 0
         idf.index.name='sample_id'
@@ -47,6 +46,14 @@ class TsaAlgorithm(NlpAlgorithm):
 
         result = self.model.predict(ibundle)
         idf = idf.merge(result[['predicted']], left_index=True, right_index=True)
+        return idf
+
+
+    def _run_inner(self, db: DataBundle, index: pd.Index) -> Optional[pd.DataFrame]:
+        df = db.src.loc[index]
+        idf = self._build_prediction_frame(df)
+        if idf is None:
+            return None
         idf = idf.loc[idf.predicted>self.borderline]
         if idf.shape[0] == 0:
             return None
