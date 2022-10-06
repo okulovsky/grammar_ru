@@ -1,6 +1,6 @@
 from ....common.ml import dft
 from ....common.ml.batched_training import mirrors as btm
-from .contextual_bunding import ContextualBinding
+from .contextual_binding import ContextualBinding
 from ....common.ml.batched_training import torch as btt
 from ....common.ml import batched_training as bt
 from .plain_context_builder import PlainContextBuilder

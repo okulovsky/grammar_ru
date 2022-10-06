@@ -64,15 +64,15 @@ def build_task(
 autonamer = Autonamer(build_task)
 
 
-def run_local():
-    task = build_task(plain_network_mode=ContextualNetworkType.Plain)
-    task.settings.batch_size = 1000
-    task.settings.training_batch_limit = 2
-    task.settings.evaluation_batch_limit = 2
-    bundle = bt.DataBundle.load(Loc.data_cache_path/'bundles/tsa/bundles/toy')
-    print(task.info['name'])
-    task.run(bundle)
-    exit(0)
+# def run_local():
+#     task = build_task(plain_network_mode=ContextualNetworkType.Plain)
+#     task.settings.batch_size = 1000
+#     task.settings.training_batch_limit = 2
+#     task.settings.evaluation_batch_limit = 2
+#     bundle = bt.DataBundle.load(Loc.data_cache_path/'bundles/tsa/bundles/toy')
+#     print(task.info['name'])
+#     task.run(bundle)
+#     exit(0)
 
 def execute_tasks(tasks):
     routine = create_sagemaker_routine('tsa', instance_type='ml.m5.xlarge')
@@ -80,14 +80,29 @@ def execute_tasks(tasks):
         routine.remote.execute(t, 'big', wait=False)
 
 
+def run_local():
+    tasks = autonamer.build_tasks(
+        plain_network_mode = [ContextualNetworkType.Attention],
+        plain_net_size = [20],
+        epoch_count = [50],
+        batch_size = [1000],
+        plain_context_length = [10],
+        plain_context_left_shift = [0.15]
+    )
+    
+    bundle = bt.DataBundle.load(Loc.data_cache_path/'bundles/tsa/bundles/toy')
+    
+    return {
+        task.info['name']: task.run(bundle)['output']['history']
+        for task in tasks
+    }
 
 
 if __name__ == '__main__':
     #run_local()
 
-    tasks = autonamer.build_tasks(
-        #TODO: plain_network_type = ContextualNetworkType.Attention
-    )
+    # tasks = autonamer.build_tasks(
+    #     #TODO: plain_network_type = ContextualNetworkType.Attention
+    # )
     # print(tasks[0].info['name'])
     run_local()
-
