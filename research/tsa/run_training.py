@@ -82,7 +82,7 @@ def execute_tasks(tasks):
 
 def run_local():
     tasks = autonamer.build_tasks(
-        plain_network_mode = [ContextualNetworkType.Attention],
+        plain_network_mode = [ContextualNetworkType.AttentionReccurent],
         plain_net_size = [20],
         epoch_count = [50],
         batch_size = [1000],
