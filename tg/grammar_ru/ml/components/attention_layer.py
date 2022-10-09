@@ -35,12 +35,22 @@ class Attention3D(torch.nn.Module):
 class Attention2D(torch.nn.Module):
     """
         Converts 3D tensor (context_length, batch_size, n_features) 
-        to 2D tensor (batch_size, 1) as a weighted sum of contexts, 
+        to 2D tensor (batch_size, n_features) as a weighted sum of contexts, 
         like here https://arxiv.org/pdf/1803.09473.pdf
     """
-    def __init__(self, input: torch.Tensor):
-        super(Attention2D).__init__()
+    def __init__(self, n_features: int):
+        super(Attention2D, self).__init__()
+
+        self.attention_weights = torch.nn.Linear(n_features, 1)
+        self.softmax = torch.nn.Softmax(dim = 1)
 
     def forward(self, input):
-        # TODO using Linear(n_features, 1)
-        pass
+        context_length, batch_size, n_features = input.shape
+        output = torch.Tensor(batch_size, n_features)
+
+        for i in range(batch_size):
+            input_2d = input[:, i: i+1, :].clone().detach().reshape(context_length, n_features)
+            weights = self.softmax(self.attention_weights(input_2d))
+            output[i] = sum(input_2d * weights)
+
+        return output

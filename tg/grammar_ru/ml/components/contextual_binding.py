@@ -9,13 +9,14 @@ from ....common.ml.batched_training import context as btc
 from ....common.ml.batched_training import torch as btt
 from ....common.ml.batched_training.mirrors import ExtractorNetworkBinding
 
-from .attention_network import AttentionReccurentNetwork
+from .attention_network import AttentionReccurentNetwork, AttentionNetwork
 
 
 class ContextualNetworkType(Enum):
     Plain = 0
     LSTM = 1
-    AttentionReccurent = 2
+    Attention = 2
+    AttentionReccurent = 3
 
 
 class ContextualBinding(ExtractorNetworkBinding):
@@ -44,6 +45,8 @@ class ContextualBinding(ExtractorNetworkBinding):
             return btt.LSTMNetwork.Factory(self.hidden_size).prepend_extraction(self.name)
         elif self.network_type == ContextualNetworkType.AttentionReccurent:
             return AttentionReccurentNetwork.Factory(self.hidden_size).prepend_extraction(self.name)
+        elif self.network_type == ContextualNetworkType.Attention:
+            return AttentionNetwork.Factory().prepend_extraction(self.name)
         else:
             raise ValueError(f"Network type {self.network_type} is not recognized")
 

@@ -28,6 +28,20 @@ class AttentionReccurentNetwork(torch.nn.Module):
                 AttentionReccurentNetwork, 'input', size = size
             )
 
+
 class AttentionNetwork(torch.nn.Module):
-    # TODO using Attention2D
-    pass
+    def __init__(self, input: torch.Tensor):
+        super(AttentionNetwork, self).__init__()
+
+        n_features = input.shape[2]
+
+        self.model = torch.nn.Sequential(
+            Attention2D(n_features)
+        )
+
+    def forward(self, input):
+        return self.model(input)
+
+    class Factory(UniversalFactory):
+        def __init__(self):
+            super(AttentionNetwork.Factory, self).__init__(AttentionNetwork, 'input')
