@@ -41,8 +41,10 @@ class Attention2D(torch.nn.Module):
     def __init__(self, n_features: int):
         super(Attention2D, self).__init__()
 
-        self.attention_weights = torch.nn.Linear(n_features, 1)
-        self.softmax = torch.nn.Softmax(dim = 1)
+        self.layer = torch.nn.Sequential(
+            torch.nn.Linear(n_features, 1),
+            torch.nn.Softmax(dim = 0)
+        )
 
     def forward(self, input):
         context_length, batch_size, n_features = input.shape
@@ -50,7 +52,6 @@ class Attention2D(torch.nn.Module):
 
         for i in range(batch_size):
             input_2d = input[:, i: i+1, :].clone().detach().reshape(context_length, n_features)
-            weights = self.softmax(self.attention_weights(input_2d))
-            output[i] = sum(input_2d * weights)
+            output[i] = torch.sum(input_2d * self.layer(input_2d), dim = 0)
 
         return output

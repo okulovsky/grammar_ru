@@ -64,16 +64,6 @@ def build_task(
 autonamer = Autonamer(build_task)
 
 
-# def run_local():
-#     task = build_task(plain_network_mode=ContextualNetworkType.Plain)
-#     task.settings.batch_size = 1000
-#     task.settings.training_batch_limit = 2
-#     task.settings.evaluation_batch_limit = 2
-#     bundle = bt.DataBundle.load(Loc.data_cache_path/'bundles/tsa/bundles/toy')
-#     print(task.info['name'])
-#     task.run(bundle)
-#     exit(0)
-
 def execute_tasks(tasks):
     routine = create_sagemaker_routine('tsa', instance_type='ml.m5.xlarge')
     for t in tasks:
@@ -82,27 +72,36 @@ def execute_tasks(tasks):
 
 def run_local():
     tasks = autonamer.build_tasks(
-        plain_network_mode = [ContextualNetworkType.AttentionReccurent],
-        plain_net_size = [20],
-        epoch_count = [50],
+        plain_network_mode = [ContextualNetworkType.BidirectLSTM],
+        plain_net_size = [10],
+        epoch_count = [1],
         batch_size = [1000],
-        plain_context_length = [10],
-        plain_context_left_shift = [0.15]
+        plain_context_length = [25],
+        plain_context_left_shift = [0.25]
     )
     
     bundle = bt.DataBundle.load(Loc.data_cache_path/'bundles/tsa/bundles/toy')
     
     return {
-        task.info['name']: task.run(bundle)['output']['history']
+        task.info['name']: task.run(bundle)
         for task in tasks
     }
 
 
-if __name__ == '__main__':
-    #run_local()
+def save_history(filename, history):
+    import json
+    with open(filename, "w") as f:
+        json.dump(history, f)
 
-    # tasks = autonamer.build_tasks(
-    #     #TODO: plain_network_type = ContextualNetworkType.Attention
-    # )
-    # print(tasks[0].info['name'])
-    run_local()
+
+def save_task(filename, task):
+    import pickle
+    with open(filename  + ".pickle", "wb") as f:
+        pickle.dump(task['output']['training_task'], f)
+
+
+if __name__ == '__main__':
+    results = run_local()
+    for task_name, task in results.items():
+        save_history(task_name, task['output']['history'])
+        save_task(task_name, task)
