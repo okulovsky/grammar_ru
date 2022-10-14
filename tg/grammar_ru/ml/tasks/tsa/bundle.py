@@ -3,7 +3,7 @@ from ....common import DataBundle
 import pandas as pd
 from ....algorithms import SpellcheckAlgorithm
 import numpy as np
-from .....common.ml.batched_training import train_display_test_split
+
 
 def _count_verbs(dfs: Iterable[pd.DataFrame]):
     counter = {}
@@ -52,53 +52,3 @@ def build_dictionary(dfs):
     df = _get_good_words_df(cnt)
     good_words = set(df.i_word).union(df.f_word)
     return good_words
-
-
-class TrainIndexBuilder:
-    def __init__(self, good_words, add_negative_samples = True):
-        self.good_words = good_words
-        self.ref_id = 0
-        self.add_negative_samples = add_negative_samples
-
-    def build_train_index(self, df):
-        ddf = df.iloc[[0]]
-        description = (ddf.corpus_id+'/'+ddf.file_id).iloc[0]
-
-        df['original_corpus_id'] = df.corpus_id
-        df['is_target'] = df.word.str.lower().isin(self.good_words)
-        good_sentences = df.groupby('sentence_id').is_target.max().feed(lambda z: z.loc[z].index)
-        positive = df.loc[df.sentence_id.isin(good_sentences)].copy()
-        positive['label'] = 0
-
-        ref_map = {v: self.ref_id + k for k, v in enumerate(positive.sentence_id.unique())}
-        positive['reference_sentence_id'] = positive.sentence_id.replace(ref_map)
-        self.ref_id += 1 + len(positive.sentence_id.unique())
-
-        ar = [positive]
-
-        if self.add_negative_samples:
-            negative = positive.copy()
-            negative.word = np.where(
-                ~negative.is_target,
-                negative.word,
-                np.where(
-                    negative.word.str.endswith('тся'),
-                    negative.word.str.replace('тся', 'ться'),
-                    negative.word.str.replace('ться', 'тся')
-                )
-            )
-            negative['label'] = 1
-            ar = [positive, negative]
-
-        for f in ar:
-            if f.sentence_id.isnull().any():
-                raise ValueError(f"Null sentence id when processing, uid {description}")
-        return ar
-
-    @staticmethod
-    def build_index_from_src(src_df):
-        df = src_df.loc[src_df.is_target][['word_id', 'sentence_id', 'label', 'reference_sentence_id']].copy()
-        df = df.reset_index(drop=True)
-        df.index.name = 'sample_id'
-        df['split'] = train_display_test_split(df)
-        return df
