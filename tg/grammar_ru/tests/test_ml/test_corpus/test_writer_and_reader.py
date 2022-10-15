@@ -5,14 +5,18 @@ from pathlib import Path
 import os
 
 
+
 class CorpusTestCase(TestCase):
     def test_corpus(self):
+
         fragments = InterFormatParser(Path('/test'), Path('/test/a/b.md'), ['folder', 'name'], mock = text).parse().to_list()
         corpus_file = Path(__file__).parent/'temp_corpus.zip'
         writer = CorpusWriter(corpus_file, overwrite=True)
         for f in fragments:
             writer.add_fragment(f)
         writer.finalize()
+
+
         reader = CorpusReader(corpus_file)
         toc = reader.get_toc()
         self.assertListEqual(['h1 / h1.1']*2, list(toc.header_0))

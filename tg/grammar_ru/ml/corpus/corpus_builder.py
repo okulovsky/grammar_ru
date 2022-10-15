@@ -55,10 +55,9 @@ class CorpusBuilder:
     def convert_interformat_folder_to_corpus(
             corpus_path: Path,
             md_folder: Path,
-            md_subfolder: str,
             naming,
             workers_count = None):
-        subfolder = md_folder / md_subfolder
+        subfolder = md_folder
         writer = CorpusWriter(corpus_path, True)
         files = Query.folder(subfolder, '**/*.*').to_list()
         parser = _ParallelParser(md_folder, naming)
