@@ -21,8 +21,6 @@ class MdDumper:
                                              'col_name': col_name,
                                              'collection_url': col_url,
                                              }, **author_info)))
-        b = False
-
         for chapter in books:
             mdFile.new_header(level=2, title=chapter.name)
             mdFile.write("$ " + json.dumps({'book_name': chapter.name,
@@ -34,13 +32,7 @@ class MdDumper:
                 mdFile.new_header(level=3, title=f'star part {i}')
                 mdFile.write("$ " + json.dumps({'part_number': i, 'part_length': len(part)}))
                 mdFile.write(part)
-                # if i > 1:
-                #     print(f'partial {f_name}')
-                #     b = True
         mdFile.create_md_file()
-        # if b: exit()
-        print('dumped')
-        # print(f'dumped to md {f_name} {len(books)} chapters')
 
     @staticmethod
     def get_file_name(author_rel_url, col_name, storage_dir):

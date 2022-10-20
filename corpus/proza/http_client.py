@@ -32,5 +32,5 @@ class HttpClient:
         self.html_cacher.save_html_by_url(url, html)
         soup = BeautifulSoup(html, 'lxml')
         end = time.time()
-        print(f"request in " + "{:10.4f}".format(end - beg) + f"s  {url}")
+        # print(f"request in " + "{:10.4f}".format(end - beg) + f"s  {url}")
         return html, soup

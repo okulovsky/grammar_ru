@@ -152,7 +152,7 @@ def dump_if_large(books, col_url, col_name, author_url, author_info_by_url) -> b
     # print(books)
     f_name = mddumper.get_file_name(author_url, col_name, MDSTORAGE) + ".md"
     if os.path.isfile(f_name):
-        print(f"skip {f_name}")
+        # print(f"skip {f_name}")
         return True
     for b in books:
         b.content, b.review_cnt = get_book_content(b)
