@@ -10,11 +10,11 @@ from corpus.proza.entities.book import Book
 def get_mini_parts(part, bundle_size):
     res = []
     while len(part) > bundle_size:
-        m = re.search('\n\s*\n', part[bundle_size:2*bundle_size])
+        m = re.search('\n\s*\n', part[bundle_size:2 * bundle_size])
         if m:
             d = bundle_size + m.start()
         else:
-            m2 = re.search('\n', part[bundle_size:2*bundle_size])
+            m2 = re.search('\n', part[bundle_size:2 * bundle_size])
             if m2:
                 d = bundle_size + m2.start()
             else:
@@ -35,8 +35,6 @@ class MdDumper:
         self.bundle_size = REQUIRED_BUNDLE_PART_SIZE
 
     def dump(self, books: List[Book], col_name, col_url, author_url, total_length, author_info):
-        if 'дракон' in col_name:
-            pass
         f_name = self.get_file_name(author_url, col_name, self.storage_dir)
         mdFile = MdUtils(file_name=f_name)
         mdFile.new_header(level=1, title=col_name)

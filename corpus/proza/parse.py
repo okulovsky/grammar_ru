@@ -166,10 +166,9 @@ def dump_if_large(books, col_url, col_name, author_url, author_info_by_url) -> b
 
 seen_authors = set()
 author_info_by_url = {}
-for dt in tqdm([END_DATE - timedelta(days=x) for x in range(10)], ncols=80, desc="DAYS"):
+for dt in tqdm([END_DATE - timedelta(days=x) for x in range(1000)], ncols=80, desc="DAYS"):
     print(f'DUMPED {novels_dumped}')
     authors = get_authors_books_by_day(TOPIC.FANTASY, dt.year, dt.month, dt.day)
-    # pbar = tqdm(authors - seen_authors, ncols=80, leave=False, desc=f"day = {day}, month = {month} ")
     pbar = authors - seen_authors
     for author_url in pbar:
         seen_authors.add(author_url)
@@ -179,6 +178,5 @@ for dt in tqdm([END_DATE - timedelta(days=x) for x in range(10)], ncols=80, desc
             if not books:
                 continue
             novels_dumped += dump_if_large(books, url, name, author_url, author_info_by_url)
-            if novels_dumped > 150:
-                print('breaked')
+            if novels_dumped > 100:
                 exit()

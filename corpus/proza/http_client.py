@@ -27,7 +27,9 @@ class HttpClient:
                 html = requests.get(url).text
                 break
             except requests.exceptions.ConnectionError:
-                pass
+                time.sleep(1)
+            atmpts += 1
+        if atmpts>=5:raise Exception(f'too many attempts')
 
         self.html_cacher.save_html_by_url(url, html)
         soup = BeautifulSoup(html, 'lxml')
