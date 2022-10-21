@@ -30,12 +30,9 @@ CollectionName = str
 url = str
 
 
-def get_2_sign(x): return str(x).rjust(2, '0')
-
-
 def get_authors_books_by_day(topic, year: int, month: int, day: int) -> Set[str]:
-    month_2_sign = get_2_sign(month)
-    day_2_sign = get_2_sign(day)
+    month_2_sign = "{:0>2}".format(month)
+    day_2_sign = "{:0>2}".format(day)
 
     query_params = f"year={year}&month={month_2_sign}&day={day_2_sign}"
     full_date = f"{year}/{month_2_sign}/{day_2_sign}"
