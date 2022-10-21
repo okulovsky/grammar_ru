@@ -5,13 +5,8 @@ from yo_fluq_ds import fluq
 
 DIALOG_DASH = ['—', '–', '-']
 
-PRE_DASH = [
-    '.', ',', '?', '!', '…', ':', '?!',
-    '...', '?..', '!..', '!!!', '!!', '..', '….',
-    '!?', ';', '.?', '.!', '…?'
-]
-
 NO_DIALOG_PUNCTUATION = ['»', '"', ')', '–', '“', '”', '(', '«']
+
 
 def _get_dialog_paragraphs(df):
     df = df.feed(fluq.add_ordering_column('paragraph_id','sentence_id','sentence_index'))
@@ -22,13 +17,11 @@ def _get_dialog_paragraphs(df):
     tdf['next_paragraph_id'] = tdf.paragraph_id.shift(-1).fillna(-1).astype(int)
     return tdf
 
-
 def _get_borders(tdf):
     kdf = tdf.loc[
         (
-            (tdf.word.isin(PRE_DASH)) &
-            (tdf.next_word_type=='punct') &
-            (~tdf.next_word.isin(NO_DIALOG_PUNCTUATION)) &
+            (tdf.word_type=='punct') & (~tdf.word.isin(NO_DIALOG_PUNCTUATION) & ~tdf.word.isin(DIALOG_DASH)) &
+            (tdf.next_word.isin(DIALOG_DASH)) &
             (tdf.paragraph_id==tdf.next_paragraph_id)
         )
         | (tdf.sentence_index == 0)
@@ -37,7 +30,6 @@ def _get_borders(tdf):
     kdf['border_word_id_2'] = np.where(kdf.word_index==0,-1,kdf.word_id+1)
     kdf = kdf.feed(fluq.add_ordering_column('paragraph_id','word_id','border_index'))
     return kdf
-
 
 def _build_markup(tdf, kdf):
     sdf = tdf[['word_id','paragraph_id', 'word']].merge(
@@ -64,7 +56,6 @@ def _build_markup(tdf, kdf):
     sdf['is_dialog'] = True
     sdf = sdf.set_index('word_id')[['dialog_type', 'is_dialog']]
     return sdf
-
 
 def _finalize_markup(df, sdf):
     udf = df.set_index('word_id')[[]].merge(sdf, left_index=True, right_index=True, how='left')
