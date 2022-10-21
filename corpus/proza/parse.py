@@ -13,20 +13,21 @@ from corpus.proza.html_cacher import HtmlCacher
 from corpus.proza.http_client import HttpClient
 from corpus.proza.md_dumper import MdDumper
 
+REQUIRED_SIZE = 700_000
+# REQUIRED_SIZE = 1_000
+REQUIRED_BOOK_SIZE = 10_000
+# REQUIRED_CHAPTER_SIZE = 10
+REQUIRED_PUB_CNT = 10
+REQUIRED_BUNDLE_PART_SIZE = 10_000
+
 novels_dumped = 0
 MDSTORAGE = str(pathlib.Path(__file__).parent.parent.parent.resolve()) + "/data-cache/md"
 HTMLSTORAGE = str(pathlib.Path(__file__).parent.parent.parent.resolve()) + "/data-cache/html"
 html_cacher = HtmlCacher(HTMLSTORAGE)
 http_client = HttpClient(html_cacher)
-mddumper = MdDumper(MDSTORAGE)
+mddumper = MdDumper(MDSTORAGE, REQUIRED_BUNDLE_PART_SIZE)
 CollectionName = str
 url = str
-
-REQUIRED_SIZE = 700_000
-# REQUIRED_SIZE = 1_000
-REQUIRED_CHAPTER_SIZE = 10_000
-# REQUIRED_CHAPTER_SIZE = 10
-REQUIRED_PUB_CNT = 10
 
 
 def get_2_sign(x): return str(x).rjust(2, '0')
@@ -156,7 +157,7 @@ def dump_if_large(books, col_url, col_name, author_url, author_info_by_url) -> b
         return True
     for b in books:
         b.content, b.review_cnt = get_book_content(b)
-        if len(b.content) < REQUIRED_CHAPTER_SIZE: return False
+        if len(b.content) < REQUIRED_BOOK_SIZE: return False
     total_length = sum(len(b.content) for b in books)
     if total_length > REQUIRED_SIZE:
         mddumper.dump(books, col_name, col_url, author_url, total_length, author_info_by_url[author_url])
