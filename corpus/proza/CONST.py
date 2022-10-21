@@ -1,11 +1,10 @@
+import datetime
+
 BASE_URL = "https://proza.ru"
 TEXTS_URL = BASE_URL + "/texts"
 
 topic_num = str
-DAYS = range(1, 29)
-MONTHS = range(1, 13)
-YEARS = range(2021, 2015, -1)
-
+END_DATE = datetime.datetime(year=2022, month=1, day=1)
 
 
 class TOPIC:
