@@ -79,5 +79,5 @@ class MdDumper:
     @staticmethod
     def get_file_name(author_rel_url, col_name, storage_dir):
         forbidden = """<>:"/\|?*"""
-        return storage_dir + "/" + "".join(
+        return storage_dir / "".join(
             [x for x in col_name + author_rel_url.replace('/avtor', ' ') if x not in forbidden])

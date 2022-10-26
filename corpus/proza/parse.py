@@ -12,6 +12,7 @@ from corpus.proza.entities.book import Book
 from corpus.proza.html_cacher import HtmlCacher
 from corpus.proza.http_client import HttpClient
 from corpus.proza.md_dumper import MdDumper
+from tg.grammar_ru import Loc
 
 REQUIRED_SIZE = 700_000
 # REQUIRED_SIZE = 1_000
@@ -19,10 +20,9 @@ REQUIRED_BOOK_SIZE = 10_000
 # REQUIRED_CHAPTER_SIZE = 10
 REQUIRED_PUB_CNT = 10
 REQUIRED_BUNDLE_PART_SIZE = 10_000
-
 novels_dumped = 0
-MDSTORAGE = str(pathlib.Path(__file__).parent.parent.parent.resolve()) + "/data-cache/md"
-HTMLSTORAGE = str(pathlib.Path(__file__).parent.parent.parent.resolve()) + "/data-cache/html"
+MDSTORAGE = Loc.processed_path / "proza"
+HTMLSTORAGE = Loc.raw_path / "proza/html"
 html_cacher = HtmlCacher(HTMLSTORAGE)
 http_client = HttpClient(html_cacher)
 mddumper = MdDumper(MDSTORAGE, REQUIRED_BUNDLE_PART_SIZE)
@@ -148,9 +148,8 @@ def dump_if_large(books, col_url, col_name, author_url, author_info_by_url) -> b
     # книги из одной коллекции
     books.sort(key=lambda b: b.publication_date)
     # print(books)
-    f_name = mddumper.get_file_name(author_url, col_name, MDSTORAGE) + ".md"
+    f_name = str(mddumper.get_file_name(author_url, col_name, MDSTORAGE)) + ".md"
     if os.path.isfile(f_name):
-        # print(f"skip {f_name}")
         return True
     for b in books:
         b.content, b.review_cnt = get_book_content(b)
