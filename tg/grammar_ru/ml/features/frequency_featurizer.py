@@ -4,7 +4,7 @@ from pathlib import Path
 class FrequencyFeaturizer(SimpleFeaturizer):
     def __init__(self):
         super(FrequencyFeaturizer, self).__init__('frequencies')
-        path = Path(__file__).parent/'frequency_dict.csv'
+        path = Path(__file__).parent/'frequency_featurizer_data.csv'
         fdf = pd.read_csv(path, sep='\t')
         fdf.columns = ['lemma', 'pos', 'freq', 'corpus_range', 'juilland_coef', 'text_count']
         fdf.lemma = fdf.lemma.str.lower()
