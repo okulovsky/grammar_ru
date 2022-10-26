@@ -72,12 +72,12 @@ def execute_tasks(tasks):
 
 def run_local():
     tasks = autonamer.build_tasks(
-        plain_network_mode = [ContextualNetworkType.BidirectLSTM],
+        plain_network_mode = [ContextualNetworkType.LSTM],
         plain_net_size = [10],
-        epoch_count = [1],
+        epoch_count = [5],
         batch_size = [1000],
         plain_context_length = [25],
-        plain_context_left_shift = [0.25]
+        plain_context_left_shift = [0.5]
     )
     
     bundle = bt.DataBundle.load(Loc.data_cache_path/'bundles/tsa/bundles/toy')
@@ -103,5 +103,6 @@ def save_task(filename, task):
 if __name__ == '__main__':
     results = run_local()
     for task_name, task in results.items():
-        save_history(task_name, task['output']['history'])
-        save_task(task_name, task)
+        pass
+        # save_history(task_name, task['output']['history'])
+        # save_task(task_name, task)

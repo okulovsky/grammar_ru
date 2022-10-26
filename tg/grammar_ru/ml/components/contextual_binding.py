@@ -11,6 +11,7 @@ from ....common.ml.batched_training.mirrors import ExtractorNetworkBinding
 
 from .attention_network import AttentionReccurentNetwork, AttentionNetwork
 from .bidirect_lstm_network import BidirectLSTMNetwork
+from .bicontextual_lstm_finalizer import LSTM_BicontextualFinalizer
 
 
 class ContextualNetworkType(Enum):
@@ -60,7 +61,8 @@ class ContextualBinding(ExtractorNetworkBinding):
             fin = btc.PandasAggregationFinalizer()
         else:
             eaf = btc.SimpleExtractorToAggregatorFactory(self.extractor)
-            fin = btt.LSTMFinalizer(self.reverse_order_in_lstm)
+            # fin = btt.LSTMFinalizer(self.reverse_order_in_lstm)
+            fin = LSTM_BicontextualFinalizer(mirror_concat = False)
 
         return btc.ContextExtractor(
             self.name,
