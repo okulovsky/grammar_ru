@@ -35,16 +35,17 @@ class LSTM_BicontextualFinalizer(LSTMFinalizer):
 
         offset_indices = lstm_finalizer_result.dim_indices[0]
         l, r = offset_indices[0], offset_indices[-1]
+        c = offset_indices[len(offset_indices) // 2]
         offset_name = lstm_finalizer_result.dim_names[0]
 
         left_context = lstm_finalizer_result.sample_index(
-            pd.Index(data = range(l, 0, 1), name = offset_name)).tensor
+            pd.Index(data = range(l, c, 1), name = offset_name)).tensor
 
-        word_context = lstm_finalizer_result.sample_index(
-            pd.Index(data = [0], name = offset_name)).tensor
+        central_context = lstm_finalizer_result.sample_index(
+            pd.Index(data = [c], name = offset_name)).tensor
 
         right_context = lstm_finalizer_result.sample_index(
-            pd.Index(data = range(1, r + 1), name = offset_name)).tensor
+            pd.Index(data = range(c + 1, r + 1), name = offset_name)).tensor
 
         if self.mirror_concat:
             right_context = torch.flip(right_context, dims = (0, ))
@@ -54,19 +55,19 @@ class LSTM_BicontextualFinalizer(LSTMFinalizer):
         if left_context.shape == right_context.shape:
             
             result = self.concat(
-                lhs = (left_context, right_context), rhs = (word_context, word_context), 
+                lhs = (left_context, right_context), rhs = (central_context, central_context), 
                 inner_dim = 2, outer_dim = 0
             )
             
         elif left_context.shape >= right_context.shape:
             result = self.concat(
-                lhs = (left_context, fake_context), rhs = (word_context, right_context),
+                lhs = (left_context, fake_context), rhs = (central_context, right_context),
                 inner_dim = 0, outer_dim = 2
             )
 
         else:
             result = self.concat(
-                lhs = (left_context, word_context), rhs = (right_context, fake_context),
+                lhs = (left_context, central_context), rhs = (right_context, fake_context),
                 inner_dim = 0, outer_dim = 2
             )
 
