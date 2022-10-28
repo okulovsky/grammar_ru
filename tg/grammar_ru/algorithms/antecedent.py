@@ -1,67 +1,80 @@
-import pandas as pd
-import numpy as np
 from yo_fluq_ds import *
 from .architecture import NlpAlgorithm
-from ..ml.features import PyMorphyFeaturizer, SlovnetFeaturizer, AntecedentFeaturizer
+from ..ml.features import PyMorphyFeaturizer, SlovnetFeaturizer
 from ...common import DataBundle
 
 
 class AntecedentCandidatesAlgorithm(NlpAlgorithm):
-    def __init__(self, left_vicinity: int = 50):
-        self.left_vicinity = left_vicinity
+    def __init__(self, max_candidates: int = 10):
+        self.max_candidates = max_candidates
 
-    def _get_pronoun_filter(self):
-        return lambda x: ((x.normal_form == 'он') |
-                          (x.normal_form == 'она') |
-                          (x.normal_form == 'оно'))
+    @staticmethod
+    def _get_pronouns(morphology_df: pd.DataFrame):
+        pronouns_filter = morphology_df['normal_form'].isin(
+            ['он', 'она', 'оно'])
+        pronouns_df = morphology_df[pronouns_filter][['gender']]
+        pronouns_df = pronouns_df.reset_index()
+        return pronouns_df.add_prefix('pronoun_')
 
-    def _get_row_filter(self, pronoun_row: pd.Series):
-        return lambda x: ((x.gender == pronoun_row.gender) &
-                          (x.number == 'sing') &
-                          ((x.POS == 'NOUN') |
-                           (x.POS == 'ADJF') |
-                           (x.POS == 'ADJS') |
-                           (x.POS == 'NPRO') |
-                           (x.POS == 'PRCL') |
-                           (x.POS == 'PRTF') |
-                           (x.POS == 'PRTS') |
-                           (x.POS == 'ADVB')))
+    # @staticmethod
+    # def _get_antecedent_candidates(morphology_df: pd.DataFrame):
+    #     antecedent_candidate_filter = morphology_df['POS'].isin(
+    #         ['NOUN', 'PRON', 'ADJF', 'ADJS', 'NPRO', 'PRCL', 'PRTF', 'PRTS',
+    #          'ADVB']) & (morphology_df['number'] == 'sing')
+    #     antecedent_candidates_df = morphology_df[antecedent_candidate_filter][
+    #         ['gender']]
+    #     antecedent_candidates_df = antecedent_candidates_df.reset_index()
+    #     return antecedent_candidates_df.add_prefix('candidate_')
 
-    def _get_pairs_dull(self, df: pd.DataFrame):
-        return df.loc[lambda x: x.sentence_distance < 2, ['word_id', 'pronoun_id']]
+    @staticmethod
+    def _get_antecedent_candidates(db: DataBundle):
+        cand_filter = db.slovnet['POS'].isin(
+            ['NOUN', 'PROPN', 'ADJ', 'PRON', 'DET']) & (db.slovnet['Number'] == 'Sing')
+        candidates_df = db.pymorphy[cand_filter][['gender']]
+        return candidates_df[['gender']].reset_index().add_prefix('candidate_')
 
-    def _get_anaphor_antecedent_pairs(self, df: pd.DataFrame):
-        pass
+    def _filter_candidates(self,
+                           pronouns_df: pd.DataFrame,
+                           candidates_df: pd.DataFrame):
+        merged_df = pronouns_df.merge(candidates_df, how='cross')
+        merged_df = merged_df[
+            (merged_df['pronoun_word_id'] > merged_df['candidate_word_id']) &
+            (merged_df['pronoun_gender'] == merged_df['candidate_gender'])]
+        merged_df = merged_df.drop(
+            columns=['pronoun_gender', 'candidate_gender']).reset_index(
+            drop=True)
+        merged_df['candidate_distance'] = merged_df.groupby(
+            ['pronoun_word_id']).cumcount(ascending=False)
+        merged_df = merged_df[merged_df['candidate_distance'] < self.max_candidates]
+        return merged_df[['pronoun_word_id',
+                          'candidate_word_id',
+                          'candidate_distance']].reset_index(drop=True)
 
-    def _get_pronoun_antecedent_candidates(self, df: pd.DataFrame, row):
-        start_index = max(0, row.word_id - self.left_vicinity)
-        preword_df = df[(df['word_id'] >= start_index) &
-                        (df['word_id'] < row.word_id)]
-        candidates = preword_df.loc[self._get_row_filter(row),
-                                    ['word_id', 'POS', 'animacy']]
-        candidates['pronoun_id'] = row.word_id
-        return candidates
-
-    def _run_inner(self, db: DataBundle, index: pd.Index):
+    def get_candidates(self, db: DataBundle):
         pmf = PyMorphyFeaturizer()
         pmf.featurize(db)
+        slvnt = SlovnetFeaturizer()
+        slvnt.featurize(db)
         morphology_df = db.data_frames['pymorphy']
-        pronouns_df = morphology_df.loc[self._get_pronoun_filter(), ['gender']]
-        pronouns_df['word_id'] = pronouns_df.index
-        word_ids = db.data_frames['src'][db.data_frames['src']['word_type'] != 'punct'][['word_id']]
-        merged_df = pd.merge(word_ids,
-                             morphology_df[['POS', 'animacy', 'gender', 'number']],
-                             on='word_id')
-        antecedent_frames = []
-        for pronoun_row in Query.df(pronouns_df):
-            candidates = \
-                self._get_pronoun_antecedent_candidates(merged_df, pronoun_row)
-            antecedent_frames.append(candidates)
-        db.data_frames['candidates'] = pd.concat(antecedent_frames)
-        antc = AntecedentFeaturizer()
-        antc.featurize(db)
-        pairs = self._get_pairs_dull(db.data_frames['antecedents'])
-        antecedent_counts = pairs['pronoun_id'].value_counts()
-        db.data_frames['candidates'][NlpAlgorithm.Error] = \
-            db.data_frames['candidates']['pronoun_id'].map(lambda x: antecedent_counts[x] > 1)
-        return db.data_frames['candidates']
+        pronouns_df = self._get_pronouns(morphology_df)
+        antecedent_candidates_df = self._get_antecedent_candidates(db)
+        return self._filter_candidates(pronouns_df, antecedent_candidates_df)
+
+    def get_pronoun_parent(self,
+                           db: DataBundle,
+                           candidates_df: pd.DataFrame = None):
+        if candidates_df is None:
+            candidates_df = self.get_candidates(db)
+        slovnet = db['slovnet']
+
+        parent_ids = slovnet[
+            slovnet.index.isin(
+                candidates_df['pronoun_word_id'])]['syntax_parent_id']
+        parent_df = (parent_ids.to_frame()
+                     .reset_index()
+                     .rename(columns={'syntax_parent_id': 'pronoun_parent_id',
+                                      'word_id': 'pronoun_word_id'}))
+        return candidates_df.merge(parent_df, on='pronoun_word_id')
+
+    def _run_inner(self, db: DataBundle, index: pd.Index):
+        pass

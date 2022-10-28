@@ -7,5 +7,7 @@ from .capitalization_featurizer import CapitalizationFeaturizer
 from .tikhonov_featurizer import TikhonovDict, MorphemeTikhonovFeaturizer
 from .hierarchical_context_featurizer import SyntaxTreeFeaturizer
 from .syntax_stats_featurizer import SyntaxStatsFeaturizer
+from .navec_featurizer import NavecFeaturizer
+
 from .dialog_markup_featurizer import DialogMarkupFeaturizer
 from .glove_featurizer import GloveFeaturizer
