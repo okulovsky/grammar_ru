@@ -14,7 +14,7 @@ class HtmlCacher:
 
     def save_html_by_url(self, url, html: str):
         file_name = self._encode_url(url)
-        full_path = self.cache_dir + "/" + file_name
+        full_path = self.cache_dir / file_name
         with open(full_path, 'w') as f:
             f.write(html)
 

@@ -17,7 +17,8 @@ from tg.grammar_ru import Loc
 REQUIRED_SIZE = 700_000
 # REQUIRED_SIZE = 1_000
 REQUIRED_BOOK_SIZE = 10_000
-# REQUIRED_CHAPTER_SIZE = 10
+# REQUIRED_BOOK_SIZE = 10
+REQUIRED_CHAPTER_SIZE = 10
 REQUIRED_PUB_CNT = 10
 REQUIRED_BUNDLE_PART_SIZE = 10_000
 novels_dumped = 0
@@ -65,6 +66,8 @@ def try_get(a, reg):
 def get_author_info(soup, url):
     res = {k: None for k in ["auth_publication_count", "auth_reviews_received_count",
                              "auth_reviews_sent_count", "auth_readers_count"]}
+    res['dumped_total_len'] = 0
+    res['dumped_cnt'] = 0
     info_tag = soup.find(text="Читателей")
     if info_tag:
         try:
@@ -147,20 +150,40 @@ def get_book_content(book: Book):
 def dump_if_large(books, col_url, col_name, author_url, author_info_by_url) -> bool:
     # книги из одной коллекции
     books.sort(key=lambda b: b.publication_date)
-    # print(books)
     f_name = str(mddumper.get_file_name(author_url, col_name, MDSTORAGE)) + ".md"
     if os.path.isfile(f_name):
+        author_info_by_url[author_url]['dumped_total_len'] += os.path.getsize(f_name)
+        author_info_by_url[author_url]['dumped_cnt'] += 1
         return True
     for b in books:
         b.content, b.review_cnt = get_book_content(b)
         if len(b.content) < REQUIRED_BOOK_SIZE: return False
     total_length = sum(len(b.content) for b in books)
     if total_length > REQUIRED_SIZE:
+        author_info_by_url[author_url]['dumped_total_len'] += total_length
+        author_info_by_url[author_url]['dumped_cnt'] += 1
+
         mddumper.dump(books, col_name, col_url, author_url, total_length, author_info_by_url[author_url])
         print(f'dumped {f_name}')
         return True
     # print(f'candidate too small {BASE_URL + col_url}. total_size = {total_length}')
     return False
+
+
+def print_stat(author_info_by_url):
+    only_dumped = {author: info for author, info in author_info_by_url.items() if
+                   info['dumped_cnt']}
+    print(only_dumped)
+    pub_cnts, rev_rcvd_cnts, rev_sent_cnts, readers_cnts = [], [], [], []
+    for author, info in only_dumped.items():
+        pub_cnts.append(info["auth_publication_count"])
+        rev_rcvd_cnts.append(info["auth_reviews_received_count"])
+        rev_sent_cnts.append(info["auth_reviews_sent_count"])
+        readers_cnts.append(info["auth_readers_count"])
+    print("pub_cnts", pub_cnts)
+    print("rev_rcvd_cnts", rev_rcvd_cnts)
+    print("rev_sent_cnts", rev_sent_cnts)
+    print("readers_cnts", readers_cnts)
 
 
 seen_authors = set()
@@ -177,5 +200,7 @@ for dt in tqdm([END_DATE - timedelta(days=x) for x in range(1000)], ncols=80, de
             if not books:
                 continue
             novels_dumped += dump_if_large(books, url, name, author_url, author_info_by_url)
-            if novels_dumped > 100:
+            if novels_dumped > 150:
+                print_stat(author_info_by_url)
                 exit()
+print_stat(author_info_by_url)

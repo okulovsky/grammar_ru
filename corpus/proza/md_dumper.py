@@ -29,20 +29,22 @@ chapter_delim = re.compile('((\n\s*){3}|\s\*\s?\*\s?\*\s)')
 
 
 class MdDumper:
-    def __init__(self, storage_dir: str, REQUIRED_BUNDLE_PART_SIZE):
+    def __init__(self, storage_dir, REQUIRED_BUNDLE_PART_SIZE):
         Path(storage_dir).mkdir(parents=True, exist_ok=True)
         self.storage_dir = storage_dir
         self.bundle_size = REQUIRED_BUNDLE_PART_SIZE
 
     def dump(self, books: List[Book], col_name, col_url, author_url, total_length, author_info):
         f_name = self.get_file_name(author_url, col_name, self.storage_dir)
-        mdFile = MdUtils(file_name=f_name)
+        mdFile = MdUtils(file_name=str(f_name))
         mdFile.new_header(level=1, title=col_name)
+        only_need_info = {stat_name: v for stat_name, v in author_info.items() if
+                          stat_name not in ['dumped_total_len', 'dumped_cnt']}
         mdFile.write("$ " + json.dumps(dict({'author_url': author_url,
                                              'length': total_length,
                                              'col_name': col_name,
                                              'collection_url': col_url,
-                                             }, **author_info)))
+                                             }, **only_need_info)))
         for chapter in books:
             mdFile.new_header(level=2, title=chapter.name)
             mdFile.write("$ " + json.dumps({'book_name': chapter.name,
