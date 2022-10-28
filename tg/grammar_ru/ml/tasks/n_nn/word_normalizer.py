@@ -3,7 +3,7 @@ import abc
 
 from nltk.stem import SnowballStemmer
 
-from regular_expressions import single_n_regex, double_n_regex
+from .regular_expressions import single_n_regex, double_n_regex
 
 
 class WordNormalizer(abc.ABC):
@@ -20,7 +20,7 @@ class NltkWordStemmer(WordNormalizer):
         return self._stemmer.stem(word)
 
 
-class EndingNormalizer(WordNormalizer):
+class RegexNormalizer(WordNormalizer):
     def normalize_word(self, word: str) -> str:
         if (match := re.search(single_n_regex, word)):
             return word[:match.start() + 1]

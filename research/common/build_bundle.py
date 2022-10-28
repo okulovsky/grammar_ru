@@ -9,7 +9,6 @@ from tg.grammar_ru.common import Loc
 from tg.grammar_ru.ml.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer
 from tg.grammar_ru.ml.corpus import CorpusReader, CorpusBuilder
 
-from tg.grammar_ru.ml.tasks.n_nn.bundle import build_dictionary
 from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import DictionaryIndexBuilder
 from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import NNnIndexBuilder
 
@@ -23,26 +22,21 @@ def read_data(corpus_path: Path) -> tp.Iterable[pd.DataFrame]:
             .feed(yfds.fluq.with_progress_bar()))
 
 
-def build_word_dict(vocab_path: Path) -> None:
-    words = list(build_dictionary(read_data(LENTA_CORPUS_PATH)))
-    print(words)
-    print(len(words))
-    yfds.FileIO.write_json(words, vocab_path)
-
-
 def build_index(
         index_builder: DictionaryIndexBuilder,
         corpus_path: Path,
         bundle_path: Path,
+        word_limit: tp.Optional[int] = None
         ) -> None:
     CorpusBuilder.transfuse_corpus(
         [corpus_path],
         bundle_path,
+        words_limit=word_limit,
         selector=index_builder.build_train_index
     )
 
 
-def featurize_index(source: Path, destination: Path) -> None:
+def featurize_index(source: Path, destination: Path, workers: int = 2) -> None:
     CorpusBuilder.featurize_corpus(
         source,
         destination,
@@ -52,13 +46,12 @@ def featurize_index(source: Path, destination: Path) -> None:
             SyntaxTreeFeaturizer(),
             SyntaxStatsFeaturizer()
         ],
-        2,
+        workers,
         True,
     )
 
 
 def assemble(
-        name: str,
         limit: int,
         corpus_path: Path,
         bundle_path: Path
@@ -72,5 +65,3 @@ def assemble(
     index = NNnIndexBuilder.build_index_from_src(src)
     index.to_parquet(bundle_path/'index.parquet')
     print(index.groupby('split').size())
-
-
