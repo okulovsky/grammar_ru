@@ -32,7 +32,10 @@ class LSTM_BicontextualFinalizer(LSTMFinalizer):
         features: Dict[str, pd.DataFrame], aggregations: Dict[str, pd.DataFrame]):
 
         lstm_finalizer_result: AnnotatedTensor = super().finalize(index, features, aggregations)
+        return self._bicontextual_transformation(lstm_finalizer_result)
 
+    def _bicontextual_transformation(self, lstm_finalizer_result: AnnotatedTensor) -> AnnotatedTensor:
+        
         offset_indices = lstm_finalizer_result.dim_indices[0]
         l, r = offset_indices[0], offset_indices[-1]
         c = offset_indices[len(offset_indices) // 2]
@@ -54,20 +57,26 @@ class LSTM_BicontextualFinalizer(LSTMFinalizer):
 
         if left_context.shape == right_context.shape:
             
-            result = self.concat(
+            result = self._concat(
                 lhs = (left_context, right_context), rhs = (central_context, central_context), 
                 inner_dim = 2, outer_dim = 0
             )
             
         elif left_context.shape >= right_context.shape:
-            result = self.concat(
-                lhs = (left_context, fake_context), rhs = (central_context, right_context),
+            rhs = (central_context, right_context)
+            if self.mirror_concat:
+                rhs = list(reversed(rhs))
+            result = self._concat(
+                lhs = (left_context, fake_context), rhs = rhs,
                 inner_dim = 0, outer_dim = 2
             )
 
         else:
-            result = self.concat(
-                lhs = (left_context, central_context), rhs = (right_context, fake_context),
+            lhs = (left_context, central_context)
+            if self.mirror_concat:
+                lhs = list(reversed(lhs))
+            result = self._concat(
+                lhs = lhs, rhs = (right_context, fake_context),
                 inner_dim = 0, outer_dim = 2
             )
 
@@ -81,7 +90,7 @@ class LSTM_BicontextualFinalizer(LSTMFinalizer):
             ]
         )
 
-    def concat( self,
+    def _concat( self,
                 lhs: Tuple[torch.Tensor], 
                 rhs: Tuple[torch.Tensor], inner_dim: int, outer_dim: int) -> torch.Tensor:
 
