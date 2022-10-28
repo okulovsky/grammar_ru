@@ -2,7 +2,7 @@ import typing as tp
 
 import pandas as pd
 
-from .word_normalizer import WordNormalizer, NltkWordStemmer
+from .word_normalizer import WordNormalizer
 from .regular_expressions import single_n_regex, double_n_regex
 
 
@@ -18,7 +18,7 @@ def _extract_words(dfs: tp.Iterable[pd.DataFrame]) -> tp.Tuple[tp.Set[str], tp.S
 
 def build_dictionary(
         dfs: tp.Iterable[pd.DataFrame],
-        normalizer: WordNormalizer = NltkWordStemmer()
+        normalizer: WordNormalizer
         ) -> tp.Set[str]:
     words_with_single_n, words_with_double_n = _extract_words(dfs)
 
