@@ -1,6 +1,6 @@
 from typing import *
 from tg.amenities import create_sagemaker_routine
-from tg.grammar_ru.ml.components import GrammarMirrorSettings
+from tg.grammar_ru.ml.components import GrammarMirrorSettings, ContextualNetworkType
 from tg.common.ml import batched_training as bt
 from tg.common.ml.batched_training import torch as btt
 from tg.common.ml.batched_training import mirrors as btm
@@ -29,7 +29,7 @@ def build_task(
         plain_context_length: int = 10,
         plain_context_left_shift: float = 0.5,
         plain_net_size = [20],
-        plain_network_mode = btm.ContextualNetworkType.Plain,
+        plain_network_mode = ContextualNetworkType.Plain,
         plain_context_reverse = False,
         feature_allow_list = None
 ):
@@ -64,32 +64,45 @@ def build_task(
 autonamer = Autonamer(build_task)
 
 
-def run_local():
-    task = build_task(plain_network_mode=btm.ContextualNetworkType.Plain)
-    task.settings.batch_size = 1000
-    task.settings.training_batch_limit = 2
-    task.settings.evaluation_batch_limit = 2
-    bundle = bt.DataBundle.load(Loc.data_cache_path/'bundles/tsa/bundles/toy')
-    print(task.info['name'])
-    task.run(bundle)
-    exit(0)
-
 def execute_tasks(tasks):
     routine = create_sagemaker_routine('tsa', instance_type='ml.m5.xlarge')
     for t in tasks:
         routine.remote.execute(t, 'big', wait=False)
 
 
+def run_local():
+    tasks = autonamer.build_tasks(
+        plain_network_mode = [ContextualNetworkType.LSTM],
+        plain_net_size = [10],
+        epoch_count = [5],
+        batch_size = [1000],
+        plain_context_length = [25],
+        plain_context_left_shift = [0.5]
+    )
+    
+    bundle = bt.DataBundle.load(Loc.data_cache_path/'bundles/tsa/bundles/toy')
+    
+    return {
+        task.info['name']: task.run(bundle)
+        for task in tasks
+    }
+
+
+def save_history(filename, history):
+    import json
+    with open(filename, "w") as f:
+        json.dump(history, f)
+
+
+def save_task(filename, task):
+    import pickle
+    with open(filename  + ".pickle", "wb") as f:
+        pickle.dump(task['output']['training_task'], f)
 
 
 if __name__ == '__main__':
-    #run_local()
-
-    tasks = autonamer.build_tasks(
-        plain_context_length=[15, 21],
-        feature_allow_list = ['P'],
-        plain_context_left_shift = [0, 0.25, 0.5]
-    )
-    # print(tasks[0].info['name'])
-    execute_tasks(tasks)
-
+    results = run_local()
+    for task_name, task in results.items():
+        pass
+        # save_history(task_name, task['output']['history'])
+        # save_task(task_name, task)
