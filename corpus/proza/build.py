@@ -4,8 +4,9 @@ from tg.grammar_ru.ml.features import PyMorphyFeaturizer, SlovnetFeaturizer, Syn
 from pathlib import Path
 from tg.grammar_ru import Loc
 import importlib
-import sys
-sys.setdefaultencoding("utf-8")
+# import sys
+# importlib.reload(sys)
+# sys.setdefaultencoding("utf-8")
 # # sys.setdefaultencoding() does not exist, here!
 # importlib.reload(sys)  # Reload does the trick!
 # sys.setdefaultencoding('UTF8')
