@@ -60,8 +60,8 @@ class AntecedentCandidatesAlgorithm(NlpAlgorithm):
 
     def _get_antecedent_candidates(self, db: DataBundle):
         slovnet = self._get_features(db, 'slovnet', self.slvnt)
-        cand_filter = slovnet['POS'].isin(
-            ['NOUN', 'PROPN', 'ADJ', 'PRON', 'DET']) & (db.slovnet['Number'] == 'Sing')
+        cand_filter = (slovnet['POS'].isin(['NOUN', 'PROPN']) &
+                       (db.slovnet['Number'] == 'Sing'))
         candidates_df = db.pymorphy[cand_filter][['gender']]
         return candidates_df[['gender']].reset_index().add_prefix('candidate_')
 
@@ -113,10 +113,10 @@ class AntecedentCandidatesAlgorithm(NlpAlgorithm):
         return candidates_df.merge(parent_df, on='pronoun_word_id')
 
     @staticmethod
-    def get_big_deviation_only(df: pd.DataFrame):
+    def get_big_deviation_only(df: pd.DataFrame, col1: str, col2: str, prod_col: str):
         product_groups = \
-        df.drop_duplicates(['pronoun_parent_norm', 'candidate_word_norm'],
-                           keep='last').groupby(['pronoun_word_id'])['product']
+        df.drop_duplicates([col1, col2],
+                           keep='last').groupby(['pronoun_word_id'])[prod_col]
         maxes = product_groups.max()
         means = product_groups.mean()
         stds = product_groups.std()
@@ -127,18 +127,40 @@ class AntecedentCandidatesAlgorithm(NlpAlgorithm):
         return best_in_group[
             best_in_group.pronoun_word_id.isin(temp[temp['product']].index)]
 
-    def filter_glove(self, with_parents_df: pd.DataFrame, pymorphy: pd.DataFrame):
+    def inflect(self, word, case):
+        return self.pmf.an.parse(word)[0].inflect({'sing', case}).word
+
+    def get_inflected_candidates(self, pymorphy, with_parents_df):
+        inflect_base = \
+        with_parents_df.merge(pymorphy, left_on='pronoun_word_id',
+                              right_on='word_id')[['candidate_word_id',
+                                                   'case']]
+        inflect_base = inflect_base.merge(
+            pymorphy.reset_index()[['word_id', 'normal_form']],
+            left_on='candidate_word_id', right_on='word_id', how='left')[
+            ['case', 'normal_form']]
+        return inflect_base.apply(
+            lambda x: self.inflect(x['normal_form'], x['case']), axis=1)
+
+    def filter_glove(self, with_parents_df: pd.DataFrame, db: DataBundle):
         product_df = with_parents_df.merge(
-            pymorphy.normal_form.rename('pronoun_parent_norm'),
+            db.src.word.str.lower().rename('pronoun_parent'),
             left_on='pronoun_parent_id', right_index=True, how='left')
-        product_df = product_df.merge(
-            pymorphy.normal_form.rename('candidate_word_norm'),
-            left_on='candidate_word_id', right_index=True, how='left')
+        product_df['inflected_candidate'] = \
+            self.get_inflected_candidates(db.pymorphy, with_parents_df)
         featurizer = NavecFeaturizer()
         product_df['product'] = featurizer.get_glove_prod(product_df,
-                                                          'pronoun_parent_norm',
-                                                          'candidate_word_norm')
-        return self.get_big_deviation_only(product_df)
+                                                          'pronoun_parent',
+                                                          'inflected_candidate')
+        a = self.get_big_deviation_only(
+            product_df, 'pronoun_parent', 'inflected_candidate', 'product')
+        return self.get_big_deviation_only(
+            product_df, 'pronoun_parent', 'inflected_candidate', 'product')
+
+    def filter_glove_neighbour(self, candidates_df: pd.DataFrame, db: DataBundle):
+        product_df = candidates_df.merge(
+            db.src.word.str.lower().rename('pronoun_parent'),
+            left_on='pronoun_parent_id', right_index=True, how='left')
 
     def run_full(self, db: DataBundle):
         self.pmf.featurize(db)
@@ -147,7 +169,7 @@ class AntecedentCandidatesAlgorithm(NlpAlgorithm):
             self.pronoun_replacer[x] if x in self.pronoun_replacer else x)
         candidates_df = self.get_candidates(db)
         with_parents_df = self.get_pronoun_parent(db, candidates_df)
-        return self.filter_glove(with_parents_df, db.pymorphy)
+        return self.filter_glove(with_parents_df, db)
 
     def _run_inner(self, db: DataBundle, index: pd.Index):
         pass
