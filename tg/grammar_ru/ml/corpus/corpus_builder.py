@@ -169,10 +169,12 @@ class CorpusBuilder:
         writer.open()
         readers = [CorpusReader(s) for s in sources]
         total_length = sum([r.get_toc().shape[0] for r in readers])
-        query = Query.en(readers[0].get_frames())
-        for i in range(1, len(readers)):
-            query = query.append(readers[i].get_frames())
-        query = Queryable(query, total_length)
+
+        query = Queryable(
+            Query.en(readers).select_many(lambda x: x.get_frames()), 
+            total_length
+        )
+
         word_count = 0
         for index, frame in enumerate(query):
             if selector is None:
