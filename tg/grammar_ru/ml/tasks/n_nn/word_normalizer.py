@@ -33,18 +33,12 @@ class RegexNormalizer(WordNormalizer):
 
 
 class LoggingRegexNormalizer(RegexNormalizer):
+    """For debug purposes"""
     def __init__(self) -> None:
         self._map: tp.MutableMapping[str, tp.List[str]] = defaultdict(list)
 
     def normalize_word(self, word: str) -> str:
         normalized = super().normalize_word(word)
-        self._map[word].append(normalized)
+        self._map[normalized].append(word)
 
         return normalized
-
-
-class EmptyNormalizer(WordNormalizer):
-    """For debug purposes"""
-
-    def normalize_word(self, word: str) -> str:
-        return word
