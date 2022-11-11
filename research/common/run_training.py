@@ -2,7 +2,6 @@ import typing as tp
 from pathlib import Path
 
 from sklearn.metrics import roc_auc_score
-
 from tg.grammar_ru.ml.components import GrammarMirrorSettings
 from tg.common.ml import batched_training as bt
 from tg.common.ml.batched_training import torch as btt
@@ -62,10 +61,9 @@ def build_task(
 
 def run_local(bundle_path: Path) -> None:
     task = build_task(plain_network_mode=btm.ContextualNetworkType.Plain)
-    task.settings.batch_size = 1000
+    task.settings.epoch_count = 50
+    task.settings.batch_size = 20000
     task.settings.training_batch_limit = 10
     task.settings.evaluation_batch_limit = 10
     bundle = bt.DataBundle.load(bundle_path)
-    print(task.info['name'])
-    task.run(bundle)
-    exit(0)
+    return (task, task.run(bundle))
