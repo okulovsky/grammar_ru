@@ -55,10 +55,9 @@ class CorpusBuilder:
     def convert_interformat_folder_to_corpus(
             corpus_path: Path,
             md_folder: Path,
-            md_subfolder: str,
             naming,
             workers_count = None):
-        subfolder = md_folder / md_subfolder
+        subfolder = md_folder
         writer = CorpusWriter(corpus_path, True)
         files = Query.folder(subfolder, '**/*.*').to_list()
         parser = _ParallelParser(md_folder, naming)
@@ -170,10 +169,12 @@ class CorpusBuilder:
         writer.open()
         readers = [CorpusReader(s) for s in sources]
         total_length = sum([r.get_toc().shape[0] for r in readers])
-        query = Query.en(readers[0].get_frames())
-        for i in range(1, len(readers)):
-            query = query.append(readers[i].get_frames())
-        query = Queryable(query, total_length)
+
+        query = Queryable(
+            Query.en(readers).select_many(lambda x: x.get_frames()), 
+            total_length
+        )
+
         word_count = 0
         for index, frame in enumerate(query):
             if selector is None:

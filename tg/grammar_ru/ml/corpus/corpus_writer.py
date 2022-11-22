@@ -8,6 +8,7 @@ import os
 from uuid import uuid4
 from ...common import DataBundle, Separator
 from yo_fluq_ds import Query
+import time
 
 class CorpusFragment:
     def __init__(self,
@@ -79,9 +80,12 @@ class CorpusWriter:
 
         fragment.df = self._update_indices(fragment.df)
         row['max_id'] = Separator.get_max_id(fragment.df)
+
         Separator.validate(fragment.df)
         self._write_parquet(f'src/{file_id}.parquet', fragment.df)
         self.toc.append(row)
+
+
 
 
     def finalize(self, custom_toc=None):
