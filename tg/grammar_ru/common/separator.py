@@ -170,7 +170,7 @@ class Separator:
     INDEX_COLUMNS = ['word_id', 'sentence_id', 'paragraph_id']
 
     @staticmethod
-    def reset_indices(df, offset=0) -> pd.DataFrame:
+    def reset_indices(df, offset=0, keep_originals = True) -> pd.DataFrame:
         df = df.copy()
         for column in Separator.INDEX_COLUMNS:
             rc = df[column]
@@ -180,7 +180,8 @@ class Separator:
             rc = rc.set_index('value')
             rc = rc['index']
             rc+=offset
-            df['original_'+column] = df[column]
+            if keep_originals:
+                df['original_'+column] = df[column]
             df[column] = list(df[[column]].merge(rc, left_on=column, right_index=True)['index'])
 
         df.index = list(df.word_id)
