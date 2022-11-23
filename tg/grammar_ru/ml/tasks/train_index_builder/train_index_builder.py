@@ -7,8 +7,7 @@ from tg.common.ml.batched_training import train_display_test_split
 
 
 class DictionaryIndexBuilder(abc.ABC):
-    def __init__(self, good_words: tp.Sequence[str], add_negative_samples: bool = True):
-        self.good_words = good_words
+    def __init__(self, add_negative_samples: bool = True):
         self.ref_id = 0
         self.add_negative_samples = add_negative_samples
 
