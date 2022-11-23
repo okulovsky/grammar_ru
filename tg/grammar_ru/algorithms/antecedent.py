@@ -10,12 +10,13 @@ from ...common import DataBundle
 
 
 class AntecedentCandidatesAlgorithm(NlpAlgorithm):
-    def __init__(self, dbs_query, max_candidates: int = 10):
+    def __init__(self, dbs_query=None, max_candidates: int = 10):
         self.pmf = PyMorphyFeaturizer()
         self.slvnt = SlovnetFeaturizer()
         self.navec = NavecFeaturizer()
         self.max_candidates = max_candidates
-        self.pronoun_replacer = self._get_proper_replace_dict(dbs_query)
+        if dbs_query is not None:
+            self.pronoun_replacer = self._get_proper_replace_dict(dbs_query)
 
     def _get_proper_replace_dict(self, dbs_query):
         proper_counts = pd.DataFrame()
@@ -33,10 +34,31 @@ class AntecedentCandidatesAlgorithm(NlpAlgorithm):
         return dict(zip(proper_counts.normal_form,
                         proper_counts.gender.apply(lambda x: converter[x])))
 
+    def pronoun_replace_for_db(self, db):
+        converter = {'femn': 'женщина',
+                     'masc': 'мужчина',
+                     'neut': 'существо',
+                     None: 'существо'}
+        db_counts = self._count_propers(db)
+        proper_counts =\
+            (db_counts
+             .groupby(['normal_form', 'gender'])
+             .sum()
+             .reset_index())
+        self.pronoun_replacer = dict(zip(proper_counts.normal_form,
+                                         proper_counts.gender.apply(lambda x: converter[x])))
+
     @staticmethod
-    def _is_proper(noun: str, db: DataBundle):
+    def _src(db: DataBundle):
+        try:
+            return db['speechless_src']
+        except KeyError:
+            return db['src']
+
+    def _is_proper(self, noun: str, db: DataBundle):
         indices = list(db.pymorphy[db.pymorphy['normal_form'] == noun].index)
-        words = db.src[db.src.index.isin(indices)]['word']
+        src = self._src(db)
+        words = src[src.index.isin(indices)]['word']
         return words.str[0].str.isupper().all() and words.count() > 2
 
     def _count_propers(self, db: DataBundle):
@@ -130,7 +152,10 @@ class AntecedentCandidatesAlgorithm(NlpAlgorithm):
         return res.reset_index(drop=True)
 
     def inflect(self, word, case):
-        return self.pmf.an.parse(word)[0].inflect({'sing', case}).word
+        try:
+            return self.pmf.an.parse(word)[0].inflect({'sing', case}).word
+        except:
+            return None
 
     def get_inflected_candidates(self, pymorphy, with_parents_df):
         inflect_base = \
@@ -142,7 +167,7 @@ class AntecedentCandidatesAlgorithm(NlpAlgorithm):
             left_on='candidate_word_id', right_on='word_id', how='left')[
             ['case', 'normal_form']]
         return inflect_base.apply(
-            lambda x: self.inflect(x['normal_form'], x['case']), axis=1)
+            lambda x: self.inflect(x['normal_form'], x['case']), axis=1).dropna()
 
     def remove_sibling_candidates(self, db, with_parents_df):
         slovnet = \
@@ -160,9 +185,9 @@ class AntecedentCandidatesAlgorithm(NlpAlgorithm):
         return copy.groupby('pronoun_word_id')['prod_e'].transform(
             lambda x: x / x.sum()).fillna(0)
 
-    @staticmethod
-    def get_context_words(db, with_parents_df, neighb_count=1):
+    def get_context_words(self, db, with_parents_df, neighb_count=1):
         extended_df = with_parents_df.copy()
+        src = self._src(db)
 
         for i in range(1, neighb_count + 1):
             left_id = 'left_id_' + str(i)
@@ -170,25 +195,25 @@ class AntecedentCandidatesAlgorithm(NlpAlgorithm):
                 with_parents_df['pronoun_word_id'].apply(
                     lambda x:
                     x - i if (x - i >= 0 and
-                              db.src.loc[x - i].word_type != 'punct') else -1)
+                              src.loc[x - i].word_type != 'punct') else -1)
             right_id = 'right_id_' + str(i)
             extended_df[right_id] = \
                 with_parents_df['pronoun_word_id'].apply(
                     lambda x:
-                    x + i if (x + i < len(db.src.index) and
-                              db.src.loc[x + i].word_type != 'punct')
+                    x + i if (x + i < len(src.index) and
+                              src.loc[x + i].word_type != 'punct')
                     else -1)
 
             extended_df = extended_df.merge(
-                db.src.word.str.lower().rename('left_word_' + str(i)),
+                src.word.str.lower().rename('left_word_' + str(i)),
                 left_on=left_id, right_index=True, how='left').reset_index(drop=True)
             extended_df = extended_df.merge(
-                db.src.word.str.lower().rename('right_word_' + str(i)),
+                src.word.str.lower().rename('right_word_' + str(i)),
                 left_on=right_id, right_index=True, how='left').reset_index(
                 drop=True)
 
         extended_df = extended_df.merge(
-            db.src.word.str.lower().rename('parent_word'),
+            src.word.str.lower().rename('parent_word'),
             left_on='pronoun_parent_id', right_index=True, how='left')
         return extended_df
 
@@ -259,7 +284,7 @@ class AntecedentCandidatesAlgorithm(NlpAlgorithm):
         if use_diff_between_mean_filter:
             filtered_df = self.get_big_deviation_only(filtered_df)
 
-        return filtered_df
+        return candidates_df, filtered_df
 
     def _run_inner(self, db: DataBundle, index: pd.Index):
         pass

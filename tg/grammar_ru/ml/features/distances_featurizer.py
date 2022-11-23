@@ -3,9 +3,9 @@ from .architecture import *
 from yo_fluq_ds import *
 
 
-class AntecedentFeaturizer(SimpleFeaturizer):
+class DistancesFeaturizer(SimpleFeaturizer):
     def __init__(self):
-        super(AntecedentFeaturizer, self).__init__('antecedents')
+        super(DistancesFeaturizer, self).__init__('antecedents')
 
     def _count_distances(
             self,
