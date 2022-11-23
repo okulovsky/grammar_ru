@@ -1,4 +1,4 @@
-from .antecedent_featurizer import AntecedentFeaturizer
+from .distances_featurizer import DistancesFeaturizer
 from .architecture import Featurizer, SimpleFeaturizer
 from .pymorphy_featurizer import PyMorphyFeaturizer
 from .slovnet_featurizer import SlovnetFeaturizer
