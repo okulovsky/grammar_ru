@@ -21,7 +21,7 @@ if not (VOCAB_FILE).exists():
 
 
 index_path = Loc.bundles_path/'n_nn/prepare/raw/raw.zip'
-if not (Path(__file__)/index_path).exists():
+if not (index_path).exists():
     print('Building index')
     words = yfds.FileIO.read_json(VOCAB_FILE)
     index_builder = NNnIndexBuilder(words, word_normalizer=RegexNormalizer())
@@ -29,13 +29,13 @@ if not (Path(__file__)/index_path).exists():
 
 
 features_path = Loc.bundles_path/'n_nn/prepare/feat/feat.zip'
-if not (Path(__file__)/features_path).exists():
+if not (features_path).exists():
     print('Extracting features')
     build_bundle.featurize_index(index_path, features_path, workers=3)
 
 
 bundle_name = 'big_1'
 bundle_path = Loc.bundles_path/f'n_nn/{bundle_name}'
-if not (Path(__file__)/bundle_path).exists():
+if not (bundle_path).exists():
     print('Building bundle')
-    build_bundle.assemble(500, features_path, bundle_path)
+    build_bundle.assemble(200, features_path, bundle_path)
