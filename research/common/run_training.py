@@ -62,8 +62,9 @@ def build_task(
 def run_local(bundle_path: Path) -> None:
     task = build_task(plain_network_mode=btm.ContextualNetworkType.Plain)
     task.settings.epoch_count = 50
-    task.settings.batch_size = 20000
+    task.settings.batch_size = 5000
     task.settings.training_batch_limit = 10
     task.settings.evaluation_batch_limit = 10
     bundle = bt.DataBundle.load(bundle_path)
+
     return (task, task.run(bundle))
