@@ -67,6 +67,11 @@ class ChtobyIndexBuilder(DictionaryIndexBuilder):
         super().__init__(add_negative_samples=add_negative_samples)
         self.good_words = ['чтобы', 'что бы']
 
+    def build_train_index(self, df: pd.DataFrame) -> tp.List[pd.DataFrame]:
+        preprocessed = ChtobyIndexBuilder.preprocess(df)
+
+        return super().build_train_index(preprocessed)
+
     def _get_targets(self, df: pd.DataFrame) -> pd.Series:
         return df.word.str.lower().isin(self.good_words)
 
@@ -84,9 +89,9 @@ class ChtobyIndexBuilder(DictionaryIndexBuilder):
             ~negative.is_target,
             negative.word,
             np.where(
-                negative['word'].apply(lambda word: word in ('чтобы', 'что бы')),
-                negative['word'].apply(self._get_another),
-                negative['word'].apply(self._get_another)
+                negative['word'] == 'чтобы',
+                negative['word'].str.replace('чтобы', 'что бы'),
+                negative['word'].str.replace('что бы', 'чтобы')
             )
         )
 
@@ -111,3 +116,56 @@ class ChtobyIndexBuilder(DictionaryIndexBuilder):
 
             # word_index now is inconsistent
             return result.drop(what_with_pair_loc)
+
+        return result
+
+
+class TakzheIndexBuilder(DictionaryIndexBuilder):
+    def __init__(self, add_negative_samples: bool = True):
+        super().__init__(add_negative_samples=add_negative_samples)
+        self.good_words = ['также', 'так же']
+
+    def _get_targets(self, df: pd.DataFrame) -> pd.Series:
+        return df.word.str.lower().isin(self.good_words)
+
+    def _get_another(self, word: str) -> str:
+        if word == 'также':
+            return 'так же'
+        elif word == 'так же':
+            return 'также'
+
+        return word
+
+    def _build_negative_from_positive(self, positive: pd.DataFrame) -> pd.DataFrame:
+        negative = positive.copy()
+        negative.word = np.where(
+            ~negative.is_target,
+            negative.word,
+            np.where(
+                negative['word'].apply(lambda word: word in self.good_words),
+                negative['word'].apply(self._get_another),
+                negative['word'].apply(self._get_another)
+            )
+        )
+
+        negative['label'] = 1
+
+        return negative
+
+    @staticmethod
+    def preprocess(df: pd.DataFrame) -> pd.DataFrame:
+        # transforming 'так' + 'же' to 'так же'
+        result = df.copy()
+        tak = result[result['word'] == 'так']
+        tak_next = tak[['sentence_id', 'word_index']].copy()
+        tak_next['word_index'] += 1
+        tak_neighbour = result.merge(tak_next, on=['sentence_id', 'word_index'], how='inner')
+        would = tak_neighbour[tak_neighbour['word'] == 'же']
+
+        if would.shape[0] != 0:
+            tak_with_pair_loc = would['word_id']
+            result.loc[tak_with_pair_loc - 1, 'word'] = 'так же'
+            result.loc[tak_with_pair_loc - 1, 'word_length'] += 3
+
+            # word_index now is inconsistent
+            return result.drop(tak_with_pair_loc)
