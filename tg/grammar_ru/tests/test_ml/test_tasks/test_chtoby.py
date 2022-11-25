@@ -1,5 +1,6 @@
 import pytest
 import pandas as pd
+import numpy as np
 import typing as tp
 
 from tg.grammar_ru.common import Separator, DataBundle
@@ -8,20 +9,24 @@ from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import ChtobyInde
 
 @pytest.fixture
 def bundle() -> DataBundle:
-    return Separator.build_bundle('что бы чтобы что бы затем что бы').src
+    return Separator.build_bundle('что бы чтобы что бы затем что бы')
 
 
 @pytest.fixture
 def preprocessed_df() -> pd.DataFrame:
     data = [
-        (0, 'что бы', 1),
-        (0, 'чтобы', 1),
-        (0, 'что бы', 1),
-        (0, 'затем', 0),
-        (0, 'что бы', 1)
+        (1, 'что бы', True),
+        (1, 'чтобы', True),
+        (2, 'что бы', True),
+        (3, 'затем', False),
+        (4, 'что бы', True)
     ]
 
-    return pd.DataFrame(data=data, columns=['sentence_id', 'word', 'is_target'])
+    return pd.DataFrame(
+        data=data,
+        columns=['sentence_id', 'word', 'is_target'],
+        index=np.arange(len(data)),
+    )
 
 
 def test_preprocessing_word(bundle: DataBundle) -> None:
@@ -31,12 +36,12 @@ def test_preprocessing_word(bundle: DataBundle) -> None:
 
 
 def test_preprocessing_word_length(bundle: DataBundle) -> None:
-    preprocessed = ChtobyIndexBuilder.preprocess(bundle.df)
+    preprocessed = ChtobyIndexBuilder.preprocess(bundle.src)
 
     assert (preprocessed['word_length'] == [6, 5, 6, 5, 6]).all()
 
 
-def test_get_targets(preprocessed_df: pd.DataFrame):
+def test_get_targets(preprocessed_df: pd.DataFrame) -> None:
     builder = ChtobyIndexBuilder()
     targets = builder._get_targets(preprocessed_df)
 
@@ -45,8 +50,12 @@ def test_get_targets(preprocessed_df: pd.DataFrame):
 
 def test_build_negative_from_positive(preprocessed_df: pd.DataFrame):
     builder = ChtobyIndexBuilder()
-    assert False, print(builder._build_positive(preprocessed_df))
+    expected = [
+        (1, 'чтобы', True, 1),
+        (1, 'что бы', True, 1),
+        (2, 'чтобы', True, 1),
+        (3, 'затем', False, 1),
+        (4, 'чтобы', True, 1)
+    ]
 
-
-def test_build_train_index(df: pd.DataFrame, expected: pd.DataFrame):
-    pass
+    assert (builder._build_negative_from_positive(preprocessed_df).to_numpy() == np.array(expected, dtype=object)).all()
