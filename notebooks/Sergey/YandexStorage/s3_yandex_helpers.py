@@ -78,3 +78,9 @@ class S3YandexHandler:
                 relative_path = file_path.relative_to(folder)
                 joint_path = f"{s3_path}/{str(relative_path.as_posix())}"
                 client.upload_file(file_path_str, bucket_name, joint_path)
+
+    @staticmethod
+    def create_bucket(bucket_name):
+        kwargs = S3YandexHandler._get_access_keys()
+        client = boto3.client('s3', **kwargs)
+        client.create_bucket(Bucket=bucket_name)
