@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 
-class PlainContextBuilder(btc.ContextBuilder):
+class PlainContextBuilder(btc.ContextBuilder): #TODO sentence_id from src
     def __init__(self,
                  include_zero_offset = False,
                  left_to_right_contexts_proportion: float = 0):
@@ -12,6 +12,8 @@ class PlainContextBuilder(btc.ContextBuilder):
         for i in range(1, 50):
             for j in range(1, i + 1):
                 rows.append(dict(context_length=i, offset=j))
+        self.sentence_id_column_name = 'sentence_id'
+        self.word_id_column_name = 'word_id'
         self.of_df = pd.DataFrame(rows).set_index('context_length')
         self.include_zero_offset = include_zero_offset
         self.left_to_right_contexts_proportion = left_to_right_contexts_proportion
@@ -54,7 +56,9 @@ class PlainContextBuilder(btc.ContextBuilder):
 
 
     def build_context(self, ibundle: bt.IndexedDataBundle, context_size) -> pd.DataFrame:
-        sl_df = (ibundle.bundle.src.loc[ibundle.bundle.src.sentence_id.isin(ibundle.index_frame.sentence_id)]
+        fake_index_frame = ibundle.index_frame[[self.sentence_id_column_name, self.word_id_column_name]]
+        fake_index_frame = fake_index_frame.rename(columns={self.sentence_id_column_name: 'sentence_id', self.word_id_column_name: 'word_id'})
+        sl_df = (ibundle.bundle.src.loc[ibundle.bundle.src.sentence_id.isin(fake_index_frame.sentence_id)]
                 .groupby('sentence_id')
                 .word_id.aggregate(['min', 'max'])
                 .rename(columns=dict(min='sentence_begin', max='sentence_end'))
@@ -62,15 +66,15 @@ class PlainContextBuilder(btc.ContextBuilder):
         frames = []
         left_size, right_size = self.get_left_and_right_sizes(context_size)
         if self.include_zero_offset:
-            frames.append(ibundle.index_frame[['word_id']]
+            frames.append(fake_index_frame[['word_id']]
                           .rename(columns=dict(word_id='another_word_id'))
                           .assign(offset=0)
                           .set_index('offset',append=True)
                           )
         if left_size>0:
-            frames.append(self.build_partial_context(ibundle.index_frame, sl_df, left_size, True))
+            frames.append(self.build_partial_context(fake_index_frame, sl_df, left_size, True))
         if right_size>0:
-            frames.append(self.build_partial_context(ibundle.index_frame, sl_df, right_size, False))
+            frames.append(self.build_partial_context(fake_index_frame, sl_df, right_size, False))
         return pd.concat(frames)
 
 
