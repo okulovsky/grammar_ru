@@ -32,7 +32,7 @@ class TrainingJob(DeliverableJob):
             return True
         except Exception as e:
             S3YandexHandler.save_to_file(self.bucket,
-                                         s3_path=f"datasphere/{self.project_name}/exceptions/{task.info['name']}",
+                                         s3_path=f"datasphere/{self.project_name}/exceptions/{task.name}.txt",
                                          content=str(e))
             print(f'Exception in {task.name} loaded to DataSphere')
             return False
