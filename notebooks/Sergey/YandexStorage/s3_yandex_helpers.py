@@ -84,3 +84,10 @@ class S3YandexHandler:
         kwargs = S3YandexHandler._get_access_keys()
         client = boto3.client('s3', **kwargs)
         client.create_bucket(Bucket=bucket_name)
+
+    @staticmethod
+    def save_to_file(bucket_name: str, s3_path: str, content: str):
+        kwargs = S3YandexHandler._get_access_keys()
+        client = boto3.client('s3', **kwargs)
+        client.put_object(Bucket=bucket_name, Key=s3_path,
+                          Body=content, StorageClass='COLD')
