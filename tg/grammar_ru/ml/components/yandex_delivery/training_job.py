@@ -1,16 +1,16 @@
-from typing import Iterable, List
+from typing import List
 from pathlib import Path
 import datetime
 import tarfile
 import os.path
 import shutil
-from notebooks.Sergey.YandexStorage.s3_yandex_helpers import S3YandexHandler
-from tg.common import DataBundle
-from tg.common.delivery.jobs import DeliverableJob
-from tg.common.delivery.training.architecture import FileCacheTrainingEnvironment
-from tg.grammar_ru.ml.components.training_task_factory import TaskFactory
-from tg.grammar_ru.common.loc import Loc
-from tg.common import Logger
+from .....common import DataBundle
+from .....common.delivery.training.architecture import FileCacheTrainingEnvironment
+from .....common import Logger
+from .....common.delivery.jobs import DeliverableJob
+from ....common.loc import Loc
+from ...components.training_task_factory import TaskFactory
+from ..yandex_storage.s3_yandex_helpers import S3YandexHandler
 
 
 class TrainingJob(DeliverableJob):
