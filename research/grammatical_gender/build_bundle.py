@@ -1,4 +1,4 @@
-from tg.grammar_ru.ml.tasks.grammatical_gender.bundle import GGTrainIndexBuilder
+from research.grammatical_gender.bundle import GGTrainIndexBuilder
 from tg.grammar_ru.ml.tasks.tsa.bundle import build_dictionary, TrainIndexBuilder
 from tg.grammar_ru.ml.corpus import CorpusReader, CorpusBufferedWriter, CorpusBuilder
 from tg.grammar_ru.ml.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer

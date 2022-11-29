@@ -18,7 +18,7 @@ class GGTrainIndexBuilder:
     def build_train_index(self, df):
         df['label'] = -1
         db = DataBundle(src=df)
-        self.pmf.featurize(db)
+        self.pmf.featurize(db)# TODO GenderLabelPyMorphyFeaturizer
         morphed = db.data_frames['pymorphy']
         morphed.replace({np.nan: 'nan'}, inplace=True)
         df['is_target'] = morphed.POS.isin(self.speech_part_labels)
