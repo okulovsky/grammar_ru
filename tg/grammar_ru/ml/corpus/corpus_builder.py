@@ -56,18 +56,24 @@ class CorpusBuilder:
             corpus_path: Path,
             md_folder: Path,
             naming,
-            workers_count = None):
+            take_files_count = None
+    ):
         subfolder = md_folder
         writer = CorpusWriter(corpus_path, True)
         files = Query.folder(subfolder, '**/*.*').to_list()
         parser = _ParallelParser(md_folder, naming)
         query = Query.en(files)
-        if workers_count is not None:
-            query = query.parallel_select(parser, workers_count)
-        else:
-            query = query.select(parser)
 
-        query.feed(fluq.with_progress_bar(total=len(files))).select_many(lambda z: z).foreach(writer.add_fragment)
+        if take_files_count is not None:
+            query = query.take(take_files_count)
+
+        for index, file in enumerate(query.feed(fluq.with_progress_bar(total=len(files)))):
+            parsed = parser(file)
+            for part_index, part in enumerate(parsed):
+                try:
+                    writer.add_fragment(part)
+                except Exception as ex:
+                    raise ValueError(f'Error when parsing file #{index}, {file} at part {part_index}') from ex
         writer.finalize()
 
     @staticmethod
