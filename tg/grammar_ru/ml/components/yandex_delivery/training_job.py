@@ -11,7 +11,7 @@ from .....common.delivery.jobs import DeliverableJob
 from ....common.loc import Loc
 from ...components.training_task_factory import TaskFactory
 from ..yandex_storage.s3_yandex_helpers import S3YandexHandler
-
+import sys
 
 class TrainingJob(DeliverableJob):
     def __init__(self, tasks: List[TaskFactory], project_name: str, bucket: str):
@@ -24,6 +24,10 @@ class TrainingJob(DeliverableJob):
         return 'datasphere_job', 'v1'
 
     def run(self):
+        if 'AWS_ACCESS_KEY_ID' not in os.environ:
+            os.environ['AWS_ACCESS_KEY_ID'] = sys.argv[1]
+            os.environ['AWS_SECRET_ACCESS_KEY'] = sys.argv[2]
+
         Logger.info("Running list of tasks")
         for task in self.tasks:
             self._run_task(task)

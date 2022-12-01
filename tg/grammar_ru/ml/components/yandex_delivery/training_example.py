@@ -3,7 +3,7 @@ import pandas as pd
 from .....common.ml import batched_training as bt
 import torch
 
-from tg.common.ml import dft
+from .....common.ml import dft
 
 from sklearn.metrics import roc_auc_score
 
@@ -18,8 +18,7 @@ from ....ml.components.yandex_delivery.training_job import TrainingJob
 
 from yo_fluq_ds import *
 
-Logger.disable()
-
+# Logger.disable()
 
 
 def get_feature_extractor():
@@ -38,7 +37,6 @@ def get_multilabel_extractor():
                        .apply(take_columns=['label'], transformer=dft.DataFrameTransformerFactory.default_factory())
                        )
     return label_extractor
-
 
 
 class ClassificationNetwork(torch.nn.Module):
@@ -114,8 +112,3 @@ class ClassificationTask(TaskFactory):
         self.setup_batcher(
             data, [get_feature_extractor(), get_multilabel_extractor()])
         self.setup_model(_inner, learning_rate=1)
-
-
-
-
-    
