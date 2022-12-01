@@ -204,6 +204,10 @@ class CorpusBuilder:
                         raise
                     word_count += df.shape[0]
                     Logger.info(f'Processed {word_count} words. {frames_count}/{total_frames}')
+                
+                if not len(dfs):
+                    Logger.info(f'Processed {word_count} words. {frames_count}/{total_frames}')
+                    
                 if words_limit is not None and word_count>words_limit:
                     break
         writer.close()

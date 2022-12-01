@@ -1,0 +1,1 @@
+from .bundle import AuthorSelector

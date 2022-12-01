@@ -4,7 +4,7 @@ import datetime
 import tarfile
 import os.path
 import shutil
-from notebooks.Sergey.YandexStorage.s3_yandex_helpers import S3YandexHandler
+from tg.grammar_ru.ml.components.yandex_storage.s3_yandex_helpers import S3YandexHandler
 from tg.common import DataBundle
 from tg.common.delivery.jobs import DeliverableJob
 from tg.common.delivery.training.architecture import FileCacheTrainingEnvironment
