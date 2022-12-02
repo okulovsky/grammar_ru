@@ -64,7 +64,7 @@ def run_local(bundle_path: Path) -> None:
     task.settings.epoch_count = 50
     task.settings.batch_size = 5000
     task.settings.training_batch_limit = 10
-    task.settings.evaluation_batch_limit = 10
+    task.settings.evaluation_batch_limit = None
     bundle = bt.DataBundle.load(bundle_path)
 
     return (task, task.run(bundle))
