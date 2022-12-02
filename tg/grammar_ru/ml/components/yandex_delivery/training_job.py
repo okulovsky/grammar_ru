@@ -13,6 +13,7 @@ from ...components.training_task_factory import TaskFactory
 from ..yandex_storage.s3_yandex_helpers import S3YandexHandler
 import sys
 
+
 class TrainingJob(DeliverableJob):
     def __init__(self, tasks: List[TaskFactory], project_name: str, bucket: str):
         super().__init__()
@@ -28,10 +29,13 @@ class TrainingJob(DeliverableJob):
             os.environ['AWS_ACCESS_KEY_ID'] = sys.argv[1]
             os.environ['AWS_SECRET_ACCESS_KEY'] = sys.argv[2]
 
+        self.name = f"job_{self.project_name}_{datetime.datetime.now().time().isoformat()}"
         Logger.info("Running list of tasks")
         for task in self.tasks:
             self._run_task(task)
-        Logger.info(f"Training job {self.get_name_and_version()} is done")
+        tasks_list_s3_path = self._upload_tasks_list()
+        Logger.info(f"List of tasks uploaded to {tasks_list_s3_path}")
+        Logger.info(f"Training job {self.name} is done")
 
     def _try_run(self, task, data, env):
         try:
@@ -72,6 +76,13 @@ class TrainingJob(DeliverableJob):
                                     s3_model_path,
                                     tar_dir / tar_file_name)
         print(f'Model uploaded at {s3_model_path}')
+
+    def _upload_tasks_list(self) -> str:
+        s3_path = f'datasphere/{self.project_name}/job_info/{self.name}.txt'
+        S3YandexHandler.save_to_file(self.bucket,
+                                     s3_path=s3_path,
+                                     content=str([task.name for task in self.tasks]))
+        return s3_path
 
     def _download_dataset(self, dataset_name: str) -> Path:
         Logger.info("Downloading dataset")
