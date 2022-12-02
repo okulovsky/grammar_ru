@@ -8,7 +8,10 @@ import re
 class Record:
     def __init__(self, prefixes, parents, element, tail, filename):
         self.element = element
-        self.tag = element.tag.split('}')[1]
+        if '}' in element.tag:
+            self.tag = element.tag.split('}')[1]
+        else:
+            self.tag = element.tag
         self.text = element.tail if tail else element.text
         self.prefix = prefixes + ('tail',) if tail else prefixes + (self.tag,)
         self.element_path = parents if tail else parents + [element]

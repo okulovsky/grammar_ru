@@ -8,10 +8,12 @@ from yo_fluq_ds import *
 import urllib.request
 import os
 
+#TODO: simplify! use glove_featurizer::download_dependency (and, probably, names like slovnet_navec, etc)
 class SlovnetFiles:
     navec = Loc.dependencies_path/'navec_news_v1_1B_250K_300d_100q.tar'
     syntax = Loc.dependencies_path/'slovnet_syntax_news_v1.tar'
     morph = Loc.dependencies_path/'slovnet_morph_news_v1.tar'
+
 
 class SlovnetFeaturizer(SimpleFeaturizer):
     def __init__(self, disable_downloading = False):
