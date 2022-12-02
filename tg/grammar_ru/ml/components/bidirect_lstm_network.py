@@ -1,5 +1,5 @@
 import torch
-from tg.common.ml.batched_training.torch.networks.extracting_network import UniversalFactory
+from ....common.ml.batched_training.torch.networks.extracting_network import UniversalFactory
 
 
 class BidirectLSTMNetwork(torch.nn.Module):
