@@ -5,14 +5,14 @@ from .corpus_writer import CorpusWriter
 from .corpus_buffered_writer import CorpusBufferedWriter
 from .corpus_reader import CorpusReader
 from ..features import Featurizer
-from io import BytesIO
 import shutil
 from yo_fluq_ds import *
-import zipfile
 import traceback
 from pathlib import Path
 import datetime
 from ....common._common import Logger
+from .transfuse_selector import ITransfuseSelector
+
 
 class _ParallelParser:
     def __init__(self, SRC, naming):
@@ -151,7 +151,7 @@ class CorpusBuilder:
             destination: Path,
             words_per_frame: int = 50000,
             words_limit: Optional[int] = None,
-            selector: Optional[Callable[[pd.DataFrame], Union[pd.DataFrame, List[pd.DataFrame]]]] = None
+            selector: Optional[ITransfuseSelector] = None
     ):
 
         if isinstance(sources, Path):
@@ -167,42 +167,43 @@ class CorpusBuilder:
             break_down_by_sentence=True
         )
         writer.open()
-        readers = [CorpusReader(s) for s in sources]
-        total_length = sum([r.get_toc().shape[0] for r in readers])
 
-        query = Queryable(
-            Query.en(readers).select_many(lambda x: x.get_frames()), 
-            total_length
-        )
+        total_frames = sum([CorpusReader(source).get_toc().shape[0] for source in sources])
 
         word_count = 0
-        for index, frame in enumerate(query):
-            if selector is None:
-                dfs = [frame]
-            else:
-                dfs = selector(frame)
-                if isinstance(dfs, pd.DataFrame):
-                    dfs = [dfs]
-                elif isinstance(dfs, list):
-                    pass
-                else:
-                    raise ValueError(f'The output of `selector` is expected to be pd.DataFrame or List of them, but was {type(dfs)}')
-            for df in dfs:
-                try:
-                    writer.add(df)
-                except:
-                    dump = dict(
-                        input_frame = frame,
-                        dfs = dfs,
-                        failed_result = df
-                    )
-                    dump_file = Loc.error_dumps/f'{datetime.datetime.now}_corpus_builder_transfuse_corpus'
-                    os.makedirs(dump_file.parent, exist_ok=True)
-                    FileIO.write_pickle(dump, dump_file)
-                    raise
-                word_count += df.shape[0]
-                Logger.info(f'Processed {word_count} words. {index}/{total_length}')
-            if words_limit is not None and word_count>words_limit:
-                break
-        writer.close()
+        frames_count = 0
 
+        for source in sources:
+            reader = CorpusReader(source)
+            for toc_row in Query.df(reader.get_toc().reset_index()):
+                frame = reader.get_frames(uids = [toc_row["file_id"]]).first()
+                frames_count += 1
+
+                if selector is None:
+                    dfs = [frame]
+                else:
+                    dfs = selector(source, frame, toc_row)
+                    if isinstance(dfs, pd.DataFrame):
+                        dfs = [dfs]
+                    elif isinstance(dfs, list):
+                        pass
+                    else:
+                        raise ValueError(f'The output of `selector` is expected to be pd.DataFrame or List of them, but was {type(dfs)}')
+                for df in dfs:
+                    try:
+                        writer.add(df)
+                    except:
+                        dump = dict(
+                            input_frame = frame,
+                            dfs = dfs,
+                            failed_result = df
+                        )
+                        dump_file = Loc.error_dumps/f'{datetime.datetime.now}_corpus_builder_transfuse_corpus'
+                        os.makedirs(dump_file.parent, exist_ok=True)
+                        FileIO.write_pickle(dump, dump_file)
+                        raise
+                    word_count += df.shape[0]
+                    Logger.info(f'Processed {word_count} words. {frames_count}/{total_frames}')
+                if words_limit is not None and word_count>words_limit:
+                    break
+        writer.close()
