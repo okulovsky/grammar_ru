@@ -97,4 +97,4 @@ def make_tarfile(output_dir, tar_file_name, source_dir):
         shutil.rmtree(output_dir)
     os.makedirs(output_dir)
     with tarfile.open(output_dir / tar_file_name, "w:gz") as tar:
-        tar.add(source_dir, arcname=os.path.basename(source_dir))
+        tar.add(source_dir / 'output', arcname=os.path.basename(source_dir/ 'output'))

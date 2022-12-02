@@ -39,11 +39,12 @@ dockerhub_repo = 'grammar_repo'
 local_img = 'test_iris_img'
 
 dockerhub_login = 'sergio0x0'
+
+# job.run()
 # 6a
 # routine.local.execute()
 
 # 6b
-
 build_container(job, 'test_job_iris', '1', local_img,
                 image_tag=tag)
 
