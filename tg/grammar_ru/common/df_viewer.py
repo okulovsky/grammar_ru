@@ -73,7 +73,7 @@ class Highlight:
             return None
         if self.gradient_between is not None:
             v = (val-self.min_value)/(self.max_value-self.min_value)
-            c = self.gradient_from*v + self.gradient_to*(1-v)
+            c = self.gradient_from*(1-v) + self.gradient_to*v
             return matplotlib.colors.to_hex(c)
 
 
