@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 import pandas as pd
 import numpy as np
@@ -7,55 +8,27 @@ from tg.grammar_ru.common import Separator, DataBundle
 from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import ChtobyIndexBuilder
 
 
-@pytest.fixture
-def bundle() -> DataBundle:
-    return Separator.build_bundle('что бы чтобы что бы затем что бы')
-
+TEST_DF_PATH = Path(__file__).parent/'chtoby_test.parquet'
 
 @pytest.fixture
-def preprocessed_df() -> pd.DataFrame:
-    data = [
-        (1, 'что бы', True),
-        (1, 'чтобы', True),
-        (2, 'что бы', True),
-        (3, 'затем', False),
-        (4, 'что бы', True)
-    ]
-
-    return pd.DataFrame(
-        data=data,
-        columns=['sentence_id', 'word', 'is_target'],
-        index=np.arange(len(data)),
-    )
+def chtoby_df() -> pd.DataFrame:
+    return pd.read_parquet(TEST_DF_PATH)
 
 
-def test_preprocessing_word(bundle: DataBundle) -> None:
-    preprocessed = ChtobyIndexBuilder.preprocess(bundle.src)
-
-    assert (preprocessed['word'] == ['что бы', 'чтобы', 'что бы', 'затем', 'что бы']).all()
-
-
-def test_preprocessing_word_length(bundle: DataBundle) -> None:
-    preprocessed = ChtobyIndexBuilder.preprocess(bundle.src)
-
-    assert (preprocessed['word_length'] == [6, 5, 6, 5, 6]).all()
+@pytest.fixture
+def index_builder() -> ChtobyIndexBuilder:
+    return ChtobyIndexBuilder()
 
 
-def test_get_targets(preprocessed_df: pd.DataFrame) -> None:
-    builder = ChtobyIndexBuilder()
-    targets = builder._get_targets(preprocessed_df)
+def test_get_targets(chtoby_df: pd.DataFrame, index_builder: ChtobyIndexBuilder) -> None:
+    targets = index_builder._get_targets(chtoby_df)
 
-    assert (targets == [True, True, True, False, True]).all()
+    assert not ('бы' in chtoby_df[targets]['word'])
+    assert (chtoby_df[targets]['word'] == 'чтобы').sum() == 13
+    assert (chtoby_df[targets]['word'] == 'что').sum() == 1
 
 
-def test_build_negative_from_positive(preprocessed_df: pd.DataFrame):
-    builder = ChtobyIndexBuilder()
-    expected = [
-        (1, 'чтобы', True, 1),
-        (1, 'что бы', True, 1),
-        (2, 'чтобы', True, 1),
-        (3, 'затем', False, 1),
-        (4, 'чтобы', True, 1)
-    ]
-
-    assert (builder._build_negative_from_positive(preprocessed_df).to_numpy() == np.array(expected, dtype=object)).all()
+def test_build_negative_from_positive(chtoby_df: pd.DataFrame, index_builder: ChtobyIndexBuilder) -> None:
+    _, negative = index_builder.build_train_index(chtoby_df)
+    
+    assert (negative['word'] == ['что', 'бы'] * 13 + ['чтобы']).all()
