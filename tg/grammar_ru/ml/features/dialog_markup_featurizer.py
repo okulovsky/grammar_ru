@@ -1,4 +1,4 @@
-from tg.grammar_ru.ml.features.architecture import *
+from .architecture import *
 import pandas as pd
 import numpy as np
 from yo_fluq_ds import fluq

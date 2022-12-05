@@ -2,6 +2,8 @@ from typing import *
 from IPython.display import HTML
 from yo_fluq_ds import *
 from enum import Enum
+import matplotlib
+import numpy as np
 
 class Fragment:
     def __init__(self, word: str, tail: int):
@@ -47,24 +49,43 @@ class Highlight:
                  type: HighlightType,
                  column_name: str,
                  value_to_color: Optional[Dict[Any, str]] = None,
+                 gradient_between: Optional[Tuple[str,str]] = None
                  ):
         self.type = type
         self.column_name = column_name
         self.value_to_color = value_to_color
+        self.gradient_between = gradient_between
+        if self.gradient_between is not None:
+            self.gradient_from = np.array(matplotlib.colors.to_rgb(self.gradient_between[0]))
+            self.gradient_to = np.array(matplotlib.colors.to_rgb(self.gradient_between[1]))
+
+
+    def preview(self, df):
+        if self.gradient_between is not None:
+            self.min_value = df[self.column_name].min()
+            self.max_value = df[self.column_name].max()
+
+
+    def _get_color(self, val):
+        if self.value_to_color is not None:
+            if val in self.value_to_color:
+                return self.value_to_color[val]
+            return None
+        if self.gradient_between is not None:
+            v = (val-self.min_value)/(self.max_value-self.min_value)
+            c = self.gradient_from*(1-v) + self.gradient_to*v
+            return matplotlib.colors.to_hex(c)
 
 
     def style_row(self, row: Dict, fragment: Fragment):
         if self.column_name not in row:
             raise ValueError(f"Column {self.column_name} is not in df's columns")
         val = row[self.column_name]
-        if self.type == HighlightType.Foreground or self.type==HighlightType.Background:
-            for key, color in self.value_to_color.items():
-                if val == key:
-                    if self.type == HighlightType.Foreground:
-                        fragment.foreground_color = color
-                    else:
-                        fragment.background_color = color
-        else:
+        if self.type == HighlightType.Foreground:
+            fragment.foreground_color = self._get_color(val)
+        elif self.type == HighlightType.Background:
+            fragment.background_color = self._get_color(val)
+        elif self.type == HighlightType.Tooltip:
             fragment.tooltip = str(val)
 
 
@@ -72,12 +93,18 @@ class DfViewer:
     def __init__(self):
         self.highlights = []
 
-    def highlight(self, column_name: str, value_to_color: Dict[Any, str]) -> 'DfViewer':
-        self.highlights.append(Highlight(HighlightType.Background, column_name, value_to_color))
+    def highlight(self,
+                  column_name: str,
+                  value_to_color: Optional[Dict[Any, str]] = None,
+                  gradient_between: Optional[Tuple[str, str]] = None) -> 'DfViewer':
+        self.highlights.append(Highlight(HighlightType.Background, column_name, value_to_color, gradient_between))
         return self
 
-    def color(self, column_name: str, value_to_color: Dict[Any, str]) -> 'DfViewer':
-        self.highlights.append(Highlight(HighlightType.Foreground, column_name, value_to_color))
+    def color(self,
+              column_name: str,
+              value_to_color: Optional[Dict[Any, str]] = None,
+              gradient_between: Optional[Tuple[str, str]] = None) -> 'DfViewer':
+        self.highlights.append(Highlight(HighlightType.Foreground, column_name, value_to_color, gradient_between))
         return self
 
     def tooltip(self, column_name) -> 'DfViewer':
@@ -86,6 +113,8 @@ class DfViewer:
 
     def _paragraph_to_html(self, df):
         df = df.sort_values('word_id')
+        for h in self.highlights:
+            h.preview(df)
         fragments = []
         for row in Query.df(df):
             fragment = Fragment(row.word, row.word_tail)
@@ -119,3 +148,7 @@ class DfViewer:
         pars = df.drop_duplicates('paragraph_id').sort_values('paragraph_id')
         pars = [self._paragraph_to_text(df.loc[df.paragraph_id == p]) for p in pars.paragraph_id]
         return '\n'.join(pars)
+
+    def to_sentences_strings(self, df):
+        df = df.assign(space=' ')
+        return df.assign(word_print = df.word+df.space*df.word_tail).groupby('sentence_id').word_print.sum()

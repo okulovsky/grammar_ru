@@ -1,16 +1,17 @@
-from typing import Iterable, List
+from typing import List
 from pathlib import Path
 import datetime
 import tarfile
 import os.path
 import shutil
-from tg.grammar_ru.ml.components.yandex_storage.s3_yandex_helpers import S3YandexHandler
-from tg.common import DataBundle
-from tg.common.delivery.jobs import DeliverableJob
-from tg.common.delivery.training.architecture import FileCacheTrainingEnvironment
-from tg.grammar_ru.ml.components.training_task_factory import TaskFactory
-from tg.grammar_ru.common.loc import Loc
-from tg.common import Logger
+from .....common import DataBundle
+from .....common.delivery.training.architecture import FileCacheTrainingEnvironment
+from .....common import Logger
+from .....common.delivery.jobs import DeliverableJob
+from ....common.loc import Loc
+from ...components.training_task_factory import TaskFactory
+from ..yandex_storage.s3_yandex_helpers import S3YandexHandler
+import sys
 
 
 class TrainingJob(DeliverableJob):
@@ -24,10 +25,17 @@ class TrainingJob(DeliverableJob):
         return 'datasphere_job', 'v1'
 
     def run(self):
+        if 'AWS_ACCESS_KEY_ID' not in os.environ:
+            os.environ['AWS_ACCESS_KEY_ID'] = sys.argv[1]
+            os.environ['AWS_SECRET_ACCESS_KEY'] = sys.argv[2]
+
+        self.name = f"job_{self.project_name}_{datetime.datetime.now().time().isoformat()}"
         Logger.info("Running list of tasks")
         for task in self.tasks:
             self._run_task(task)
-        Logger.info(f"Training job {self.get_name_and_version()} is done")
+        tasks_list_s3_path = self._upload_tasks_list()
+        Logger.info(f"List of tasks uploaded to {tasks_list_s3_path}")
+        Logger.info(f"Training job {self.name} is done")
 
     def _try_run(self, task, data, env):
         try:
@@ -69,6 +77,13 @@ class TrainingJob(DeliverableJob):
                                     tar_dir / tar_file_name)
         print(f'Model uploaded at {s3_model_path}')
 
+    def _upload_tasks_list(self) -> str:
+        s3_path = f'datasphere/{self.project_name}/job_info/{self.name}.txt'
+        S3YandexHandler.save_to_file(self.bucket,
+                                     s3_path=s3_path,
+                                     content=str([task.name for task in self.tasks]))
+        return s3_path
+
     def _download_dataset(self, dataset_name: str) -> Path:
         Logger.info("Downloading dataset")
         s3path = f'datasphere/{self.project_name}/datasets/{dataset_name}'
@@ -82,4 +97,4 @@ def make_tarfile(output_dir, tar_file_name, source_dir):
         shutil.rmtree(output_dir)
     os.makedirs(output_dir)
     with tarfile.open(output_dir / tar_file_name, "w:gz") as tar:
-        tar.add(source_dir, arcname=os.path.basename(source_dir))
+        tar.add(source_dir / 'output', arcname=os.path.basename(source_dir/ 'output'))

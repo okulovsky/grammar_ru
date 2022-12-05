@@ -4,7 +4,6 @@ from .formats.interformat_parser import InterFormatParser
 from .corpus_writer import CorpusWriter
 from .corpus_buffered_writer import CorpusBufferedWriter
 from .corpus_reader import CorpusReader
-from ..features import Featurizer
 import shutil
 from yo_fluq_ds import *
 import traceback
@@ -24,7 +23,7 @@ class _ParallelParser:
 
 class _Corpusfeaturizer:
     def __init__(self,
-                 steps: List[Union[Callable, Featurizer]],
+                 steps: List,
                  required_uids: List[str]
                  ):
         self.steps = steps
@@ -36,14 +35,14 @@ class _Corpusfeaturizer:
         try:
             for index, step in enumerate(self.steps):
                 Logger.info(type(step))
-                if isinstance(step, Featurizer):
+                if hasattr(step, 'featurize'):
                     step.featurize(db)
                 elif callable(step):
                     result = step(db)
                     if not result:
                         return None, None
                 else:
-                    raise ValueError(f"The step {step} at index {index} is neither featurizer, Featurizer nor callable")
+                    raise ValueError(f"The step {step} at index {index} is neither Featurizer nor callable")
             return uid, db
         except:
             Logger.error(f'Error in {uid}, {traceback.format_exc()}')
@@ -56,25 +55,31 @@ class CorpusBuilder:
             corpus_path: Path,
             md_folder: Path,
             naming,
-            workers_count = None):
+            take_files_count = None
+    ):
         subfolder = md_folder
         writer = CorpusWriter(corpus_path, True)
         files = Query.folder(subfolder, '**/*.*').to_list()
         parser = _ParallelParser(md_folder, naming)
         query = Query.en(files)
-        if workers_count is not None:
-            query = query.parallel_select(parser, workers_count)
-        else:
-            query = query.select(parser)
 
-        query.feed(fluq.with_progress_bar(total=len(files))).select_many(lambda z: z).foreach(writer.add_fragment)
+        if take_files_count is not None:
+            query = query.take(take_files_count)
+
+        for index, file in enumerate(query.feed(fluq.with_progress_bar(total=len(files)))):
+            parsed = parser(file)
+            for part_index, part in enumerate(parsed):
+                try:
+                    writer.add_fragment(part)
+                except Exception as ex:
+                    raise ValueError(f'Error when parsing file #{index}, {file} at part {part_index}') from ex
         writer.finalize()
 
     @staticmethod
     def featurize_corpus(
                       source: Path,
                       destination: Path,
-                      steps: List[Union[Callable, Featurizer]],
+                      steps: List,
                       workers = None,
                       append = True,
                       uid_black_list = None
