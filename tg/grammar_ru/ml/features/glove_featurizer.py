@@ -10,8 +10,9 @@ from .architecture import Featurizer, DataBundle
 
 def download_dependency(fname, url, disable_downloading):
     path = Loc.dependencies_path/fname
-    if not os.path.exists(path) and not disable_downloading:
-        urllib.request.urlretrieve(url, filename=path)
+    if not os.path.exists(path):
+        if not disable_downloading:
+            urllib.request.urlretrieve(url, filename=path)
 
 
 class GloveFeaturizer(Featurizer):
@@ -20,8 +21,8 @@ class GloveFeaturizer(Featurizer):
                  add_lowercase = True,
                  add_normal_form = True
                  ):
-        download_dependency('glove_featurizer_navec', 'https://storage.yandexcloud.net/natasha-navec/packs/navec_news_v1_1B_250K_300d_100q.tar', disable_downloading)
-        self.navec = Navec.load(Loc.data_cache_path / 'glove.tar')
+        download_dependency('glove_featurizer_navec.tar', 'https://storage.yandexcloud.net/natasha-navec/packs/navec_news_v1_1B_250K_300d_100q.tar', disable_downloading)
+        self.navec = Navec.load(Loc.dependencies_path / 'glove_featurizer_navec.tar')
         self.words = list(self.navec.vocab.words)
         self.ndf = pd.DataFrame(dict(word=self.words)).reset_index(drop=False).set_index('word').rename(columns={'index': 'glove_index'})
         self.add_lowercase = add_lowercase
