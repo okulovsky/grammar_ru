@@ -171,6 +171,8 @@ class Separator:
 
     @staticmethod
     def reset_indices(df, offset=0, keep_originals = True) -> pd.DataFrame:
+        if not isinstance(offset, int):
+            raise ValueError(f'Offset must be `int`, but was: {offset}')
         df = df.copy()
         for column in Separator.INDEX_COLUMNS:
             rc = df[column]
@@ -191,7 +193,7 @@ class Separator:
 
     @staticmethod
     def get_max_id(df: pd.DataFrame) -> int:
-        return df[Separator.INDEX_COLUMNS].max().max()+1
+        return int(df[Separator.INDEX_COLUMNS].max().max())+2
 
     @staticmethod
     def validate(df: pd.DataFrame):
