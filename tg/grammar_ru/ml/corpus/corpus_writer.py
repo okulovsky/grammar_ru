@@ -7,7 +7,7 @@ from io import BytesIO
 import os
 from uuid import uuid4
 from ...common import DataBundle, Separator
-from yo_fluq_ds import Query
+from yo_fluq_ds import Query, FileIO
 import time
 
 class CorpusFragment:
@@ -34,6 +34,7 @@ class CorpusWriter:
             else:
                 os.remove(filename)
         os.makedirs(filename.parent, exist_ok=True)
+        self.filename = filename
         self.file = zipfile.ZipFile(filename,'w',zipfile.ZIP_DEFLATED)
         self.toc = []
         self.indices = {}
@@ -58,6 +59,9 @@ class CorpusWriter:
     def add_fragment(self, fragment: Union[CorpusFragment,pd.DataFrame]):
         if isinstance(fragment, pd.DataFrame):
             fragment = CorpusFragment('', 0, fragment, {})
+
+        if fragment.df.shape[0] == 0:
+            return
 
         if fragment.filename not in self.indices:
             self.indices[fragment.filename] = 0
@@ -89,13 +93,24 @@ class CorpusWriter:
 
 
     def finalize(self, custom_toc=None):
-        if custom_toc is None:
-            toc = pd.DataFrame(self.toc)
-            toc = toc.set_index('file_id')
-        else:
-            toc = custom_toc
-        self._write_parquet('toc.parquet',toc)
+        has_error = False
+        toc = None
+        try:
+            if custom_toc is None:
+                toc = pd.DataFrame(self.toc)
+                toc.timestamp = toc.timestamp.astype('datetime64[s]')
+                toc = toc.set_index('file_id')
+            else:
+                toc = custom_toc
+            self._write_parquet('toc.parquet',toc)
+        except:
+            has_error = True
+
         self.file.close()
+        if has_error:
+            FileIO.write_pickle(self.toc, self.filename.parent/'debug_toc_array.pickle')
+            FileIO.write_pickle(toc, self.filename.parent/'debug_toc_df.pickle')
+            raise ValueError('There was an issue with storaging TOC as a parquet dataframe. The corpus is finalized and readable. The pickled are stored in the same folder as the corpus, debug them and add toc.parquet in the zip folder manually')
 
 
     @staticmethod

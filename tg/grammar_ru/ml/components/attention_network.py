@@ -2,7 +2,7 @@ from typing import *
 import torch
 
 from .attention_layer import Attention3D, Attention2D
-from tg.common.ml.batched_training.torch.networks.extracting_network import UniversalFactory
+from ....common.ml.batched_training.torch.networks.extracting_network import UniversalFactory
 
 
 class AttentionReccurentNetwork(torch.nn.Module):

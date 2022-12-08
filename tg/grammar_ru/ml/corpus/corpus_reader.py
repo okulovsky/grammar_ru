@@ -99,12 +99,13 @@ class CorpusReader(ISrcReader):
         return self.get_bundles(uids)
 
 
+def read_data(sources: Union[Path, List[Path]]) -> List[pd.DataFrame]:
+    if isinstance(sources, Path):
+        sources = [sources]
+    readers = [CorpusReader(s) for s in sources]
+    total_length = sum([r.get_toc().shape[0] for r in readers])
 
-
-
-
-
-
-
-
-
+    query = Query.en(readers).select_many(
+        lambda x: x.get_frames()
+    )
+    return Queryable(query, total_length).feed(fluq.with_progress_bar(console=True))

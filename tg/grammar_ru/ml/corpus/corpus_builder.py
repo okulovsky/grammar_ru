@@ -4,15 +4,14 @@ from .formats.interformat_parser import InterFormatParser
 from .corpus_writer import CorpusWriter
 from .corpus_buffered_writer import CorpusBufferedWriter
 from .corpus_reader import CorpusReader
-from ..features import Featurizer
-from io import BytesIO
 import shutil
 from yo_fluq_ds import *
-import zipfile
 import traceback
 from pathlib import Path
 import datetime
 from ....common._common import Logger
+from .transfuse_selector import ITransfuseSelector
+
 
 class _ParallelParser:
     def __init__(self, SRC, naming):
@@ -24,7 +23,7 @@ class _ParallelParser:
 
 class _Corpusfeaturizer:
     def __init__(self,
-                 steps: List[Union[Callable, Featurizer]],
+                 steps: List,
                  required_uids: List[str]
                  ):
         self.steps = steps
@@ -36,14 +35,14 @@ class _Corpusfeaturizer:
         try:
             for index, step in enumerate(self.steps):
                 Logger.info(type(step))
-                if isinstance(step, Featurizer):
+                if hasattr(step, 'featurize'):
                     step.featurize(db)
                 elif callable(step):
                     result = step(db)
                     if not result:
                         return None, None
                 else:
-                    raise ValueError(f"The step {step} at index {index} is neither featurizer, Featurizer nor callable")
+                    raise ValueError(f"The step {step} at index {index} is neither Featurizer nor callable")
             return uid, db
         except:
             Logger.error(f'Error in {uid}, {traceback.format_exc()}')
@@ -56,25 +55,31 @@ class CorpusBuilder:
             corpus_path: Path,
             md_folder: Path,
             naming,
-            workers_count = None):
+            take_files_count = None
+    ):
         subfolder = md_folder
         writer = CorpusWriter(corpus_path, True)
         files = Query.folder(subfolder, '**/*.*').to_list()
         parser = _ParallelParser(md_folder, naming)
         query = Query.en(files)
-        if workers_count is not None:
-            query = query.parallel_select(parser, workers_count)
-        else:
-            query = query.select(parser)
 
-        query.feed(fluq.with_progress_bar(total=len(files))).select_many(lambda z: z).foreach(writer.add_fragment)
+        if take_files_count is not None:
+            query = query.take(take_files_count)
+
+        for index, file in enumerate(query.feed(fluq.with_progress_bar(total=len(files)))):
+            parsed = parser(file)
+            for part_index, part in enumerate(parsed):
+                try:
+                    writer.add_fragment(part)
+                except Exception as ex:
+                    raise ValueError(f'Error when parsing file #{index}, {file} at part {part_index}') from ex
         writer.finalize()
 
     @staticmethod
     def featurize_corpus(
                       source: Path,
                       destination: Path,
-                      steps: List[Union[Callable, Featurizer]],
+                      steps: List,
                       workers = None,
                       append = True,
                       uid_black_list = None
@@ -151,7 +156,7 @@ class CorpusBuilder:
             destination: Path,
             words_per_frame: int = 50000,
             words_limit: Optional[int] = None,
-            selector: Optional[Callable[[pd.DataFrame], Union[pd.DataFrame, List[pd.DataFrame]]]] = None
+            selector: Optional[ITransfuseSelector] = None
     ):
 
         if isinstance(sources, Path):
@@ -167,42 +172,43 @@ class CorpusBuilder:
             break_down_by_sentence=True
         )
         writer.open()
-        readers = [CorpusReader(s) for s in sources]
-        total_length = sum([r.get_toc().shape[0] for r in readers])
 
-        query = Queryable(
-            Query.en(readers).select_many(lambda x: x.get_frames()), 
-            total_length
-        )
+        total_frames = sum([CorpusReader(source).get_toc().shape[0] for source in sources])
 
         word_count = 0
-        for index, frame in enumerate(query):
-            if selector is None:
-                dfs = [frame]
-            else:
-                dfs = selector(frame)
-                if isinstance(dfs, pd.DataFrame):
-                    dfs = [dfs]
-                elif isinstance(dfs, list):
-                    pass
-                else:
-                    raise ValueError(f'The output of `selector` is expected to be pd.DataFrame or List of them, but was {type(dfs)}')
-            for df in dfs:
-                try:
-                    writer.add(df)
-                except:
-                    dump = dict(
-                        input_frame = frame,
-                        dfs = dfs,
-                        failed_result = df
-                    )
-                    dump_file = Loc.error_dumps/f'{datetime.datetime.now}_corpus_builder_transfuse_corpus'
-                    os.makedirs(dump_file.parent, exist_ok=True)
-                    FileIO.write_pickle(dump, dump_file)
-                    raise
-                word_count += df.shape[0]
-                Logger.info(f'Processed {word_count} words. {index}/{total_length}')
-            if words_limit is not None and word_count>words_limit:
-                break
-        writer.close()
+        frames_count = 0
 
+        for source in sources:
+            reader = CorpusReader(source)
+            for toc_row in Query.df(reader.get_toc().reset_index()):
+                frame = reader.get_frames(uids = [toc_row["file_id"]]).first()
+                frames_count += 1
+
+                if selector is None:
+                    dfs = [frame]
+                else:
+                    dfs = selector(source, frame, toc_row)
+                    if isinstance(dfs, pd.DataFrame):
+                        dfs = [dfs]
+                    elif isinstance(dfs, list):
+                        pass
+                    else:
+                        raise ValueError(f'The output of `selector` is expected to be pd.DataFrame or List of them, but was {type(dfs)}')
+                for df in dfs:
+                    try:
+                        writer.add(df)
+                    except:
+                        dump = dict(
+                            input_frame = frame,
+                            dfs = dfs,
+                            failed_result = df
+                        )
+                        dump_file = Loc.error_dumps/f'{datetime.datetime.now}_corpus_builder_transfuse_corpus'
+                        os.makedirs(dump_file.parent, exist_ok=True)
+                        FileIO.write_pickle(dump, dump_file)
+                        raise
+                    word_count += df.shape[0]
+                    Logger.info(f'Processed {word_count} words. {frames_count}/{total_frames}')
+                if words_limit is not None and word_count>words_limit:
+                    break
+        writer.close()
