@@ -4,49 +4,40 @@ import abc
 import pandas as pd
 
 from tg.common.ml.batched_training import train_display_test_split
+from tg.grammar_ru.ml.tasks.train_index_builder.sentence_filterer import SentenceFilterer
+from tg.grammar_ru.ml.tasks.train_index_builder.negative_sampler import NegativeSampler
 
 
-class DictionaryIndexBuilder(abc.ABC):
-    def __init__(self, add_negative_samples: bool = True):
+class IndexBuilder(abc.ABC):
+    def __init__(
+            self,
+            filterer: SentenceFilterer,
+            negative_sampler: NegativeSampler,
+            add_negative_samples: bool = True
+            ) -> None:
         self.ref_id = 0
         self.add_negative_samples = add_negative_samples
+        self.filterer = filterer
+        self.negative_sampler = negative_sampler
 
     def build_train_index(self, df: pd.DataFrame) -> tp.List[pd.DataFrame]:
         ddf = df.iloc[[0]]
         description = (ddf.corpus_id+'/'+ddf.file_id).iloc[0]
-
         df['original_corpus_id'] = df.corpus_id
-        df['is_target'] = self._get_targets(df)
 
-        positive = self._build_positive(df)
-        ar = [positive]
+        filtered = self.filterer.filter_sentences(df=df)
+
+        index = [filtered]
         if self.add_negative_samples:
-            ar.append(self._build_negative_from_positive(positive))
+            negative = self.negative_sampler.build_negative_sample_from_positive(filtered)
+            negative['is_target'] = self.filterer.get_targets(negative)
+            index.append(negative)
 
-        for f in ar:
-            if f.sentence_id.isnull().any():
+        for frame in index:
+            if frame.sentence_id.isnull().any():
                 raise ValueError(f"Null sentence id when processing, uid {description}")
 
-        return ar
-
-    @abc.abstractmethod
-    def _get_targets(self, df: pd.DataFrame) -> pd.Series:
-        pass
-
-    def _build_positive(self, df: pd.DataFrame) -> pd.DataFrame:
-        good_sentences = df.groupby('sentence_id').is_target.max().feed(lambda z: z.loc[z].index)
-        positive = df.loc[df.sentence_id.isin(good_sentences)].copy()
-        positive['label'] = 0
-
-        ref_map = {v: self.ref_id + k for k, v in enumerate(positive.sentence_id.unique())}
-        positive['reference_sentence_id'] = positive.sentence_id.replace(ref_map)
-        self.ref_id += 1 + len(positive.sentence_id.unique())
-
-        return positive
-
-    @abc.abstractmethod
-    def _build_negative_from_positive(self, positive: pd.DataFrame) -> pd.DataFrame:
-        pass
+        return index
 
     @staticmethod
     def build_index_from_src(src_df: pd.DataFrame) -> pd.DataFrame:
