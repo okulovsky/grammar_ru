@@ -146,6 +146,7 @@ class CorpusBuilder:
         os.makedirs(bundle_path, exist_ok=True)
         for frame in frames:
             df = pd.concat(reader.get_frames(uids, frame).feed(fluq.with_progress_bar()).to_list())
+            df = df[~df.index.duplicated(keep='first')]
             df.to_parquet(bundle_path / f'{frame}.parquet')
 
 

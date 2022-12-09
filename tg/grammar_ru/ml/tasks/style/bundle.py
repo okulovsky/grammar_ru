@@ -1,5 +1,5 @@
-from tg.grammar_ru.ml.corpus.transfuse_selector import ITransfuseSelector
-from tg.common.ml.batched_training import train_display_test_split
+from .....grammar_ru.ml.corpus.transfuse_selector import ITransfuseSelector
+from .....common.ml.batched_training import train_display_test_split
 from typing import Union, Dict, List
 from pathlib import Path
 import pandas as pd
