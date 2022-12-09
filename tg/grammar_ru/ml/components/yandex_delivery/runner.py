@@ -7,12 +7,12 @@ from tg.common._common.data_bundle import DataBundle
 from tg.grammar_ru.ml.components.yandex_delivery.docker_tools import deploy_container
 from dotenv import load_dotenv
 import datetime
+
 load_dotenv(Loc.root_path / 'environment.env')
 
 project_name = 'testirisproject'
 dataset_name = 'irisdataset'
 bucket = 'testirisbucket'
-
 
 task = ClassificationTask()
 task.info['dataset'] = dataset_name
@@ -25,7 +25,6 @@ job = TrainingJob(tasks=[task],
                   project_name=project_name,
                   bucket=bucket)
 
-
 routine = SSHDockerJobRoutine(
     job=job,
     remote_host_address=None,
@@ -35,18 +34,18 @@ routine = SSHDockerJobRoutine(
                                                              "AWS_SECRET_ACCESS_KEY"])
 )
 tag = 'v_' + datetime.datetime.now().time().strftime("%H_%M_%S")
-dockerhub_repo = 'grammar_repo'
+dockerhub_repo = ''  # name of your repo
+dockerhub_login = ''  # your login
+
 local_img = 'test_iris_img'
 
-dockerhub_login = 'sergio0x0'
-
 # job.run()
+
+
 # 6a
 # routine.local.execute()
 
 # 6b
 build_container(job, 'test_job_iris', '1', local_img,
                 image_tag=tag)
-
-
 deploy_container(local_img, dockerhub_repo, dockerhub_login, tag)
