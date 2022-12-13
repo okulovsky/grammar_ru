@@ -4,6 +4,9 @@ from tg.common.ml.batched_training import IndexedDataBundle
 from tg.common.ml import batched_training as bt
 from tg.common.ml.batched_training import torch as btt
 from tg.common.ml.batched_training import context as btc
+from tg.common.ml import dft
+from yo_fluq_ds import fluq
+
 
 from tg.grammar_ru.ml.components.attention_network import AttentionNetwork
 from tg.common.ml.batched_training.torch.networks.lstm_network import LSTMFinalizer
@@ -24,11 +27,18 @@ from tg.common.delivery.packaging import FakeContainerHandler
 from tg.grammar_ru.common import Loc
 from sklearn.metrics import roc_auc_score
 from typing import Dict, Optional  # TODO delete redundant
-
+from tg.common.delivery.training.architecture import FileCacheTrainingEnvironment
 from tg.grammar_ru.ml.components.yandex_delivery.docker_tools import deploy_container
 from tg.common.delivery.jobs.ssh_docker_job_routine import build_container
 from tg.common.ml.batched_training.torch.networks import FeedForwardNetwork, FullyConnectedNetwork
 import torch
+from pathlib import Path
+from dotenv import load_dotenv
+
+from tg.grammar_ru.common import Loc
+
+load_dotenv(Loc.root_path / 'environment.env')
+
 project_name = 'gg_project'
 dataset_name = 'gg_dataset'
 bucket = 'ggbucket'
@@ -99,7 +109,8 @@ class MyNetworkFactory:
         labels_count = input['label'].shape[1]
         nn_tail = FullyConnectedNetwork(
             sizes=[3], input=hidden_size, output=labels_count)
-        return FeedForwardNetwork(nn_head, nn_tail, torch.nn.Softmax(dim=1))
+        # return FeedForwardNetwork(nn_head, nn_tail, torch.nn.Softmax(dim=1))
+        return FeedForwardNetwork(nn_head, nn_tail)
 
 
 class ClassificationTask(TaskFactory):
@@ -115,10 +126,10 @@ class ClassificationTask(TaskFactory):
 
         metrics = bt.MetricPool().add(MulticlassMetrics())
         self.instantiate_default_task(
-            epoch_count=1,
+            epoch_count=2,
             batch_size=100,
             mini_batch_size=50,
-            mini_epoch_count=2,
+            mini_epoch_count=1,
             metric_pool=metrics
         )
 
@@ -137,8 +148,7 @@ class ClassificationTask(TaskFactory):
         self.nn_head_factory = plain_context.create_network_factory(
             task=None, input=None)  # TODO could be better?
         core_extractor = plain_context.create_extractor(task=None, bundle=data)
-        extractors = [core_extractor, get_multilabel_extractor()]
-        self.setup_batcher(data, extractors)
+        self.setup_batcher(data, [core_extractor, get_multilabel_extractor()])
         self.setup_model(self.get_network)
 
 
@@ -171,13 +181,28 @@ dockerhub_login = 'sergio0x0'  # your login
 
 local_img = 'gg_img'
 
+
 # job.run()
+
+b_path = Loc.bundles_path/'grammatical_gender/toy'
+data = DataBundle.load(b_path)
+task = job.tasks[0]
+task.name='gg'
+model_folder = Path.home() / 'models' / f'{task.name}'
+env = FileCacheTrainingEnvironment(model_folder)
+# print(data)
+success = task.run_with_environment(data, env)
+
+# object_methods = [method_name for method_name in dir(task.task)
+#                   if callable(getattr(task.task, method_name))]
+
+# print(object_methods)
 
 
 # 6a
 # routine.local.execute()
 
 # 6b
-build_container(job, 'gg', '1', local_img,
-                image_tag=tag)
-deploy_container(local_img, dockerhub_repo, dockerhub_login, tag)
+# build_container(job, 'gg', '1', local_img,
+#                 image_tag=tag)
+# deploy_container(local_img, dockerhub_repo, dockerhub_login, tag)
