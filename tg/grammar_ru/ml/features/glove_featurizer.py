@@ -19,7 +19,8 @@ class GloveFeaturizer(Featurizer):
     def __init__(self,
                  disable_downloading = False,
                  add_lowercase = True,
-                 add_normal_form = True
+                 add_normal_form = True,
+                 try_without_yo = True
                  ):
         download_dependency('glove_featurizer_navec.tar', 'https://storage.yandexcloud.net/natasha-navec/packs/navec_news_v1_1B_250K_300d_100q.tar', disable_downloading)
         self.navec = Navec.load(Loc.dependencies_path / 'glove_featurizer_navec.tar')
@@ -27,6 +28,7 @@ class GloveFeaturizer(Featurizer):
         self.ndf = pd.DataFrame(dict(word=self.words)).reset_index(drop=False).set_index('word').rename(columns={'index': 'glove_index'})
         self.add_lowercase = add_lowercase
         self.add_normal_form = add_normal_form
+        self.try_without_yo = try_without_yo
 
     def get_frame_names(self) -> List[str]:
         return ['glove_keys','glove_scores']
@@ -35,14 +37,23 @@ class GloveFeaturizer(Featurizer):
         df = db.src.set_index('word_id')[['word', 'word_type']]
         check_columns = ['word']
 
+        if self.try_without_yo:
+            df['word_without_yo'] = df.word.str.replace('ё','е')
+            check_columns.append('word_without_yo')
+
         if self.add_lowercase:
             df['lowercase_word'] = df.word.str.lower()
             check_columns.append('lowercase_word')
+            if self.try_without_yo:
+                df['lowercase_word_without_yo'] = df.lowercase_word.str.replace('ё','е')
+                check_columns.append('lowercase_word_without_yo')
 
         if self.add_normal_form:
             df = df.merge(db.pymorphy[['normal_form']], left_index=True, right_index=True)
             check_columns.append('normal_form')
-
+            if self.try_without_yo:
+                df['normal_form_without_yo'] = df.normal_form.str.replace('ё','е')
+                check_columns.append('normal_form_without_yo')
 
         df = df.loc[df.word_type == 'ru'].copy()
 
