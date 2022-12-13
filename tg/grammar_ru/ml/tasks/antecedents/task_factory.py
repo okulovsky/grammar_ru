@@ -1,11 +1,11 @@
 import torch
 from sklearn.metrics import roc_auc_score
-from tg.common.ml import batched_training as bt
-from tg.grammar_ru.ml.components.core_extractor.extractor import CoreExtractor
-from tg.grammar_ru.ml.components.plain_context_builder import PlainContextBuilder
-from tg.grammar_ru.ml.components.training_task_factory import TaskFactory, Conventions
-from tg.common.ml.batched_training.torch.networks.simple_networks import FullyConnectedNetwork
-from tg.grammar_ru.ml.components.contextual_binding import ContextualBinding, ContextualNetworkType
+from .....common.ml import batched_training as bt
+from .....common.ml.batched_training.torch.networks.simple_networks import FullyConnectedNetwork
+from ...components.core_extractor.extractor import CoreExtractor
+from ...components.plain_context_builder import PlainContextBuilder
+from ...components.training_task_factory import TaskFactory, Conventions
+from ...components.contextual_binding import ContextualBinding, ContextualNetworkType
 
 
 def get_binary_label_extractor():
@@ -99,7 +99,3 @@ class AntecedentCandidateTask(TaskFactory):
         ]
         self.setup_batcher(data, extractors)
         self.setup_model(self._create_network, learning_rate=1)
-
-
-if __name__ == "__main__":
-    task = AntecedentCandidateTask()
