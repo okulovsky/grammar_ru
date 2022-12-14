@@ -78,7 +78,7 @@ class ChtobyNegativeSampler(RegexNegativeSampler):
 
     def get_alternatives(self, word: str) -> tp.List[str]:
         if word.lower() not in ('чтобы', 'что бы'):
-            raise ValueError()
+            raise ValueError(f'got unexpected word: {word}')
 
         alternatives = [word]
         # saving first letter register
