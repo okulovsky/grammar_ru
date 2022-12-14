@@ -20,12 +20,15 @@ class IndexBuilder(abc.ABC):
         self.filterer = filterer
         self.negative_sampler = negative_sampler
 
-    def build_train_index(self, df: pd.DataFrame) -> tp.List[pd.DataFrame]:
-        ddf = df.iloc[[0]]
+    def build_train_index(self, filtered: pd.DataFrame) -> tp.List[pd.DataFrame]:
+        ddf = filtered.iloc[[0]]
         description = (ddf.corpus_id+'/'+ddf.file_id).iloc[0]
-        df['original_corpus_id'] = df.corpus_id
+        filtered['original_corpus_id'] = filtered.corpus_id
+        filtered['label'] = 0
 
-        filtered = self.filterer.filter_sentences(df=df)
+        ref_map = {v: self.ref_id + k for k, v in enumerate(filtered.sentence_id.unique())}
+        filtered['reference_sentence_id'] = filtered.sentence_id.replace(ref_map)
+        self.ref_id += 1 + len(filtered.sentence_id.unique())
 
         index = [filtered]
         if self.add_negative_samples:

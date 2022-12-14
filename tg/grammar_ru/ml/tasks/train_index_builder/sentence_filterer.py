@@ -14,18 +14,16 @@ class SentenceFilterer(abc.ABC):
     def get_targets(self, df: pd.DataFrame) -> pd.Series:
         pass
 
-    def filter_sentences(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _get_good_sentences(self, df: pd.DataFrame) -> pd.DataFrame:
         df['is_target'] = self.get_targets(df)
-
         good_sentences = df.groupby('sentence_id').is_target.max().feed(lambda z: z.loc[z].index)
-        filtered = df.loc[df.sentence_id.isin(good_sentences)].copy()
-        filtered['label'] = 0
 
-        ref_map = {v: self.ref_id + k for k, v in enumerate(filtered.sentence_id.unique())}
-        filtered['reference_sentence_id'] = filtered.sentence_id.replace(ref_map)
-        self.ref_id += 1 + len(filtered.sentence_id.unique())
+        return good_sentences
 
-        return filtered
+    def get_filtered_df(self, df: pd.DataFrame) -> pd.DataFrame:
+        good_sentences = self._get_good_sentences(df)
+
+        return df.loc[df.sentence_id.isin(good_sentences)].copy()
 
 
 class DictionaryFilterer(SentenceFilterer):
