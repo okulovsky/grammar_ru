@@ -67,7 +67,7 @@ class CorpusReader(ISrcReader):
         return Query.en(file.namelist()).where(lambda z: '/' in z and z.endswith('.parquet')).select(lambda z: z.split('/')[0]).distinct().where(lambda z: z!='src').to_list()
 
 
-    def _get_bundles_iter(self, uids):
+    def _get_bundles_iter(self, uids, toc):
         with zipfile.ZipFile(self.location, 'r') as file:
             featurizers = self._get_fearurizers_name(file)
             for uid in uids:
@@ -81,25 +81,31 @@ class CorpusReader(ISrcReader):
                     #    df.index = df.index+self.id_shift
                     frames[featurizer] = df
                 bundle = DataBundle(**frames)
+
                 bundle.additional_information.uid = uid
+                for c in toc.columns:
+                    bundle.additional_information[c] = toc.loc[uid, c]
+
                 yield bundle
 
 
     def get_bundles(self, uids = None):
+        toc = self.get_toc()
         if uids is None:
-            uids = self.get_toc().index
-        return Queryable(self._get_bundles_iter(uids), len(uids))
+            uids = toc.index
+        return Queryable(self._get_bundles_iter(uids, toc), len(uids))
 
     def read_bundles(self, uids=None):
         return self.get_bundles(uids)
 
 
+def read_data(sources: Union[Path, List[Path]]) -> List[pd.DataFrame]:
+    if isinstance(sources, Path):
+        sources = [sources]
+    readers = [CorpusReader(s) for s in sources]
+    total_length = sum([r.get_toc().shape[0] for r in readers])
 
-
-
-
-
-
-
-
-
+    query = Query.en(readers).select_many(
+        lambda x: x.get_frames()
+    )
+    return Queryable(query, total_length).feed(fluq.with_progress_bar(console=True))

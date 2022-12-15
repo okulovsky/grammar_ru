@@ -173,18 +173,15 @@ class Separator:
     def reset_indices(df, offset=0) -> pd.DataFrame:
         df = df.copy()
         for column in Separator.INDEX_COLUMNS:
-            replacement = (
-                df[column]
-                    .drop_duplicates()
-                    .sort_values()
-                    .to_frame('value')
-                    .reset_index(drop=True)
-                    .reset_index(drop=False)
-                    .set_index('value')['index']
-            )
-            replacement+=offset
+            rc = df[column]
+            rc = rc.drop_duplicates().sort_values().to_frame('value')
+            rc = rc.reset_index(drop=True).reset_index(drop=False)
+            rc.value = rc.value.astype(int)
+            rc = rc.set_index('value')
+            rc = rc['index']
+            rc+=offset
             df['original_'+column] = df[column]
-            df[column] = list(df[[column]].merge(replacement, left_on=column, right_index=True)['index'])
+            df[column] = list(df[[column]].merge(rc, left_on=column, right_index=True)['index'])
 
         df.index = list(df.word_id)
         df['updated'] = False
