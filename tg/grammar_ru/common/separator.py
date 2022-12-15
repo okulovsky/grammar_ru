@@ -170,7 +170,9 @@ class Separator:
     INDEX_COLUMNS = ['word_id', 'sentence_id', 'paragraph_id']
 
     @staticmethod
-    def reset_indices(df, offset=0) -> pd.DataFrame:
+    def reset_indices(df, offset=0, keep_originals = True) -> pd.DataFrame:
+        if not isinstance(offset, int):
+            raise ValueError(f'Offset must be `int`, but was: {offset}')
         df = df.copy()
         for column in Separator.INDEX_COLUMNS:
             rc = df[column]
@@ -180,7 +182,8 @@ class Separator:
             rc = rc.set_index('value')
             rc = rc['index']
             rc+=offset
-            df['original_'+column] = df[column]
+            if keep_originals:
+                df['original_'+column] = df[column]
             df[column] = list(df[[column]].merge(rc, left_on=column, right_index=True)['index'])
 
         df.index = list(df.word_id)
@@ -190,7 +193,7 @@ class Separator:
 
     @staticmethod
     def get_max_id(df: pd.DataFrame) -> int:
-        return df[Separator.INDEX_COLUMNS].max().max()+1
+        return int(df[Separator.INDEX_COLUMNS].max().max())+2
 
     @staticmethod
     def validate(df: pd.DataFrame):
