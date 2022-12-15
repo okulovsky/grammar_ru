@@ -102,7 +102,7 @@ class ClassificationTask(TaskFactory):
 
         metrics = bt.MetricPool().add(MulticlassMetrics())
         self.instantiate_default_task(
-            epoch_count=10,
+            epoch_count=30,
             batch_size=100,
             mini_batch_size=50,
             mini_epoch_count=1,
@@ -127,4 +127,4 @@ class ClassificationTask(TaskFactory):
             task=None, input=None)  # TODO could be better?
         core_extractor = plain_context.create_extractor(task=None, bundle=data)
         self.setup_batcher(data, [core_extractor, get_multilabel_extractor()])
-        self.setup_model(self.get_network)
+        self.setup_model(self.get_network, learning_rate=0.1)
