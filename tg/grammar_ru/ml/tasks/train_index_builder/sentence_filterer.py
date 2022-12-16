@@ -9,6 +9,8 @@ from tg.grammar_ru.ml.tasks.n_nn.word_normalizer import WordNormalizer
 
 
 class SentenceFilterer(ITransfuseSelector):
+    """Filters sentences from given dataframe"""
+
     def __init__(self) -> None:
         self.ref_id = 0
 
@@ -37,6 +39,8 @@ class SentenceFilterer(ITransfuseSelector):
 
 
 class DictionaryFilterer(SentenceFilterer):
+    """Filters sentences which contains given words"""
+
     def __init__(self, good_words: tp.Sequence[str]) -> None:
         super().__init__()
         self.good_words = good_words
@@ -60,6 +64,8 @@ class ChtobyFilterer(SentenceFilterer):
 
 
 class NormalizeFilterer(DictionaryFilterer):
+    """Filter sentences witch contains normalized form of given words"""
+
     def __init__(self, good_words: tp.Sequence[str], word_normalizer: WordNormalizer) -> None:
         super().__init__(good_words=good_words)
 

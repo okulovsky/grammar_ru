@@ -10,6 +10,8 @@ from tg.grammar_ru.ml.tasks.train_index_builder.negative_sampler import Negative
 
 
 class IndexBuilder(ITransfuseSelector):
+    """Builds train index from filtered corpus"""
+
     def __init__(
             self,
             filterer: SentenceFilterer,
