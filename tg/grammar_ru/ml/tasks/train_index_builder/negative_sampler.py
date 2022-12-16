@@ -11,12 +11,16 @@ from tg.grammar_ru.ml.tasks.n_nn.regular_expressions import single_n_regex
 
 
 class NegativeSampler(abc.ABC):
+    """Builds dataframe with negative samples from correct dataframe"""
+
     @abc.abstractmethod
     def build_negative_sample_from_positive(self, positive_sample: pd.DataFrame) -> pd.DataFrame:
         pass
 
 
 class RegexNegativeSampler(NegativeSampler):
+    """Builds negative samples from sentences which contains given regexp"""
+
     def __init__(self, target_regex: str) -> None:
         self.target_regex = target_regex
 
@@ -65,7 +69,7 @@ class RegexNegativeSampler(NegativeSampler):
             .sum()
         )
         negative = sentences_df.apply(self._build_negative_sentences).explode()
-        # TODO: mark correct words with target=1
+        # TODO: mark correct words with target=0
         negative = Separator.separate_string(negative.str.cat(sep=' '))
 
         negative['label'] = 1
