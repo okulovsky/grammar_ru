@@ -17,16 +17,16 @@ from pathlib import Path
 def build_index():
     gg_index_builder = GGTrainIndexBuilder()
     CorpusBuilder.transfuse_corpus(
-        [Loc.corpus_path / 'lenta.base.zip'],
-        Loc.bundles_path / 'grammatical_gender/prepare/raw/raw.zip',
+        [Loc.corpus_path / 'lenta.base200.zip'],
+        Loc.bundles_path / 'grammatical_gender/prepare/lenta200/raw/raw.zip',
         selector=gg_index_builder.build_train_index
     )
 
 
 def featurize_index():
     CorpusBuilder.featurize_corpus(
-        Loc.bundles_path / 'grammatical_gender/prepare/raw/raw.zip',
-        Loc.bundles_path / 'grammatical_gender/prepare/feat/feat.zip',
+        Loc.bundles_path / 'grammatical_gender/prepare/lenta200/raw/raw.zip',
+        Loc.bundles_path / 'grammatical_gender/prepare/lenta200/feat/feat.zip',
         [
             PyMorphyFeaturizer(),
             SlovnetFeaturizer(),
@@ -41,7 +41,7 @@ def featurize_index():
 def assemble(name, limit):
     bundle_path = Loc.bundles_path / f'grammatical_gender/{name}'
     CorpusBuilder.assemble(
-        Loc.bundles_path / 'grammatical_gender/prepare/feat/feat.zip',
+        Loc.bundles_path / 'grammatical_gender/prepare/lenta200/feat/feat.zip',
         bundle_path,
         limit
     )
@@ -51,18 +51,18 @@ def assemble(name, limit):
     print(index.groupby('split').size())
 
 
-def upload_bundle(name):
-    bundle_path = Loc.bundles_path / f'tsa/{name}'
-    S3Handler.upload_folder(
-        'ps-data-science-sandbox',
-        'sagemaker/tsa/datasets/' + name,
-        bundle_path)
+# def upload_bundle(name):
+#     bundle_path = Loc.bundles_path / f'tsa/{name}'
+#     S3Handler.upload_folder(
+#         'ps-data-science-sandbox',
+#         'sagemaker/tsa/datasets/' + name,
+#         bundle_path)
 
 
 if __name__ == '__main__':
-    build_index()
-    featurize_index()
-    assemble('toy', 5)
+    # build_index()
+    # featurize_index()
+    # assemble('toy', 5)
     # assemble('big', 50)
-    # assemble('full', None)
+    assemble('full', None)
     # upload_bundle('big')

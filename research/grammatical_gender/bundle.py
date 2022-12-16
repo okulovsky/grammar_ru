@@ -15,7 +15,7 @@ class GGTrainIndexBuilder:
         self.speech_part_labels = ['NOUN', 'ADJF', 'ADJS', 'VERB', 'PRTF', 'PRTS']  # TODO what else?
         self.gender_nums = {g: i for i, g in enumerate(['masc', 'femn', 'neut', 'nan'])}
 
-    def build_train_index(self, df):
+    def build_train_index(self, source, df, toc_row):
         df['label'] = -1
         db = DataBundle(src=df)
         self.pmf.featurize(db)# TODO GenderLabelPyMorphyFeaturizer
