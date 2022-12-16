@@ -13,6 +13,7 @@ class DataPath:
     FEATURES_PATH = Loc.bundles_path/'chtoby/prepare/feat/feat.zip'
     FILTERED_CORPUS_PATH = Loc.bundles_path/'chtoby/prepare/filtered/filtered.zip'
     BALANCED_CORPUS_PATH = Loc.bundles_path/'chtoby/prepare/balanced/balanced.zip'
+    BUCKET_PATH = Loc.bundles_path/'chtoby/prepare/bucket/bucket.zip'
 
 
 @click.group()
@@ -24,7 +25,7 @@ def cli() -> None:
 def filter() -> None:
     print(f'Building filtered corpus in {DataPath.FILTERED_CORPUS_PATH}')
     filterer = ChtobyFilterer()
-    build_bundle.filter_corpus(filterer, build_bundle.LENTA_CORPUS_PATH, DataPath.FILTERED_CORPUS_PATH)
+    build_bundle.filter_corpuses(filterer, build_bundle.CORPUSES, DataPath.FILTERED_CORPUS_PATH)
 
 
 @cli.command()
