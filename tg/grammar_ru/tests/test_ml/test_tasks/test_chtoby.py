@@ -1,34 +1,68 @@
+import typing as tp
 from pathlib import Path
-import pytest
+from unittest import TestCase
+
 import pandas as pd
 import numpy as np
-import typing as tp
 
 from tg.grammar_ru.common import Separator, DataBundle
+from tg.grammar_ru.ml.tasks.train_index_builder.sentence_filterer import ChtobyFilterer
 from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import ChtobyIndexBuilder
+from tg.grammar_ru.ml.tasks.train_index_builder.negative_sampler import ChtobyNegativeSampler
 
 
-TEST_DF_PATH = Path(__file__).parent/'chtoby_test.parquet'
+class ChtobyTestCase(TestCase):
+    def test_filterer(self):
+        db = Separator.build_bundle(
+            '''Чтобы приготовить суп. Нужно купить продукты. 
+            Что бы мне сделать. С Новым Годом!. Для того, чтобы. 
+            Во что бы мне поиграть.'''
+        )
+        frame = db.data_frames['src']
+        expected_words = [
+            'Чтобы', 'приготовить', 'суп',
+            '.', 'Что', 'бы',
+            'мне', 'сделать', '.', 
+            'Для', 'того', ',', 
+            'чтобы', '.', 
+            'Во', 'что', 'бы', 
+            'мне', 'поиграть', '.'
+        ]
 
-@pytest.fixture
-def chtoby_df() -> pd.DataFrame:
-    return pd.read_parquet(TEST_DF_PATH)
+        filterer = ChtobyFilterer()
+        filterered_df = filterer.get_filtered_df(frame)
 
+        self.assertListEqual(expected_words, list(filterered_df['word']))
 
-@pytest.fixture
-def index_builder() -> ChtobyIndexBuilder:
-    return ChtobyIndexBuilder()
+    def test_negative_sampler(self):
+        db = Separator.build_bundle(
+            '''Чтобы приготовить суп. 
+            Что бы мне сделать. Для того, чтобы. 
+            Во что бы мне поиграть, чтобы развлечься.'''
+        )
+        frame = db.data_frames['src']
+        expected_words = [
+            'Что', 'бы', 'приготовить',
+            'суп', '.', 'Чтобы',
+            'мне', 'сделать', '.',
+            'Для', 'того', ',',
+            'что', 'бы', '.',
+            'Во', 'чтобы', 'мне',
+            'поиграть', ',', 'что',
+            'бы', 'развлечься', '.',
+            'Во', 'что', 'бы',
+            'мне', 'поиграть', ',',
+            'что', 'бы', 'развлечься',
+            '.', 'Во', 'чтобы',
+            'мне', 'поиграть', ',',
+            'чтобы', 'развлечься', '.'
+        ]
 
+        sampler = ChtobyNegativeSampler()
+        negative = sampler.build_negative_sample_from_positive(frame)
 
-def test_get_targets(chtoby_df: pd.DataFrame, index_builder: ChtobyIndexBuilder) -> None:
-    targets = index_builder._get_targets(chtoby_df)
+        self.assertListEqual(expected_words, list(negative['word']))
+        # TODO: check targets
 
-    assert not ('бы' in chtoby_df[targets]['word'])
-    assert (chtoby_df[targets]['word'] == 'чтобы').sum() == 13
-    assert (chtoby_df[targets]['word'] == 'что').sum() == 1
-
-
-def test_build_negative_from_positive(chtoby_df: pd.DataFrame, index_builder: ChtobyIndexBuilder) -> None:
-    _, negative = index_builder.build_train_index(chtoby_df)
-    
-    assert (negative['word'] == ['что', 'бы'] * 13 + ['чтобы']).all()
+    def test_algorithm(self):
+        pass
