@@ -187,7 +187,7 @@ class CorpusBuilder:
                 if selector is None:
                     dfs = [frame]
                 else:
-                    dfs = selector(source, frame, toc_row)
+                    dfs = selector.select(source, frame, toc_row)
                     if isinstance(dfs, pd.DataFrame):
                         dfs = [dfs]
                     elif isinstance(dfs, list):
