@@ -11,9 +11,16 @@ from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import ChtobyInde
 class DataPath:
     INDEX_PATH = Loc.bundles_path/'chtoby/prepare/raw/raw.zip'
     FEATURES_PATH = Loc.bundles_path/'chtoby/prepare/feat/feat.zip'
-    FILTERED_CORPUS_PATH = Loc.bundles_path/'chtoby/prepare/filtered/filtered.zip'
     BALANCED_CORPUS_PATH = Loc.bundles_path/'chtoby/prepare/balanced/balanced.zip'
-    BUCKET_PATH = Loc.bundles_path/'chtoby/prepare/bucket/bucket.zip'
+    BUCKET_PATH = Loc.bundles_path/'chtoby/prepare/bucket/bucket.parquet'
+    FILTERED_CORPUSES = [
+        Loc.bundles_path/'chtoby/prepare/filtered/filtered_lenta.zip',
+        Loc.bundles_path/'chtoby/prepare/filtered/filtered_proza.zip'
+    ]
+    CORPUSES = [
+        Loc.corpus_path/'lenta.base.zip',
+        Loc.corpus_path/'proza.base.zip',
+    ]
 
 
 @click.group()
@@ -22,10 +29,22 @@ def cli() -> None:
 
 
 @cli.command()
+def balance() -> None:
+    bucket_numbers = [2, 3, 4]
+    bucket_limit = 2400
+    build_bundle.balance(
+        DataPath.FILTERED_CORPUSES,
+        DataPath.BUCKET_PATH,
+        DataPath.BALANCED_CORPUS_PATH,
+        bucket_numbers, bucket_limit
+    )
+
+
+@cli.command()
 def filter() -> None:
-    print(f'Building filtered corpus in {DataPath.FILTERED_CORPUS_PATH}')
+    print('Filtering corpuses')
     filterer = ChtobyFilterer()
-    build_bundle.filter_corpuses(filterer, build_bundle.CORPUSES, DataPath.FILTERED_CORPUS_PATH)
+    build_bundle.filter_corpuses(filterer, DataPath.CORPUSES)
 
 
 @cli.command()
