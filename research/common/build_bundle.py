@@ -1,3 +1,4 @@
+import math
 import typing as tp
 from pathlib import Path
 
@@ -7,16 +8,32 @@ import yo_fluq_ds as yfds
 from tg.grammar_ru.common import Loc
 
 from tg.grammar_ru.ml.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer
-from tg.grammar_ru.ml.corpus import CorpusReader, CorpusBuilder
+from tg.grammar_ru.ml.corpus import CorpusReader, CorpusBuilder, BucketCorpusBalancer
 
 from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import IndexBuilder
 from tg.grammar_ru.ml.tasks.train_index_builder.sentence_filterer import SentenceFilterer
 
 
-CORPUSES = [
-    Loc.corpus_path/'lenta.base.zip',
-    Loc.corpus_path/'proza.base.zip',
-]
+def balance(
+        filtered_corpuses: tp.List[Path],
+        bucket_path: Path,
+        balanced_corpus_path: Path,
+        bucket_numbers: tp.List[int],
+        bucket_limit: int
+        ) -> None:
+    BucketCorpusBalancer.build_buckets_frame(filtered_corpuses, bucket_path)
+
+    balancer = BucketCorpusBalancer(
+        buckets=pd.read_parquet(bucket_path),
+        log_base=math.e,
+        bucket_limit=bucket_limit,
+    )
+
+    CorpusBuilder.transfuse_corpus(
+        sources=filtered_corpuses,
+        destination=balanced_corpus_path,
+        selector=balancer
+    )
 
 
 def read_data(corpus_path: Path) -> tp.Iterable[pd.DataFrame]:
@@ -28,7 +45,6 @@ def read_data(corpus_path: Path) -> tp.Iterable[pd.DataFrame]:
 def filter_corpuses(
         filterer: SentenceFilterer,
         corpuses: tp.List[Path],
-        filtered_corpus_path: Path,
         word_limit: tp.Optional[int] = None
         ) -> None:
     for corpus_path in corpuses:
@@ -40,7 +56,7 @@ def filter_corpuses(
         CorpusBuilder.transfuse_corpus(
             [corpus_path],
             filtered_path,
-            selector=filterer.select
+            selector=filterer
         )
 
 
@@ -54,7 +70,7 @@ def build_index(
         [corpus_path],
         bundle_path,
         words_limit=word_limit,
-        selector=index_builder.select
+        selector=index_builder
     )
 
 
