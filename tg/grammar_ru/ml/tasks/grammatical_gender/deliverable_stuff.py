@@ -102,14 +102,14 @@ class ClassificationTask(TaskFactory):
 
         metrics = bt.MetricPool().add(MulticlassMetrics())
         self.instantiate_default_task(
-            epoch_count=30,
-            batch_size=100,
+            epoch_count=100,
+            batch_size=20000,
             mini_batch_size=50,
             mini_epoch_count=1,
             metric_pool=metrics
         )
-        self.task.settings.evaluation_batch_limit = 5
-        self.task.settings.training_batch_limit = 5
+        # self.task.settings.evaluation_batch_limit = 5
+        # self.task.settings.training_batch_limit = 5
 
         plain_context_builder = PlainContextBuilder(include_zero_offset=False,
                                                     left_to_right_contexts_proportion=1)

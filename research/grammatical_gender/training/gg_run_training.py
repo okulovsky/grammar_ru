@@ -40,14 +40,14 @@ from tg.grammar_ru.common import Loc
 load_dotenv(Loc.root_path / 'environment.env')
 
 project_name = 'gg_project'
-dataset_name = 'gg_dataset'
+dataset_name = 'gg_lenta_big'
 bucket = 'ggbucket'
 
 
 def get_training_job() -> TrainingJob:
     task = ClassificationTask()
     task.info["dataset"] = dataset_name
-    task.info["name"] = "gg_task"
+    task.info["name"] = "gg_task_lenta_big_20K_100ep"
 
     job = TrainingJob(
         tasks=[task],
@@ -75,21 +75,21 @@ local_img = 'gg_img'
 
 
 # job.run()
-b_path = Loc.bundles_path/'grammatical_gender/toy'
-data = DataBundle.load(b_path)
+# b_path = Loc.bundles_path/'grammatical_gender/toy'
+# data = DataBundle.load(b_path)
 
 # task = ClassificationTask()
 # task.create_task(data)
 # temp_batch = task.task.generate_sample_batch(data,0)
 
 
-task = job.tasks[0]
+# task = job.tasks[0]
 
-task.name = 'gg'
-model_folder = Path.home() / 'models' / f'{task.name}'
-env = FileCacheTrainingEnvironment(model_folder)
-print(data)
-success = task.run_with_environment(data, env)
+# task.name = 'gg'
+# model_folder = Path.home() / 'models' / f'{task.name}'
+# env = FileCacheTrainingEnvironment(model_folder)
+# print(data)
+# success = task.run_with_environment(data, env)
 # task.in
 # object_methods = [method_name for method_name in dir(task.task)
 #                   if callable(getattr(task.task, method_name))]
@@ -100,6 +100,7 @@ success = task.run_with_environment(data, env)
 # routine.local.execute()
 
 # 6b
-# build_container(job, 'gg', '1', local_img,
-#                 image_tag=tag)
-# deploy_container(local_img, dockerhub_repo, dockerhub_login, tag)
+build_container(job, 'gg', '1', local_img,
+                image_tag=tag)
+deploy_container(local_img, dockerhub_repo, dockerhub_login, tag)
+print(tag)
