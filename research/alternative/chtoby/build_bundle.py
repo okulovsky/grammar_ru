@@ -3,6 +3,7 @@ import click
 
 from research.common import build_bundle
 from tg.grammar_ru.common import Loc
+from tg.grammar_ru.ml.tasks.train_index_builder.sentence_filterer import ChtobyFilterer
 from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import ChtobyIndexBuilder
 
 
@@ -10,6 +11,8 @@ from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import ChtobyInde
 class DataPath:
     INDEX_PATH = Loc.bundles_path/'chtoby/prepare/raw/raw.zip'
     FEATURES_PATH = Loc.bundles_path/'chtoby/prepare/feat/feat.zip'
+    FILTERED_CORPUS_PATH = Loc.bundles_path/'chtoby/prepare/filtered/filtered.zip'
+    BALANCED_CORPUS_PATH = Loc.bundles_path/'chtoby/prepare/balanced/balanced.zip'
 
 
 @click.group()
@@ -18,10 +21,17 @@ def cli() -> None:
 
 
 @cli.command()
+def filter() -> None:
+    print(f'Building filtered corpus in {DataPath.FILTERED_CORPUS_PATH}')
+    filterer = ChtobyFilterer()
+    build_bundle.filter_corpus(filterer, build_bundle.LENTA_CORPUS_PATH, DataPath.FILTERED_CORPUS_PATH)
+
+
+@cli.command()
 def index() -> None:
     print(f'Building index in {DataPath.INDEX_PATH}')
     index_builder = ChtobyIndexBuilder()
-    build_bundle.build_index(index_builder, build_bundle.LENTA_CORPUS_PATH, DataPath.INDEX_PATH)
+    build_bundle.build_index(index_builder, DataPath.BALANCED_CORPUS_PATH, DataPath.INDEX_PATH)
 
 
 @cli.command()
