@@ -1,14 +1,15 @@
 import typing as tp
-import abc
+from pathlib import Path
 
 import pandas as pd
 
 from tg.common.ml.batched_training import train_display_test_split
+from tg.grammar_ru.ml.corpus import ITransfuseSelector
 from tg.grammar_ru.ml.tasks.train_index_builder.sentence_filterer import SentenceFilterer
 from tg.grammar_ru.ml.tasks.train_index_builder.negative_sampler import NegativeSampler
 
 
-class IndexBuilder(abc.ABC):
+class IndexBuilder(ITransfuseSelector):
     def __init__(
             self,
             filterer: SentenceFilterer,
@@ -34,6 +35,7 @@ class IndexBuilder(abc.ABC):
         if self.add_negative_samples:
             negative = self.negative_sampler.build_negative_sample_from_positive(filtered)
             negative['is_target'] = self.filterer.get_targets(negative)
+            # TODO: move marking with target to negative sampler
             index.append(negative)
 
         for frame in index:
@@ -41,6 +43,14 @@ class IndexBuilder(abc.ABC):
                 raise ValueError(f"Null sentence id when processing, uid {description}")
 
         return index
+
+    def select(
+            self,
+            path: Path,
+            df: pd.DataFrame,
+            toc_row: tp.Dict
+            ) -> tp.Union[tp.List[pd.DataFrame], pd.DataFrame]:
+        return self.build_train_index(df)
 
     @staticmethod
     def build_index_from_src(src_df: pd.DataFrame) -> pd.DataFrame:
