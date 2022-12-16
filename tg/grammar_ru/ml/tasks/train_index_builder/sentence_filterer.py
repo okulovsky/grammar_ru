@@ -1,12 +1,14 @@
 import abc
 import typing as tp
+from pathlib import Path
 
 import pandas as pd
 
+from tg.grammar_ru.ml.corpus import ITransfuseSelector
 from tg.grammar_ru.ml.tasks.n_nn.word_normalizer import WordNormalizer
 
 
-class SentenceFilterer(abc.ABC):
+class SentenceFilterer(ITransfuseSelector):
     def __init__(self) -> None:
         self.ref_id = 0
 
@@ -25,6 +27,14 @@ class SentenceFilterer(abc.ABC):
 
         return df.loc[df.sentence_id.isin(good_sentences)].copy()
 
+    def select(
+            self,
+            corpus: Path,
+            df: pd.DataFrame,
+            toc_row: tp.Dict
+            ) -> tp.Union[tp.List[pd.DataFrame], pd.DataFrame]:
+        return self.get_filtered_df(df)
+
 
 class DictionaryFilterer(SentenceFilterer):
     def __init__(self, good_words: tp.Sequence[str]) -> None:
@@ -39,7 +49,7 @@ class ChtobyFilterer(SentenceFilterer):
     def get_targets(self, df: pd.DataFrame) -> tp.Sequence[bool]:
         targets = df.set_index('word_id').word.str.lower() == 'чтобы'
 
-        chto = df[df['word'] == 'что']
+        chto = df[df['word'].str.lower() == 'что']
         chto_next = chto['word_id'] + 1
         chto_neighbour = df.merge(chto_next, how='inner')
         by = chto_neighbour[chto_neighbour['word'] == 'бы']

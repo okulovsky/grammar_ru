@@ -46,7 +46,7 @@ class RegexNegativeSampler(NegativeSampler):
         return ''.join(rebuilt_sentence)
 
     def _build_negative_sentences(self, sentence: str) -> tp.List[str]:
-        sentence_parts = re.split(self.target_regex, sentence, re.IGNORECASE)
+        sentence_parts = re.split(self.target_regex, sentence)
         starts_with_target = sentence_parts[0] == ''
         sentence_parts = list(filter(lambda word: word != '', sentence_parts))
         negative_samples = []
@@ -65,6 +65,7 @@ class RegexNegativeSampler(NegativeSampler):
             .sum()
         )
         negative = sentences_df.apply(self._build_negative_sentences).explode()
+        # TODO: mark correct words with target=1
         negative = Separator.separate_string(negative.str.cat(sep=' '))
 
         negative['label'] = 1
