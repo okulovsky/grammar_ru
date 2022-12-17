@@ -25,7 +25,6 @@ class TestTask(TaskFactory):
 
 
 def get_training_job() -> TrainingJob:
-    #task = TestTask()
     task = AntecedentCandidateTask()
     task.info["dataset"] = dataset_name
     task.info["name"] = "antc_task"
@@ -57,8 +56,5 @@ def build_deploy(job):
 
 if __name__ == "__main__":
     load_dotenv(Loc.root_path / 'environment.env')
-    print('a')
     job = get_training_job()
-    print('b')
     build_deploy(job)
-    print('c')
