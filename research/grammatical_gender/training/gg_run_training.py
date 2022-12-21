@@ -34,7 +34,7 @@ from tg.common.ml.batched_training.torch.networks import FeedForwardNetwork, Ful
 import torch
 from pathlib import Path
 from dotenv import load_dotenv
-from tg.grammar_ru.ml.tasks.grammatical_gender.deliverable_stuff import ClassificationTask
+from tg.grammar_ru.ml.tasks.grammatical_gender.deliverable_stuff import ClassificationTask, ClassificationTaskByBatchSize
 from tg.grammar_ru.common import Loc
 
 load_dotenv(Loc.root_path / 'environment.env')
@@ -44,21 +44,44 @@ dataset_name = 'gg_lenta_big'
 bucket = 'ggbucket'
 
 
-def get_training_job() -> TrainingJob:
-    task = ClassificationTask()
-    task.info["dataset"] = dataset_name
-    task.info["name"] = "gg_task_lenta_big_20K_100ep"
+def get_tasks():
+    tasks = []
+    for bs in [22000, 25000, 28000, 30000, 32000, 35000]:
+        task = ClassificationTaskByBatchSize(bs)
+        task.info["dataset"] = dataset_name
+        # "gg_task_lenta_full_20K_100ep"
+        task.info["name"] = f"task_{dataset_name}_{bs}_1ep"
+        tasks.append(task)
+    return tasks
 
+
+def get_training_job_with_many_tasks() -> TrainingJob:
+    tasks = get_tasks()
     job = TrainingJob(
-        tasks=[task],
+        tasks=tasks,
         project_name=project_name,
         bucket=bucket
     )
     return job
 
 
-job = get_training_job()
+# def get_training_job() -> TrainingJob:
+#     task = ClassificationTask()
+#     task.info["dataset"] = dataset_name
+#     # "gg_task_lenta_full_20K_100ep"
+#     task.info["name"] = f"task_{dataset_name}_20K_200ep"
 
+#     job = TrainingJob(
+#         tasks=[task],
+#         project_name=project_name,
+#         bucket=bucket
+#     )
+#     return job
+
+
+# job = get_training_job()
+job_many_tasks = get_training_job_with_many_tasks()
+job = job_many_tasks
 routine = SSHDockerJobRoutine(
     job=job,
     remote_host_address=None,
