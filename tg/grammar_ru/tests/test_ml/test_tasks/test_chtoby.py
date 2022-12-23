@@ -35,34 +35,28 @@ class ChtobyTestCase(TestCase):
         self.assertListEqual(expected_words, list(filterered_df['word']))
 
     def test_negative_sampler(self):
+        self.maxDiff = None
         db = Separator.build_bundle(
             '''Чтобы приготовить суп. 
             Что бы мне сделать. Для того, чтобы. 
             Во что бы мне поиграть, чтобы развлечься.'''
         )
         frame = db.data_frames['src']
+        sampler = ChtobyNegativeSampler()
+        correct_word_marker = sampler._correct_word_suffix
         expected_words = [
-            'Что', 'бы', 'приготовить',
-            'суп', '.', 'Чтобы',
-            'мне', 'сделать', '.',
-            'Для', 'того', ',',
-            'что', 'бы', '.',
-            'Во', 'чтобы', 'мне',
-            'поиграть', ',', 'что',
-            'бы', 'развлечься', '.',
-            'Во', 'что', 'бы',
-            'мне', 'поиграть', ',',
-            'что', 'бы', 'развлечься',
-            '.', 'Во', 'чтобы',
-            'мне', 'поиграть', ',',
-            'чтобы', 'развлечься', '.'
+            'Что', 'бы', 'приготовить', 'суп', '.',
+            'Чтобы', 'мне', 'сделать', '.',
+            'Для', 'того', ',', 'что', 'бы', '.',
+            'Во', f'что{correct_word_marker}', f'бы{correct_word_marker}', 'мне', 'поиграть', ',', 'что', 'бы', 'развлечься','.',
+            'Во', 'чтобы', 'мне', 'поиграть', ',', 'что', 'бы', 'развлечься', '.',
+            'Во', 'чтобы', 'мне', 'поиграть', ',', f'чтобы{correct_word_marker}', 'развлечься', '.'
         ]
 
-        sampler = ChtobyNegativeSampler()
+
         negative = sampler.build_negative_sample_from_positive(frame)
 
         self.assertListEqual(expected_words, list(negative['word']))
-        # TODO: check targets
 
     def test_algorithm(self):
         pass

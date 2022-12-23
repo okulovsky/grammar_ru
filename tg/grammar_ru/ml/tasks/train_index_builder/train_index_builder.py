@@ -37,7 +37,9 @@ class IndexBuilder(ITransfuseSelector):
         if self.add_negative_samples:
             negative = self.negative_sampler.build_negative_sample_from_positive(filtered)
             negative['is_target'] = self.filterer.get_targets(negative)
-            # TODO: move marking with target to negative sampler
+            correct_words_mask = negative['word'].str.endswith('-корректноеслово')
+            negative.loc[correct_words_mask, 'word'] = \
+                negative[correct_words_mask]['word'].str.strip('-корректноеслово')
             index.append(negative)
 
         for frame in index:

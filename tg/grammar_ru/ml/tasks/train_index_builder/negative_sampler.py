@@ -23,6 +23,7 @@ class RegexNegativeSampler(NegativeSampler):
 
     def __init__(self, target_regex: str) -> None:
         self.target_regex = target_regex
+        self._correct_word_suffix = '-корректноеслово'
 
     @abc.abstractmethod
     def get_alternatives(self, word: str) -> tp.List[str]:
@@ -30,8 +31,18 @@ class RegexNegativeSampler(NegativeSampler):
 
     def _get_word_combinations(self, sentence: str) -> tp.Iterable[tp.Sequence[str]]:
         words = re.findall(self.target_regex, sentence, re.IGNORECASE)
+        combinations = sorted(set(itertools.product(*(self.get_alternatives(word) for word in words))) - set([tuple(words)]))
+        marked_alternatives = []
+        for combination in combinations:
+            marked = []
+            for alternative, word in zip(combination, words):
+                if alternative == word:
+                    marked.append(f'{self._correct_word_suffix} '.join(word.split() + ['']).strip())
+                else:
+                    marked.append(alternative)
+            marked_alternatives.append(marked)
 
-        return set(itertools.product(*(self.get_alternatives(word) for word in words))) - set([tuple(words)])
+        return marked_alternatives
 
     def _join_sentence_parts(
             self,
@@ -69,7 +80,7 @@ class RegexNegativeSampler(NegativeSampler):
             .sum()
         )
         negative = sentences_df.apply(self._build_negative_sentences).explode()
-        # TODO: mark correct words with target=0
+
         negative = Separator.separate_string(negative.str.cat(sep=' '))
 
         negative['label'] = 1
