@@ -1,72 +1,46 @@
-import dataclasses
-import click
-
-from research.common import build_bundle
+from research.common.bundle_builder import BundleConfig, BundleBuilder
 from tg.grammar_ru.common import Loc
 from tg.grammar_ru.ml.tasks.train_index_builder.sentence_filterer import ChtobyFilterer
 from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import ChtobyIndexBuilder
+from tg.grammar_ru.ml.features import (
+    PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer
+)
 
 
-@dataclasses.dataclass
-class DataPath:
-    INDEX_PATH = Loc.bundles_path/'chtoby/prepare/raw/raw.zip'
-    FEATURES_PATH = Loc.bundles_path/'chtoby/prepare/feat/feat.zip'
-    BALANCED_CORPUS_PATH = Loc.bundles_path/'chtoby/prepare/balanced/balanced.zip'
-    BUCKET_PATH = Loc.bundles_path/'chtoby/prepare/bucket/bucket.parquet'
-    FILTERED_CORPUSES = [
+ChtobyBundleConfig = BundleConfig(
+    INDEX_PATH=Loc.bundles_path/'chtoby/prepare/raw/raw.zip',
+    FEATURES_PATH=Loc.bundles_path/'chtoby/prepare/feat/feat.zip',
+    BALANCED_CORPUS_PATH=Loc.bundles_path/'chtoby/prepare/balanced/balanced.zip',
+    BUCKET_PATH=Loc.bundles_path/'chtoby/prepare/bucket/bucket.parquet',
+    FILTERED_CORPUSES=[
         Loc.bundles_path/'chtoby/prepare/filtered/filtered_lenta.zip',
         Loc.bundles_path/'chtoby/prepare/filtered/filtered_proza.zip'
-    ]
-    CORPUSES = [
+    ],
+    CORPUSES=[
         Loc.corpus_path/'lenta.base.zip',
         Loc.corpus_path/'proza.base.zip',
+    ],
+    BUCKETS_NUMBERS=[2, 3, 4],
+    BUCKET_LIMIT=2400,
+    BUNDLE_NAME='toy',
+    TASK_NAME='chtoby',
+    SENTENCE_FILTERER=ChtobyFilterer(),
+    INDEX_BUILDER=ChtobyIndexBuilder(),
+    BUNDLE_LIMIT=50,
+    FEATURIZERS=[
+        PyMorphyFeaturizer(),
+        SlovnetFeaturizer(),
+        SyntaxTreeFeaturizer(),
+        SyntaxStatsFeaturizer()
     ]
+)
 
 
-@click.group()
-def cli() -> None:
-    pass
-
-
-@cli.command()
-def balance() -> None:
-    bucket_numbers = [2, 3, 4]
-    bucket_limit = 2400
-    build_bundle.balance(
-        DataPath.FILTERED_CORPUSES,
-        DataPath.BUCKET_PATH,
-        DataPath.BALANCED_CORPUS_PATH,
-        bucket_numbers, bucket_limit
-    )
-
-
-@cli.command()
-def filter() -> None:
-    print('Filtering corpuses')
-    filterer = ChtobyFilterer()
-    build_bundle.filter_corpuses(filterer, DataPath.CORPUSES)
-
-
-@cli.command()
-def index() -> None:
-    print(f'Building index in {DataPath.INDEX_PATH}')
-    index_builder = ChtobyIndexBuilder()
-    build_bundle.build_index(index_builder, DataPath.BALANCED_CORPUS_PATH, DataPath.INDEX_PATH)
-
-
-@cli.command()
-def features() -> None:
-    print(f'Extracting features in {DataPath.FEATURES_PATH}')
-    build_bundle.featurize_index(DataPath.INDEX_PATH, DataPath.FEATURES_PATH, workers=3)
-
-
-@cli.command()
-def bundle() -> None:
-    bundle_name = 'toy'
-    bundle_path = Loc.bundles_path/f'chtoby/{bundle_name}'
-    print(f'Building bundle in {bundle_path}')
-    build_bundle.assemble(50, DataPath.FEATURES_PATH, bundle_path)
+class ChtobyBundleBuilder(BundleBuilder):
+    def __init__(self) -> None:
+        super().__init__(ChtobyBundleConfig)
 
 
 if __name__ == '__main__':
-    cli()
+    builder = ChtobyBundleBuilder()
+    builder.features()
