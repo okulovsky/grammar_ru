@@ -9,7 +9,6 @@ class LocHolder(LocationsClass):
         self.data_path = self.data_cache_path
         self.dependencies_path = self.data_path/'external_models'
         os.makedirs(self.dependencies_path, exist_ok=True)
-        self.temp_path = self.data_path/'temp'
         os.makedirs(self.temp_path, exist_ok=True)
 
         self.corpus_path = self.data_path / 'corpus'
