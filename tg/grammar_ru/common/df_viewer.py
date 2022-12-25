@@ -149,6 +149,6 @@ class DfViewer:
         pars = [self._paragraph_to_text(df.loc[df.paragraph_id == p]) for p in pars.paragraph_id]
         return '\n'.join(pars)
 
-    def to_sentences_strings(self, df):
+    def to_sentences_strings(self, df, group_by_column='sentence_id'):
         df = df.assign(space=' ')
-        return df.assign(word_print = df.word+df.space*df.word_tail).groupby('sentence_id').word_print.sum()
+        return df.assign(word_print = df.word+df.space*df.word_tail).groupby(group_by_column).word_print.sum()
