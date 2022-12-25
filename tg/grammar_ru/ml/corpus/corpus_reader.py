@@ -3,6 +3,7 @@ import zipfile
 from io import BytesIO
 from yo_fluq_ds import *
 from ...common import DataBundle, Separator
+import deprecated
 
 class ISrcReader:
     def read_frames(self):
@@ -99,6 +100,20 @@ class CorpusReader(ISrcReader):
         return self.get_bundles(uids)
 
 
+    @staticmethod
+    def read_frames_from_several_corpora(sources: Union[Path, List[Path]]):
+        if isinstance(sources, Path):
+            sources = [sources]
+        readers = [CorpusReader(s) for s in sources]
+        total_length = sum([r.get_toc().shape[0] for r in readers])
+
+        query = Query.en(readers).select_many(
+            lambda x: x.get_frames()
+        )
+        return Queryable(query, total_length)
+
+
+@deprecated.deprecated('Use CorpusReader.read_frames_from_several_corpora')
 def read_data(sources: Union[Path, List[Path]]) -> List[pd.DataFrame]:
     if isinstance(sources, Path):
         sources = [sources]

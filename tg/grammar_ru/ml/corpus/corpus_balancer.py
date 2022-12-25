@@ -6,6 +6,7 @@ from typing import List, Dict, Union, Optional
 from .transfuse_selector import ITransfuseSelector
 from .corpus_reader import read_data
 from pathlib import Path
+import deprecated
 
 
 def create_path_if_not_exists(path: Path) -> None:
@@ -13,7 +14,7 @@ def create_path_if_not_exists(path: Path) -> None:
     if not path_dirs.exists():
         path_dirs.mkdir(parents = True)
 
-
+@deprecated.deprecated('Use BucketBalances instead')
 class BucketCorpusBalancer(ITransfuseSelector):
     def __init__(
         self, buckets: Union[pd.DataFrame, Path], 
