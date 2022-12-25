@@ -1,3 +1,4 @@
+from typing import *
 import abc
 import re
 import itertools
@@ -6,8 +7,7 @@ import typing as tp
 import pandas as pd
 import numpy as np
 
-from tg.grammar_ru.common import Separator
-from tg.grammar_ru.ml.tasks.n_nn.regular_expressions import single_n_regex
+from ...common import Separator
 
 
 class NegativeSampler(abc.ABC):
@@ -16,6 +16,8 @@ class NegativeSampler(abc.ABC):
     @abc.abstractmethod
     def build_negative_sample_from_positive(self, positive_sample: pd.DataFrame) -> pd.DataFrame:
         pass
+
+    
 
 
 class RegexNegativeSampler(NegativeSampler):
@@ -106,36 +108,22 @@ class ChtobyNegativeSampler(RegexNegativeSampler):
         return alternatives
 
 
-class TsaNegativeSampler(NegativeSampler):
+class EndingNegativeSampler(NegativeSampler):
+    def __init__(self, ending_1, ending_2):
+        self.ending_1 = ending_1
+        self.ending_2 = ending_2
+
+
     def build_negative_sample_from_positive(self, positive: pd.DataFrame) -> pd.DataFrame:
         negative = positive.copy()
         negative.word = np.where(
             ~negative.is_target,
             negative.word,
             np.where(
-                negative.word.str.endswith('тся'),
-                negative.word.str.replace('тся', 'ться'),
-                negative.word.str.replace('ться', 'тся')
+                negative.word.str.endswith(self.ending_1),
+                negative.word.str.replace(self.ending_1, self.ending_2),
+                negative.word.str.replace(self.ending_2, self.ending_1)
             )
         )
-        negative['label'] = 1
-
         return negative
 
-
-class NNnNegativeSampler(NegativeSampler):
-    def build_negative_sample_from_positive(self, positive: pd.DataFrame) -> pd.DataFrame:
-        negative = positive.copy()
-        negative.word = np.where(
-            ~negative.is_target,
-            negative.word,
-            np.where(
-                negative.word.str.contains(single_n_regex),
-                negative.word.str[::-1].str.replace('н', 'нн', 1).str[::-1],
-                negative.word.str[::-1].str.replace('нн', 'н', 1).str[::-1]
-            )
-        )
-
-        negative['label'] = 1
-
-        return negative
