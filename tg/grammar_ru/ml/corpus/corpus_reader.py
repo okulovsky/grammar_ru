@@ -42,7 +42,9 @@ class CorpusReader(ISrcReader):
     def _get_frames_iter(self, uids):
         with zipfile.ZipFile(self.location, 'r') as file:
             for uid in uids:
-                yield  self._read_src(file, uid)
+                df = self._read_src(file, uid)
+                if df.shape[0] > 0:
+                    yield df
 
 
     def _get_custom_frames_iter(self, frame_type, uids):
@@ -73,7 +75,10 @@ class CorpusReader(ISrcReader):
             featurizers = self._get_fearurizers_name(file)
             for uid in uids:
                 frames = {}
-                frames['src'] = self._read_src(file, uid)
+                src = self._read_src(file, uid)
+                if src.shape[0] == 0:
+                    continue
+                frames['src'] = src
                 for featurizer in featurizers:
                     df = self._read_frame(file, f'{featurizer}/{uid}.parquet')
                     #if df.index.name not in self.updatable_columns:

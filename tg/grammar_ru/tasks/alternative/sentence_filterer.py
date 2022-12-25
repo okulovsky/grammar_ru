@@ -1,15 +1,11 @@
 import abc
 import typing as tp
 from pathlib import Path
-
 import pandas as pd
-
-from tg.grammar_ru.ml.corpus import ITransfuseSelector
-from tg.grammar_ru.ml.tasks.n_nn.word_normalizer import WordNormalizer
 import deprecated
 
 
-class SentenceFilterer(ITransfuseSelector):
+class SentenceFilterer:
     """Filters sentences from given dataframe"""
 
     def __init__(self) -> None:
@@ -30,16 +26,11 @@ class SentenceFilterer(ITransfuseSelector):
         return self.filter(df)
 
     def filter(self, df: pd.DataFrame) -> pd.DataFrame:
+        df = df.copy()
         good_sentences = self._get_good_sentences(df)
         return df.loc[df.sentence_id.isin(good_sentences)].copy()
 
-    def select(
-            self,
-            corpus: Path,
-            df: pd.DataFrame,
-            toc_row: tp.Dict
-            ) -> tp.Union[tp.List[pd.DataFrame], pd.DataFrame]:
-        return self.get_filtered_df(df)
+
 
 
 class DictionaryFilterer(SentenceFilterer):
@@ -66,17 +57,3 @@ class ChtobyFilterer(SentenceFilterer):
 
         return targets.values
 
-
-class NormalizeFilterer(DictionaryFilterer):
-    """Filter sentences witch contains normalized form of given words"""
-
-    def __init__(self, good_words: tp.Sequence[str], word_normalizer: WordNormalizer) -> None:
-        super().__init__(good_words=good_words)
-
-        self._word_normalizer = word_normalizer
-
-    def get_targets(self, df: pd.DataFrame) -> tp.Sequence[bool]:
-        return df.word.apply(self._get_normalized_word).str.lower().isin(self.good_words)
-
-    def _get_normalized_word(self, word: str) -> str:
-        return self._word_normalizer.normalize_word(word)

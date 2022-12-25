@@ -145,7 +145,7 @@ class CorpusBuilder:
         frames = list(reader.get_bundles().first().data_frames)
         os.makedirs(bundle_path, exist_ok=True)
         for frame in frames:
-            df = pd.concat(reader.get_frames(uids, frame).feed(fluq.with_progress_bar()).to_list())
+            df = pd.concat(reader.get_frames(uids, frame).feed(fluq.with_progress_bar()).to_list(), sort=False)
             df.to_parquet(bundle_path / f'{frame}.parquet')
 
 
@@ -156,8 +156,14 @@ class CorpusBuilder:
             destination: Path,
             words_per_frame: int = 50000,
             words_limit: Optional[int] = None,
-            selector: Optional[ITransfuseSelector] = None
+            selector: Optional[ITransfuseSelector] = None,
+            overwrite = False
     ):
+        if destination.is_file():
+            if overwrite:
+                os.remove(destination)
+            else:
+                raise ValueError(f'File {destination} already exists. ')
 
         if isinstance(sources, Path):
             sources = [sources]
@@ -204,6 +210,7 @@ class CorpusBuilder:
                             failed_result = df
                         )
                         dump_file = Loc.error_dumps/f'{datetime.datetime.now}_corpus_builder_transfuse_corpus'
+                        Logger.error(f'Error. The dump is stored in {dump_file}')
                         os.makedirs(dump_file.parent, exist_ok=True)
                         FileIO.write_pickle(dump, dump_file)
                         raise

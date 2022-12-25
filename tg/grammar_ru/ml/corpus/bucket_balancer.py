@@ -19,6 +19,8 @@ class BucketBalancer(ITransfuseSelector):
     def collect_buckets(dfs: Iterable[pd.DataFrame], log_base = 2):
         result = []
         for df in dfs:
+            if df.shape[0]==0:
+                continue
             sdf = df.groupby(['corpus_id','sentence_id']).size().to_frame('len').reset_index()
             sdf['log_len'] = np.log(sdf.len)/np.log(log_base)
             sdf.log_len = sdf.log_len.astype(int)

@@ -26,9 +26,9 @@ class CorpusBufferedWriter:
         self.writer_.add_fragment(sdf)
         self.buffer_ = []
 
-    def _write_with_breakdown(self):
-        while self._words_in_buffer() > self.words_per_frame:
-            sdf = pd.concat(self.buffer_)
+    def _write_with_breakdown(self, finalize = False):
+        while True:
+            sdf = pd.concat(self.buffer_, sort = False)
             sids = sdf.groupby('sentence_id').size().cumsum()
             sids = sids.loc[sids<self.words_per_frame].index
             to_write = sdf.loc[sdf.sentence_id.isin(sids)]
@@ -36,16 +36,23 @@ class CorpusBufferedWriter:
             Logger.info(f'Writing {len(self.buffer_)} frames, {sdf.shape[0]} words, to write {to_write.shape[0]}, to keep {to_keep.shape[0]}')
             self.writer_.add_fragment(to_write)
             self.buffer_ = [to_keep]
+            if not finalize:
+                if self._words_in_buffer() < self.words_per_frame:
+                    break
+            if finalize:
+                if self._words_in_buffer() == 0:
+                    break
 
 
-    def _flush(self):
+
+    def _flush(self, finalize = False):
         if len(self.buffer_)==0:
             return
         if not self.break_down_by_sentence:
             self._write_simple()
             return
         else:
-            self._write_with_breakdown()
+            self._write_with_breakdown(finalize)
             return
 
     def _words_in_buffer(self) -> int:
@@ -66,5 +73,5 @@ class CorpusBufferedWriter:
 
 
     def close(self):
-        self._flush()
+        self._flush(True)
         self.writer_.finalize()

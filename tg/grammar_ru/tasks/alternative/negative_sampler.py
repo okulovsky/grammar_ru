@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 
 from ...common import Separator
-
+from yo_fluq_ds import fluq
 
 class NegativeSampler(abc.ABC):
     """Builds dataframe with negative samples from correct dataframe"""
@@ -17,7 +17,24 @@ class NegativeSampler(abc.ABC):
     def build_negative_sample_from_positive(self, positive_sample: pd.DataFrame) -> pd.DataFrame:
         pass
 
-    
+    def build_all_negative_samples_from_positive(self, positive_sample: pd.DataFrame) -> List[pd.DataFrame]:
+        results = []
+        xdf = positive_sample
+        qdf = xdf.loc[xdf.is_target]
+        qdf = qdf.feed(fluq.add_ordering_column('sentence_id', 'word_id'))
+        xdf = xdf.merge(qdf[['order']], left_index=True, right_index=True, how='left')
+        xdf.order = xdf.order.fillna(-1).astype(int)
+        orders = list(range(xdf.order.max()+1))
+        for k in orders:
+            if k == -1:
+                continue
+            kdf = xdf.copy()
+            kdf.is_target = kdf.is_target & (kdf.order==k)
+            kdf = kdf.drop('order',axis=1)
+            results.append(self.build_negative_sample_from_positive(kdf))
+        return results
+
+
 
 
 class RegexNegativeSampler(NegativeSampler):
