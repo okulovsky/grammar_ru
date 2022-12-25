@@ -21,7 +21,7 @@ class GGTrainIndexBuilder:
         self.pmf.featurize(db)# TODO GenderLabelPyMorphyFeaturizer
         morphed = db.data_frames['pymorphy']
         morphed.replace({np.nan: 'nan'}, inplace=True)
-        df['is_target'] = morphed.POS.isin(self.speech_part_labels)
+        df['is_target'] = morphed.POS.isin(self.speech_part_labels) & ~df.word.str[0].str.isupper()
         df.loc[df.is_target, 'label'] = morphed[df.is_target].gender.replace(self.gender_nums)
         return [df]
 
