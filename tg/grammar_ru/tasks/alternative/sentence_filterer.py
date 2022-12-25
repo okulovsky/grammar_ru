@@ -6,6 +6,7 @@ import pandas as pd
 
 from tg.grammar_ru.ml.corpus import ITransfuseSelector
 from tg.grammar_ru.ml.tasks.n_nn.word_normalizer import WordNormalizer
+import deprecated
 
 
 class SentenceFilterer(ITransfuseSelector):
@@ -24,9 +25,12 @@ class SentenceFilterer(ITransfuseSelector):
 
         return good_sentences
 
+    @deprecated.deprecated('Use `filter` instead')
     def get_filtered_df(self, df: pd.DataFrame) -> pd.DataFrame:
-        good_sentences = self._get_good_sentences(df)
+        return self.filter(df)
 
+    def filter(self, df: pd.DataFrame) -> pd.DataFrame:
+        good_sentences = self._get_good_sentences(df)
         return df.loc[df.sentence_id.isin(good_sentences)].copy()
 
     def select(
@@ -43,7 +47,7 @@ class DictionaryFilterer(SentenceFilterer):
 
     def __init__(self, good_words: tp.Sequence[str]) -> None:
         super().__init__()
-        self.good_words = good_words
+        self.good_words = set(good_words)
 
     def get_targets(self, df: pd.DataFrame) -> pd.Series:
         return df.word.str.lower().isin(self.good_words)
