@@ -206,6 +206,13 @@ class Separator:
         if df.word_id.isnull().any():
             raise ValueError(f'Null word_id at {list(df.loc[df.word_id.isnull()])}')
 
+    @staticmethod
+    def from_word_en(words: Iterable[str]):
+        df = pd.DataFrame(dict(word=list(words)))
+        for c in Separator.INDEX_COLUMNS:
+            df[c] = list(range(df.shape[0]))
+        return df
+
     Viewer = DfViewer
 
 
