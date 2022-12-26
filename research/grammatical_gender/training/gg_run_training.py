@@ -40,48 +40,47 @@ from tg.grammar_ru.common import Loc
 load_dotenv(Loc.root_path / 'environment.env')
 
 project_name = 'gg_project'
-dataset_name = 'gg_lenta_big'
+dataset_name = 'gg_lenta_big3featdist'
 bucket = 'ggbucket'
+task_name = f"task_{dataset_name}_120ep"
+
+# def get_tasks():
+#     tasks = []
+#     for bs in [22000, 25000, 28000, 30000, 32000, 35000]:
+#         task = ClassificationTaskByBatchSize(bs)
+#         task.info["dataset"] = dataset_name
+#         # "gg_task_lenta_full_20K_100ep"
+#         task.info["name"] = f"task_{dataset_name}_{bs}_1ep"
+#         tasks.append(task)
+#     return tasks
 
 
-def get_tasks():
-    tasks = []
-    for bs in [22000, 25000, 28000, 30000, 32000, 35000]:
-        task = ClassificationTaskByBatchSize(bs)
-        task.info["dataset"] = dataset_name
-        # "gg_task_lenta_full_20K_100ep"
-        task.info["name"] = f"task_{dataset_name}_{bs}_1ep"
-        tasks.append(task)
-    return tasks
-
-
-def get_training_job_with_many_tasks() -> TrainingJob:
-    tasks = get_tasks()
-    job = TrainingJob(
-        tasks=tasks,
-        project_name=project_name,
-        bucket=bucket
-    )
-    return job
-
-
-# def get_training_job() -> TrainingJob:
-#     task = ClassificationTask()
-#     task.info["dataset"] = dataset_name
-#     # "gg_task_lenta_full_20K_100ep"
-#     task.info["name"] = f"task_{dataset_name}_20K_200ep"
-
+# def get_training_job_with_many_tasks() -> TrainingJob:
+#     tasks = get_tasks()
 #     job = TrainingJob(
-#         tasks=[task],
+#         tasks=tasks,
 #         project_name=project_name,
 #         bucket=bucket
 #     )
 #     return job
 
 
-# job = get_training_job()
-job_many_tasks = get_training_job_with_many_tasks()
-job = job_many_tasks
+def get_training_job() -> TrainingJob:
+    task = ClassificationTask()
+    task.info["dataset"] = dataset_name
+    task.info["name"] = task_name
+
+    job = TrainingJob(
+        tasks=[task],
+        project_name=project_name,
+        bucket=bucket
+    )
+    return job
+
+
+job = get_training_job()
+# job_many_tasks = get_training_job_with_many_tasks()
+# job = job_many_tasks
 routine = SSHDockerJobRoutine(
     job=job,
     remote_host_address=None,
@@ -98,6 +97,7 @@ local_img = 'gg_img'
 
 
 # job.run()
+# exit()
 # b_path = Loc.bundles_path/'grammatical_gender/toy'
 # data = DataBundle.load(b_path)
 
@@ -111,7 +111,7 @@ local_img = 'gg_img'
 # task.name = 'gg'
 # model_folder = Path.home() / 'models' / f'{task.name}'
 # env = FileCacheTrainingEnvironment(model_folder)
-# print(data)
+# # print(data)
 # success = task.run_with_environment(data, env)
 # task.in
 # object_methods = [method_name for method_name in dir(task.task)

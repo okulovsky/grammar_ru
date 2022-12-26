@@ -84,7 +84,7 @@ class MyNetworkFactory:
         hidden_size = head_out.shape[1]
         labels_count = input['label'].shape[1]
         nn_tail = FullyConnectedNetwork(
-            sizes=[], input=hidden_size, output=labels_count)
+            sizes=[hidden_size], input=hidden_size, output=labels_count)
         # return FeedForwardNetwork(nn_head, nn_tail, torch.nn.Softmax(dim=1))
         return FeedForwardNetwork(nn_head, nn_tail)
 
@@ -102,8 +102,8 @@ class ClassificationTask(TaskFactory):
 
         metrics = bt.MetricPool().add(MulticlassMetrics())
         self.instantiate_default_task(
-            epoch_count=100,
-            batch_size=20000,
+            epoch_count=120,
+            batch_size=30_000,
             mini_batch_size=50,
             mini_epoch_count=1,
             metric_pool=metrics
@@ -118,7 +118,7 @@ class ClassificationTask(TaskFactory):
             name='plain_context',
             context_length=3,
             network_type=ContextualNetworkType.Plain,
-            hidden_size=[30],
+            hidden_size=[],
             context_builder=plain_context_builder,
             extractor=CoreExtractor(join_column='another_word_id'),
             debug=False
@@ -127,4 +127,13 @@ class ClassificationTask(TaskFactory):
             task=None, input=None)  # TODO could be better?
         core_extractor = plain_context.create_extractor(task=None, bundle=data)
         self.setup_batcher(data, [core_extractor, get_multilabel_extractor()])
-        self.setup_model(self.get_network, learning_rate=0.1)
+        self.setup_model(self.get_network, learning_rate=0.1)#,optimizer_ctor='torch.optim:Adam')
+
+
+class ClassificationTaskByBatchSize(ClassificationTask):
+    def __init__(self, batch_size):
+        super().__init__()
+        self.batch_size = batch_size
+
+    def instantiate_default_task(self, epoch_count, batch_size, metric_pool, mini_batch_size=200, mini_epoch_count=8):
+        return super().instantiate_default_task(1, self.batch_size, metric_pool, mini_batch_size, mini_epoch_count)
