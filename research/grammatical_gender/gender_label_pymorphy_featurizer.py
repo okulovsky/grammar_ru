@@ -17,7 +17,8 @@ class GenderLabelPyMorphyFeaturizer(PyMorphyFeaturizer):
         rows = []
 
         # TODO delete progress bar
-        for src_row in Query.df(db.src).feed(fluq.with_progress_bar()):
+        # Query.df(db.src).feed(fluq.with_progress_bar()):
+        for src_row in Query.df(db.src):
             if src_row.word in self.cache:
                 row = copy.copy(self.cache[src_row.word])
                 row['word_id'] = src_row.word_id
@@ -42,7 +43,7 @@ class GenderLabelPyMorphyFeaturizer(PyMorphyFeaturizer):
                 row['delta_score'] = row['score']
             # ts = result.tag._grammemes_tuple
             for t in result.tag._grammemes_tuple:
-                if t in self.map: #and self.map[t] != 'gender':
+                if t in self.map:  # and self.map[t] != 'gender':
                     row[self.map[t]] = t
             rows.append(row)
             self.cache[src_row.word] = row
