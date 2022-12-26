@@ -7,7 +7,8 @@ import shutil
 import subprocess
 from ..yandex_storage.s3_yandex_helpers import S3YandexHandler
 from pathlib import Path
-
+import ast 
+from typing import List
 
 _TRAINING_RESULTS_LOCATION = Loc.temp_path / 'training_results'
 
@@ -35,3 +36,11 @@ def download_and_open_datasphere_result(bucket, project_name, task_id, dont_redo
             filename
         )
         return open_datasphere_result(filename, task_id)
+
+
+def get_tasks_list(list_s3_path:str, bucket)->List[str]:
+    tmp_local_file = Loc.temp_path / list_s3_path.split('/')[-1]
+    S3YandexHandler.download_file(bucket, list_s3_path, tmp_local_file)
+    with open(tmp_local_file,'r') as f:
+        tasks = ast.literal_eval(f.read())
+    return tasks
