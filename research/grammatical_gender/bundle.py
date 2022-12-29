@@ -14,7 +14,7 @@ class GGTrainIndexBuilder:
         self.pmf = GenderLabelPyMorphyFeaturizer()  # PyMorphyFeaturizer()
         self.an = pymorphy2.MorphAnalyzer()  # TODO delete
         self.speech_part_labels = [
-            'NOUN', 'ADJF', 'ADJS', 'VERB', 'PRTF', 'PRTS']  # TODO what else?
+            'ADJF', 'ADJS', 'VERB', 'PRTF', 'PRTS']
         self.gender_nums = {g: i for i, g in enumerate(
             ['masc', 'femn', 'neut'])}  # , 'nan'])}
 
