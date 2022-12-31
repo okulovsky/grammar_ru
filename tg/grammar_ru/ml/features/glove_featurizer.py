@@ -33,6 +33,16 @@ class GloveFeaturizer(Featurizer):
     def get_frame_names(self) -> List[str]:
         return ['glove_keys','glove_scores']
 
+    @staticmethod
+    def embedding_to_df(emb, indices):
+        t_input = torch.tensor(indices)
+        t_output = emb(t_input)
+        gdf = pd.DataFrame(t_output.tolist())
+        gdf['glove_index'] = t_input.tolist()
+        gdf = gdf.set_index('glove_index')
+        gdf.columns = [f'c{c}' for c in gdf.columns]
+        return gdf
+
     def featurize(self, db: DataBundle) -> None:
         df = db.src.set_index('word_id')[['word', 'word_type']]
         check_columns = ['word']
@@ -69,11 +79,8 @@ class GloveFeaturizer(Featurizer):
         df = df[['selected_word', 'selected_word_column', 'glove_index']]
         db['glove_keys'] = df
 
+        indices = list(df.glove_index.unique())
         emb = NavecEmbedding(self.navec)
-        t_input = torch.tensor(list(df.glove_index.unique()))
-        t_output = emb(t_input)
-        gdf = pd.DataFrame(t_output.tolist())
-        gdf['glove_index'] = t_input.tolist()
-        gdf = gdf.set_index('glove_index')
-        gdf.columns = [f'c{c}' for c in gdf.columns]
+        gdf = GloveFeaturizer.embedding_to_df(emb, indices)
+
         db['glove_scores'] = gdf
