@@ -35,6 +35,45 @@ class NegativeSampler(abc.ABC):
         return results
 
 
+class EndingNegativeSampler(NegativeSampler):
+    def __init__(self, ending_1, ending_2):
+        self.ending_1 = ending_1
+        self.ending_2 = ending_2
+
+
+    def build_negative_sample_from_positive(self, positive: pd.DataFrame) -> pd.DataFrame:
+        negative = positive.copy()
+        negative.word = np.where(
+            ~negative.is_target,
+            negative.word,
+            np.where(
+                negative.word.str.endswith(self.ending_1),
+                negative.word.str.replace(self.ending_1, self.ending_2),
+                negative.word.str.replace(self.ending_2, self.ending_1)
+            )
+        )
+        return negative
+
+class WordPairsNegativeSampler(NegativeSampler):
+    def __init__(self, pairs: List[Tuple[str,str]]):
+        self.pairs = pairs
+        self.input_marker =  'ЫВЩЛЦЩУСЛФФЫВАЙЗДЫ'
+        self.output_marker = 'ВЩЛЙДЫЗФЗСЧЯФБЦЬЛУ'
+
+
+    def build_negative_sample_from_positive(self, positive_sample: pd.DataFrame) -> pd.DataFrame:
+        df = positive_sample.copy()
+        df.word = np.where(df.is_target, self.input_marker+df.word, df.word)
+        text = Separator.Viewer().to_text(df)
+        for p in self.pairs:
+            for w_1, w_2 in [ (p[0], p[1]), (p[1], p[0])]:
+                text = text.replace(self.input_marker+w_1, self.output_marker+w_2)
+        ndf = Separator.separate_string(text)
+        ndf['is_target'] = ndf.word.str.startswith(self.output_marker)
+        ndf.word = np.where(ndf.word.str.startswith(self.output_marker), ndf.word.str.slice(len(self.output_marker)), ndf.word)
+        return ndf
+
+
 
 
 class RegexNegativeSampler(NegativeSampler):
@@ -125,22 +164,4 @@ class ChtobyNegativeSampler(RegexNegativeSampler):
         return alternatives
 
 
-class EndingNegativeSampler(NegativeSampler):
-    def __init__(self, ending_1, ending_2):
-        self.ending_1 = ending_1
-        self.ending_2 = ending_2
-
-
-    def build_negative_sample_from_positive(self, positive: pd.DataFrame) -> pd.DataFrame:
-        negative = positive.copy()
-        negative.word = np.where(
-            ~negative.is_target,
-            negative.word,
-            np.where(
-                negative.word.str.endswith(self.ending_1),
-                negative.word.str.replace(self.ending_1, self.ending_2),
-                negative.word.str.replace(self.ending_2, self.ending_1)
-            )
-        )
-        return negative
 

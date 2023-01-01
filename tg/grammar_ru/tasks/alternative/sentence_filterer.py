@@ -1,3 +1,4 @@
+
 import abc
 import typing as tp
 from pathlib import Path
@@ -44,16 +45,18 @@ class DictionaryFilterer(SentenceFilterer):
         return df.word.str.lower().isin(self.good_words)
 
 
-class ChtobyFilterer(SentenceFilterer):
-    def get_targets(self, df: pd.DataFrame) -> tp.Sequence[bool]:
-        targets = df.set_index('word_id').word.str.lower() == 'чтобы'
+class WordSequenceFilterer(SentenceFilterer):
+    def __init__(self, sequences: tp.Iterable[tp.Iterable[str]]):
+        super(WordSequenceFilterer, self).__init__()
+        self.sequences = [list(z) for z in sequences]
 
-        chto = df[df['word'].str.lower() == 'что']
-        chto_next = chto['word_id'] + 1
-        chto_neighbour = df.merge(chto_next, how='inner')
-        by = chto_neighbour[chto_neighbour['word'] == 'бы']
-
-        targets[by['word_id'] - 1] = True
-
-        return targets.values
+    def get_targets(self, df: pd.DataFrame) -> pd.Series:
+        words = df.word.str.lower()
+        all_targets = pd.Series(False, index=df.index)
+        for sequence in self.sequences:
+            target = pd.Series(True, index=df.index)
+            for idx, word in enumerate(sequence):
+                target = target & (words.shift(-idx) == word)
+            all_targets = all_targets | target
+        return all_targets
 
