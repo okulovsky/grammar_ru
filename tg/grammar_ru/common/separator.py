@@ -211,6 +211,8 @@ class Separator:
         df = pd.DataFrame(dict(word=list(words)))
         for c in Separator.INDEX_COLUMNS:
             df[c] = list(range(df.shape[0]))
+        df['word_type'] = 'ru'
+        df['word_tail'] = 1
         return df
 
     Viewer = DfViewer
