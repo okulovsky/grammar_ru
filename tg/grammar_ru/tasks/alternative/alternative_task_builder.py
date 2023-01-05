@@ -16,17 +16,16 @@ from .transfusion_selector import AlternativeTaskTransfuseSelector
 
 
 @dataclasses.dataclass
-class BundleConfig():
+class AlternativeTaskBundleConfig():
     corpora: List[Path]
     filterer: SentenceFilterer
     negative_sampler: NegativeSampler
     featurizers: List[Featurizer]
     temp_folder: Path
-    output: Path
 
 
-class BundleBuilder():
-    def __init__(self, config: BundleConfig):
+class AlternativeTaskBundleBuilder():
+    def __init__(self, config: AlternativeTaskBundleConfig):
         self.config = config
 
     def get_all_frames(self):
@@ -62,8 +61,9 @@ class BundleBuilder():
             self.config.featurizers
         )
 
-    def assemble(self):
+    def assemble(self,entries_limit, output_path):
         CorpusBuilder.assemble(
             self.config.temp_folder/'featurized.zip',
-            self.config.output
+            output_path,
+            entries_limit
         )
