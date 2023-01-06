@@ -126,3 +126,4 @@ widgetsnbextension==4.0.2
 yo-fluq==1.1.11
 yo-fluq-ds==1.1.11
 zipp==3.8.1
+deprecated==1.2.13

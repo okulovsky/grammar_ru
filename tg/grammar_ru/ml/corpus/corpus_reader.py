@@ -3,6 +3,7 @@ import zipfile
 from io import BytesIO
 from yo_fluq_ds import *
 from ...common import DataBundle, Separator
+import deprecated
 
 class ISrcReader:
     def read_frames(self):
@@ -41,7 +42,9 @@ class CorpusReader(ISrcReader):
     def _get_frames_iter(self, uids):
         with zipfile.ZipFile(self.location, 'r') as file:
             for uid in uids:
-                yield  self._read_src(file, uid)
+                df = self._read_src(file, uid)
+                if df.shape[0] > 0:
+                    yield df
 
 
     def _get_custom_frames_iter(self, frame_type, uids):
@@ -72,7 +75,10 @@ class CorpusReader(ISrcReader):
             featurizers = self._get_fearurizers_name(file)
             for uid in uids:
                 frames = {}
-                frames['src'] = self._read_src(file, uid)
+                src = self._read_src(file, uid)
+                if src.shape[0] == 0:
+                    continue
+                frames['src'] = src
                 for featurizer in featurizers:
                     df = self._read_frame(file, f'{featurizer}/{uid}.parquet')
                     #if df.index.name not in self.updatable_columns:
@@ -99,6 +105,20 @@ class CorpusReader(ISrcReader):
         return self.get_bundles(uids)
 
 
+    @staticmethod
+    def read_frames_from_several_corpora(sources: Union[Path, List[Path]]):
+        if isinstance(sources, Path):
+            sources = [sources]
+        readers = [CorpusReader(s) for s in sources]
+        total_length = sum([r.get_toc().shape[0] for r in readers])
+
+        query = Query.en(readers).select_many(
+            lambda x: x.get_frames()
+        )
+        return Queryable(query, total_length)
+
+
+@deprecated.deprecated('Use CorpusReader.read_frames_from_several_corpora')
 def read_data(sources: Union[Path, List[Path]]) -> List[pd.DataFrame]:
     if isinstance(sources, Path):
         sources = [sources]

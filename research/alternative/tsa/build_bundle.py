@@ -1,4 +1,5 @@
-from tg.grammar_ru.ml.tasks.tsa.bundle import build_dictionary, TrainIndexBuilder
+from tg.grammar_ru.ml.tasks.tsa.bundle import build_dictionary
+from tg.grammar_ru.ml.tasks.train_index_builder.train_index_builders import TsaIndexBuilder
 from tg.grammar_ru.ml.corpus import CorpusReader, CorpusBufferedWriter, CorpusBuilder
 from tg.grammar_ru.ml.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer
 from tg.grammar_ru.common import Loc
@@ -20,7 +21,7 @@ def build_word_dict():
 
 def build_index():
     words = FileIO.read_json(VOCAB_FILE)
-    index_builder = TrainIndexBuilder(words)
+    index_builder = TsaIndexBuilder(words)
     CorpusBuilder.transfuse_corpus(
         [Loc.corpus_path/'lenta.base.zip'],
         Loc.bundles_path/'tsa/prepare/raw/raw.zip',
@@ -49,7 +50,7 @@ def assemble(name, limit):
         limit
     )
     src = pd.read_parquet(bundle_path/'src.parquet')
-    index = TrainIndexBuilder.build_index_from_src(src)
+    index = TsaIndexBuilder.build_index_from_src(src)
     index.to_parquet(bundle_path/'index.parquet')
     print(index.groupby('split').size())
 

@@ -4,3 +4,5 @@ from .corpus_builder import CorpusBuilder
 from .control_distribution import ControlDistribution
 from .corpus_buffered_writer import CorpusBufferedWriter
 from .corpus_balancer import BucketCorpusBalancer
+from .transfuse_selector import ITransfuseSelector
+from .bucket_balancer import BucketBalancer
