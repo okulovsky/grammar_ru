@@ -39,18 +39,6 @@ class AlternativeTaskBundleBuilder():
         buckets_df = BucketBalancer.collect_buckets(en)
         return buckets_df
 
-    def transfuse(self, buckets, words_per_frame = 50000, words_limit=None):
-        balancer = BucketBalancer(BucketBalancer.buckets_statistics_to_dict(buckets))
-        CorpusBuilder.transfuse_corpus(
-            sources=self.config.corpora,
-            destination=self.config.temp_folder/'transfuzed.zip',
-            selector=balancer,
-            words_limit=words_limit,
-            words_per_frame=words_per_frame,
-            overwrite=True
-        )
-
-    #FIXIT
     def prepare(self, buckets: pd.DataFrame, words_per_frame = 50000, words_limit=None):
         balancer = BucketBalancer(BucketBalancer.buckets_statistics_to_dict(buckets))
 
