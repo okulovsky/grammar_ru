@@ -16,4 +16,5 @@ slovnet
 pyenchant
 pymorphy2
 nerus
+corus
 Flask==2.1.0

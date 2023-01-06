@@ -186,9 +186,12 @@ class CorpusBuilder:
 
         for source in sources:
             reader = CorpusReader(source)
-            for toc_row in Query.df(reader.get_toc().reset_index()):
-                frame = reader.get_frames(uids = [toc_row["file_id"]]).first()
+            toc = reader.get_toc()
+            frame_index_in_corpus = 0
+            for frame in reader.get_frames():
+                toc_row = toc.iloc[frame_index_in_corpus].to_dict()
                 frames_count += 1
+                frame_index_in_corpus+=1
 
                 if selector is None:
                     dfs = [frame]
