@@ -9,14 +9,14 @@ from yo_fluq_ds import *
 
 from .sentence_filterer import SentenceFilterer
 from .negative_sampler import NegativeSampler
-from ...ml.features import Featurizer
-from ...ml.corpus import CorpusReader, BucketBalancer, CorpusBuilder
+from ...grammar_ru.ml.features import Featurizer
+from ...grammar_ru.ml.corpus import CorpusReader, BucketBalancer, CorpusBuilder
 from .transfusion_selector import AlternativeTaskTransfuseSelector
 
 
 
 @dataclasses.dataclass
-class AlternativeTaskBundleConfig():
+class BundleConfig():
     corpora: List[Path]
     filterer: SentenceFilterer
     negative_sampler: NegativeSampler
@@ -24,7 +24,7 @@ class AlternativeTaskBundleConfig():
     temp_folder: Path
 
 
-class AlternativeTaskBundleBuilder():
+class BundleBuilder():
     def __init__(self, config: AlternativeTaskBundleConfig):
         self.config = config
 
