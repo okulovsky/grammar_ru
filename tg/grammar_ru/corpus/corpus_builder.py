@@ -1,5 +1,5 @@
 from typing import *
-from tg.grammar_ru.common import DataBundle, Loc
+from ..common import DataBundle, Loc
 from .formats.interformat_parser import InterFormatParser
 from .corpus_writer import CorpusWriter
 from .corpus_buffered_writer import CorpusBufferedWriter
@@ -9,7 +9,7 @@ from yo_fluq_ds import *
 import traceback
 from pathlib import Path
 import datetime
-from tg.common._common import Logger
+from ...common._common import Logger
 from .transfuse_selector import ITransfuseSelector
 
 

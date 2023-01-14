@@ -1,10 +1,10 @@
-from tg.common.delivery.jobs.ssh_docker_job_routine import build_container
+from ....common.delivery.jobs.ssh_docker_job_routine import build_container
 import subprocess
-from tg.common.delivery.packaging import FakeContainerHandler
-from tg.common.delivery.jobs import SSHDockerJobRoutine, DockerOptions
-from tg.grammar_ru.ml.components.yandex_delivery.training_example import ClassificationTask, TrainingJob, Loc
-from tg.common._common.data_bundle import DataBundle
-from tg.grammar_ru.ml.components.yandex_delivery.docker_tools import deploy_container
+from ....common.delivery.packaging import FakeContainerHandler
+from ....common.delivery.jobs import SSHDockerJobRoutine, DockerOptions
+from ...ml.components.yandex_delivery.training_example import ClassificationTask, TrainingJob, Loc
+from ....common._common.data_bundle import DataBundle
+from ...ml.components.yandex_delivery.docker_tools import deploy_container
 from dotenv import load_dotenv
 import datetime
 

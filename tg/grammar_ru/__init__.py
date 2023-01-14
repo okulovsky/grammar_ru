@@ -1,1 +1,1 @@
-from tg.grammar_ru.corpus import CorpusReader
+from .corpus import CorpusReader

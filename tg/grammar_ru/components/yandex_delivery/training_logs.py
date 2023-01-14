@@ -4,10 +4,10 @@ import hashlib
 from datetime import datetime
 import boto3
 # from .sagemaker_training_routine import download_and_open_sagemaker_result
-from tg.grammar_ru.ml.components.yandex_delivery.datasphere_tools import download_and_open_datasphere_result
+from ...ml.components.yandex_delivery.datasphere_tools import download_and_open_datasphere_result
 from matplotlib import pyplot as plt
 # from ...datasets.access import CacheMode
-from tg.common._common import Loc
+from ....common._common import Loc
 
 class S3TrainingLogsLoader:
     def __init__(self,

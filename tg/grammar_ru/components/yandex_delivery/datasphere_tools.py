@@ -1,5 +1,5 @@
-from tg.common._common import Loc
-from tg.common.delivery.training.architecture import ResultPickleReader
+from ....common._common import Loc
+from ....common.delivery.training.architecture import ResultPickleReader
 import os
 import boto3
 import sagemaker

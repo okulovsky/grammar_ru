@@ -1,7 +1,7 @@
 from typing import *
 from .negative_sampler import NegativeSampler
 from .sentence_filterer import SentenceFilterer
-from tg.grammar_ru.corpus import ITransfuseSelector
+from ...grammar_ru.corpus import ITransfuseSelector
 from pathlib import Path
 import pandas as pd
 

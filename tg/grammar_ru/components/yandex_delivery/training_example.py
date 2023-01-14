@@ -1,17 +1,17 @@
 from sklearn import datasets
 import pandas as pd
-from tg.common.ml import batched_training as bt
+from ....common.ml import batched_training as bt
 import torch
 
-from tg.common.ml import dft
+from ....common.ml import dft
 
 from sklearn.metrics import roc_auc_score
 
-from tg.common import DataBundle
+from ....common import DataBundle
 from .....common.delivery.training.architecture import FileCacheTrainingEnvironment
-from tg.common import Logger
+from ....common import Logger
 from .....common.delivery.jobs import DeliverableJob
-from tg.grammar_ru.common.loc import Loc
+from ...common.loc import Loc
 from ...components.training_task_factory import TaskFactory, Conventions
 from ..yandex_storage.s3_yandex_helpers import S3YandexHandler
 from ....ml.components.yandex_delivery.training_job import TrainingJob

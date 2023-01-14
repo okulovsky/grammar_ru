@@ -1,9 +1,9 @@
 from typing import *
-from tg.grammar_ru.common import Separator, Loc
+from ..common import Separator, Loc
 from .corpus_writer import CorpusWriter
 import pandas as pd
 from pathlib import Path
-from tg.common._common import Logger
+from ...common._common import Logger
 
 class CorpusBufferedWriter:
     def __init__(self,

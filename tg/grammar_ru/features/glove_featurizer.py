@@ -3,7 +3,7 @@ from slovnet.model.emb import NavecEmbedding
 import torch
 from navec import Navec
 import pandas as pd
-from tg.grammar_ru.common import Loc
+from ..common import Loc
 import os
 import urllib.request
 from .architecture import Featurizer, DataBundle

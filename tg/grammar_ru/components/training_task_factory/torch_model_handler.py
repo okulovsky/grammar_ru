@@ -1,7 +1,7 @@
 from typing import *
-from tg.common.ml import batched_training as bt
+from ....common.ml import batched_training as bt
 from .....common.ml.batched_training.torch import networks as btn
-from tg.common.ml.single_frame_training import ModelConstructor
+from ....common.ml.single_frame_training import ModelConstructor
 
 import pandas as pd
 from .conventions import Conventions

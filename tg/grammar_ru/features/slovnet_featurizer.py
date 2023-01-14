@@ -3,7 +3,7 @@
 from .architecture import *
 from navec import Navec
 from slovnet import Syntax, Morph
-from tg.grammar_ru.common import Loc
+from ..common import Loc
 from yo_fluq_ds import *
 import urllib.request
 import os

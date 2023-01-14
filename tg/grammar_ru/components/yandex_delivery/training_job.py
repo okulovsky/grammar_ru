@@ -4,11 +4,11 @@ import datetime
 import tarfile
 import os.path
 import shutil
-from tg.common import DataBundle
+from ....common import DataBundle
 from .....common.delivery.training.architecture import FileCacheTrainingEnvironment
-from tg.common import Logger
+from ....common import Logger
 from .....common.delivery.jobs import DeliverableJob
-from tg.grammar_ru.common.loc import Loc
+from ...common.loc import Loc
 from ...components.training_task_factory import TaskFactory
 from ..yandex_storage.s3_yandex_helpers import S3YandexHandler
 import sys

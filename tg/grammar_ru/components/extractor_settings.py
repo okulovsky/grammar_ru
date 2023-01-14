@@ -1,8 +1,8 @@
-from tg.common.ml import dft
-from tg.common.ml.batched_training import mirrors as btm
+from ...common.ml import dft
+from ...common.ml.batched_training import mirrors as btm
 from .contextual_binding import ContextualBinding
-from tg.common.ml.batched_training import torch as btt
-from tg.common.ml import batched_training as bt
+from ...common.ml.batched_training import torch as btt
+from ...common.ml import batched_training as bt
 from .plain_context_builder import PlainContextBuilder
 from .core_extractor.extractor import CoreExtractor
 
