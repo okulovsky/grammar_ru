@@ -1,5 +1,5 @@
 from unittest import TestCase
-from tg.grammar_ru.ml.features import DialogMarkupFeaturizer
+from tg.grammar_ru.features import DialogMarkupFeaturizer
 from tg.grammar_ru.common import Separator, DataBundle
 
 

@@ -1,8 +1,6 @@
 from tg.grammar_ru.common import Separator
-from tg.grammar_ru.ml.features import SlovnetFeaturizer
+from tg.grammar_ru.features import SlovnetFeaturizer
 from unittest import TestCase
-import numpy as np
-from tg.common import DataBundle
 
 text = 'Он подошел к двери. За ней никого не было.'
 

@@ -1,2 +1,1 @@
-from .common import Loc, DataBundle, Separator
-from .ml.corpus import CorpusReader
+from tg.grammar_ru.corpus import CorpusReader

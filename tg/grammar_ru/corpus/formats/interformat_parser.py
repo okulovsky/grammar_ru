@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import *
 from yo_fluq_ds import FileIO, Query, Queryable
 from ..corpus_writer import CorpusFragment
-from ....common import Separator, Symbols
+from tg.grammar_ru.common import Separator, Symbols
 import re
 import json
 

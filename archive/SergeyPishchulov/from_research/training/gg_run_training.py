@@ -4,7 +4,6 @@ from tg.common.ml.batched_training import IndexedDataBundle
 from tg.common.ml import batched_training as bt
 from tg.common.ml.batched_training import torch as btt
 from tg.common.ml.batched_training import context as btc
-from tg.common.ml import dft
 from yo_fluq_ds import fluq
 
 
@@ -12,25 +11,19 @@ from tg.grammar_ru.ml.components.attention_network import AttentionNetwork
 from tg.common.ml.batched_training.torch.networks.lstm_network import LSTMFinalizer
 
 from tg.grammar_ru.ml.components.extractor_settings import CoreExtractor
-from tg.grammar_ru.ml.components.plain_context_builder import PlainContextBuilder
 import datetime
 from tg.grammar_ru.ml.components.training_task_factory import TaskFactory
 from tg.grammar_ru.ml.components.training_task_factory import Conventions
-from tg.common.ml.training_core import TrainingEnvironment
-from tg.grammar_ru.ml.components.contextual_binding import ContextualBinding, ContextualNetworkType
 
 from tg.grammar_ru.ml.components.yandex_delivery.training_job import TrainingJob
 from tg.grammar_ru.ml.components.yandex_storage.s3_yandex_helpers import S3YandexHandler
 from tg.common.delivery.jobs import SSHDockerJobRoutine, DockerOptions
 from tg.common.delivery.packaging import FakeContainerHandler
 
-from tg.grammar_ru.common import Loc
-from sklearn.metrics import roc_auc_score
 from typing import Dict, Optional  # TODO delete redundant
 from tg.common.delivery.training.architecture import FileCacheTrainingEnvironment
 from tg.grammar_ru.ml.components.yandex_delivery.docker_tools import deploy_container
 from tg.common.delivery.jobs.ssh_docker_job_routine import build_container
-from tg.common.ml.batched_training.torch.networks import FeedForwardNetwork, FullyConnectedNetwork
 import torch
 from pathlib import Path
 from dotenv import load_dotenv

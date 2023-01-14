@@ -6,7 +6,7 @@ from datetime import datetime
 from io import BytesIO
 import os
 from uuid import uuid4
-from ...common import DataBundle, Separator
+from tg.grammar_ru.common import DataBundle, Separator
 from yo_fluq_ds import Query, FileIO
 import time
 

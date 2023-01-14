@@ -1,5 +1,5 @@
 from typing import *
-from .....common.ml import batched_training as bt
+from tg.common.ml import batched_training as bt
 from .....common.ml.batched_training.torch.torch_task import Conventions
 from .torch_model_handler import TorchModelHandler
 

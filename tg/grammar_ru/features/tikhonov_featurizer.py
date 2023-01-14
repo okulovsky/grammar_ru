@@ -1,7 +1,7 @@
 from .architecture import *
 from yo_fluq_ds import *
 from pathlib import Path
-from ...common import DataBundle
+from tg.grammar_ru.common import DataBundle
 
 class TikhonovDict:
     @staticmethod

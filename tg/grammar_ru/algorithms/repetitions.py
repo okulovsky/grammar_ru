@@ -1,5 +1,5 @@
 from .architecture import NlpAlgorithm
-from ..ml.features import PyMorphyFeaturizer, MorphemeTikhonovFeaturizer
+from tg.grammar_ru.features import PyMorphyFeaturizer, MorphemeTikhonovFeaturizer
 from ..common import DataBundle
 from yo_fluq_ds import *
 

@@ -1,5 +1,5 @@
-from tg.grammar_ru.ml.corpus import CorpusBuilder
-from tg.grammar_ru.ml.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxStatsFeaturizer, SyntaxTreeFeaturizer
+from tg.grammar_ru.corpus import CorpusBuilder
+from tg.grammar_ru.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxStatsFeaturizer, SyntaxTreeFeaturizer
 from pathlib import Path
 
 if __name__ == '__main__':

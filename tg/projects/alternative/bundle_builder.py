@@ -1,16 +1,13 @@
-from typing import *
-import math
 import dataclasses
 
 from pathlib import Path
 
-import pandas as pd
 from yo_fluq_ds import *
 
 from .sentence_filterer import SentenceFilterer
 from .negative_sampler import NegativeSampler
-from ...grammar_ru.ml.features import Featurizer
-from ...grammar_ru.ml.corpus import CorpusReader, BucketBalancer, CorpusBuilder
+from tg.grammar_ru.features import Featurizer
+from tg.grammar_ru.corpus import CorpusReader, BucketBalancer, CorpusBuilder
 from .transfusion_selector import AlternativeTaskTransfuseSelector
 
 

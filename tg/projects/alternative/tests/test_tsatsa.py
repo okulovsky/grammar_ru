@@ -1,7 +1,7 @@
 from unittest import TestCase
 from tg.grammar_ru.ml.tasks.tsatsa import TsaTsaTask, TaskBuilder
 from tg.grammar_ru.common import Separator
-from tg.grammar_ru.ml.features import PyMorphyFeaturizer, SlovnetFeaturizer
+from tg.grammar_ru.features import PyMorphyFeaturizer, SlovnetFeaturizer
 
 class TsaTsaTestCase(TestCase):
     def test_transform(self):

@@ -1,6 +1,6 @@
 from tg.common.ml.batched_training import DataBundle, IndexedDataBundle
 from tg.grammar_ru.common import Separator
-from tg.grammar_ru.ml.components.plain_context_builder import PlainContextBuilder
+from tg.grammar_ru.components.plain_context_builder import PlainContextBuilder
 
 from unittest import TestCase
 import pandas as pd

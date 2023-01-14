@@ -1,5 +1,5 @@
 from typing import *
-from .....common.ml import dft
+from tg.common.ml import dft
 import numpy as np
 
 def log_transformer(df):

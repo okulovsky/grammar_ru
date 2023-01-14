@@ -1,6 +1,6 @@
 from typing import *
 from ..algorithms import NlpAlgorithm
-from ..ml.features import Featurizer, PyMorphyFeaturizer
+from tg.grammar_ru.features import PyMorphyFeaturizer
 from ..common import DataBundle, Separator
 import pandas as pd
 import sys

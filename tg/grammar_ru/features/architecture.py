@@ -1,6 +1,6 @@
 from typing import *
 import pandas as pd
-from ...common import DataBundle
+from tg.grammar_ru.common import DataBundle
 
 
 

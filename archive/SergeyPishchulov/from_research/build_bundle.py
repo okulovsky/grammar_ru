@@ -1,6 +1,6 @@
 from research.grammatical_gender.bundle import GGTrainIndexBuilder
-from tg.grammar_ru.ml.corpus import CorpusBuilder
-from tg.grammar_ru.ml.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer
+from tg.grammar_ru.corpus import CorpusBuilder
+from tg.grammar_ru.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer
 from tg.grammar_ru.common import Loc
 from yo_fluq_ds import *
 

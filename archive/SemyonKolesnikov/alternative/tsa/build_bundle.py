@@ -1,7 +1,7 @@
 from tg.grammar_ru.ml.tasks.tsa.bundle import build_dictionary
 from tg.grammar_ru.ml.tasks.train_index_builder.train_index_builders import TsaIndexBuilder
-from tg.grammar_ru.ml.corpus import CorpusReader, CorpusBufferedWriter, CorpusBuilder
-from tg.grammar_ru.ml.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer
+from tg.grammar_ru.corpus import CorpusReader, CorpusBuilder
+from tg.grammar_ru.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer
 from tg.grammar_ru.common import Loc
 from tg.common import S3Handler
 from yo_fluq_ds import *

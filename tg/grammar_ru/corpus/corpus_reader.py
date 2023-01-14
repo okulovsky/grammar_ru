@@ -2,7 +2,7 @@ from pathlib import Path
 import zipfile
 from io import BytesIO
 from yo_fluq_ds import *
-from ...common import DataBundle, Separator
+from tg.grammar_ru.common import DataBundle, Separator
 import deprecated
 
 class ISrcReader:

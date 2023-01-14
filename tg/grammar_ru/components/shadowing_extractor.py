@@ -1,5 +1,5 @@
-from ....common.ml import dft
-from ....common.ml import batched_training as bt
+from tg.common.ml import dft
+from tg.common.ml import batched_training as bt
 
 
 class ShadowingTransformer:

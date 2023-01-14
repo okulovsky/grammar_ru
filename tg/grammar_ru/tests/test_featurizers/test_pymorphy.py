@@ -1,7 +1,6 @@
 from tg.grammar_ru.common import Separator
-from tg.grammar_ru.ml.features import PyMorphyFeaturizer
+from tg.grammar_ru.features import PyMorphyFeaturizer
 from unittest import TestCase
-import numpy as np
 
 text = 'Он подошел к двери. За ней никого не было.'
 

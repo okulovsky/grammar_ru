@@ -1,4 +1,4 @@
-from tg.grammar_ru.ml.features.architecture import SimpleFeaturizer
+from tg.grammar_ru.features.architecture import SimpleFeaturizer
 from tg.grammar_ru.common import Separator
 from unittest import TestCase
 import pandas as pd

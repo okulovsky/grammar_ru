@@ -1,7 +1,7 @@
-from tg.grammar_ru.ml.features.hierarchical_context_featurizer import build_closure
+from tg.grammar_ru.features.hierarchical_context_featurizer import build_closure
 from unittest import TestCase
 from tg.grammar_ru.common import Separator
-from tg.grammar_ru.ml.features import SlovnetFeaturizer
+from tg.grammar_ru.features import SlovnetFeaturizer
 from tg.grammar_ru.common.tree_viewer import TreeViewer
 
 class ClosureTestCase(TestCase):

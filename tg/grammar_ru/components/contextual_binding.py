@@ -4,9 +4,9 @@ from typing import *
 from enum import Enum
 from copy import deepcopy
 
-from ....common.ml import batched_training as bt
-from ....common.ml.batched_training import context as btc
-from ....common.ml.batched_training import torch as btt
+from tg.common.ml import batched_training as bt
+from tg.common.ml.batched_training import context as btc
+from tg.common.ml.batched_training import torch as btt
 from ....common.ml.batched_training.mirrors import ExtractorNetworkBinding
 
 from .attention_network import AttentionReccurentNetwork, AttentionNetwork
