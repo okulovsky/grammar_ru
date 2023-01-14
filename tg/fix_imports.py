@@ -21,4 +21,8 @@ if __name__ == '__main__':
     imps = Query.en(lib_files).select_many(ImportFixer.parse_imports_from_file).select(fixer.fix_absolute_import).where(lambda z: z is not None).to_list()
     files = Query.en(imps).select(lambda z: z.file).distinct().order_by(lambda z: z).to_list()
     Query.en(files).foreach(print)
-    Query.en(imps).foreach(fixer.apply)
+    (Query
+     .en(imps)
+     #.where(lambda z: 'grammar_ru/__init__' in str(z.file))
+     .foreach(fixer.apply)
+     )
