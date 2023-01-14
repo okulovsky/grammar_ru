@@ -37,7 +37,7 @@ class TrainingJob(DeliverableJob):
         Logger.info(f"List of tasks uploaded to {tasks_list_s3_path}")
         Logger.info(f"Training job {self.name} is done")
 
-    def _try_run(self, task, data, env):
+    def _try_run(self, task:TaskFactory, data, env):
         try:
             Logger.info(f"Running task {task.name} with environment")
             task.run_with_environment(data, env)
