@@ -1,10 +1,9 @@
 # from .architecture import *
-import pymorphy2
 from yo_fluq_ds import *
 import copy
 
-from tg.grammar_ru.ml.features import PyMorphyFeaturizer
-from tg.grammar_ru.ml.features.architecture import *
+from tg.grammar_ru.features import PyMorphyFeaturizer
+from tg.grammar_ru.features.architecture import *
 from itertools import groupby
 
 

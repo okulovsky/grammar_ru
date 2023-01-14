@@ -2,7 +2,7 @@ from research.common.bundle_builder import BundleConfig, BundleBuilder
 from tg.grammar_ru.common import Loc
 from tg.grammar_ru.ml.tasks.train_index_builder.sentence_filterer import ChtobyFilterer
 from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import ChtobyIndexBuilder
-from tg.grammar_ru.ml.features import (
+from tg.grammar_ru.features import (
     PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer
 )
 

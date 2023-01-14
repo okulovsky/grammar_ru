@@ -1,9 +1,7 @@
 import numpy as np
-import pandas as pd
 
 from tg.common import DataBundle
 from tg.common.ml.batched_training import train_display_test_split
-from tg.grammar_ru.ml.features import PyMorphyFeaturizer
 from research.grammatical_gender.gender_label_pymorphy_featurizer import GenderLabelPyMorphyFeaturizer
 import pymorphy2
 

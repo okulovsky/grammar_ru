@@ -3,9 +3,9 @@ import subprocess
 
 from pathlib import Path
 
-from tg.common._common import Loc
-from tg.common.delivery.training import SagemakerTrainingRoutine
-from tg.common.delivery.packaging import ContainerHandler
+from ..common._common import Loc
+from ..common.delivery.training import SagemakerTrainingRoutine
+from ..common.delivery.packaging import ContainerHandler
 
 
 

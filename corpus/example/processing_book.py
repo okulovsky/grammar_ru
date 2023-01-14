@@ -1,4 +1,4 @@
-from tg.grammar_ru.ml.corpus.formats import Fb2Scripts
+from tg.grammar_ru.corpus import Fb2Scripts
 from pathlib import Path
 
 if __name__ == '__main__':
