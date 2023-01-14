@@ -1,6 +1,5 @@
 from typing import *
 import pandas as pd
-import pygraphviz as pgv
 from yo_fluq_ds import *
 from IPython.display import Image
 

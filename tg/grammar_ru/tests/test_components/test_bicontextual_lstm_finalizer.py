@@ -1,4 +1,4 @@
-from tg.grammar_ru.ml.components.bicontextual_lstm_finalizer import LSTM_BicontextualFinalizer
+from tg.grammar_ru.components.bicontextual_lstm_finalizer import LSTM_BicontextualFinalizer
 from tg.common.ml.batched_training.torch import AnnotatedTensor
 
 from unittest import TestCase

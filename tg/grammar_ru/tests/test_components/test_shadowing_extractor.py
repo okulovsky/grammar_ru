@@ -1,7 +1,7 @@
 from tg.common.ml import batched_training as bt
 from tg.grammar_ru.common import Loc
 from unittest import TestCase
-from tg.grammar_ru.ml.components import ShadowingTransformer, CoreExtractor
+from tg.grammar_ru.components import ShadowingTransformer, CoreExtractor
 from yo_fluq_ds import *
 
 pd.options.display.width = None
