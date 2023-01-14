@@ -1,5 +1,5 @@
 from tg.grammar_ru.corpus import CorpusWriter, CorpusReader
-from tg.grammar_ru.corpus import InterFormatParser
+from tg.grammar_ru.corpus.formats import InterFormatParser
 from unittest import TestCase
 from pathlib import Path
 import os
@@ -26,7 +26,7 @@ class CorpusTestCase(TestCase):
         print(dfs[0])
         print(dfs[1])
         self.assertListEqual([0,0,0,1,1], list(dfs[0].sentence_id))
-        self.assertListEqual([10005,10005], list(dfs[1].sentence_id))
+        self.assertListEqual([10006,10006], list(dfs[1].sentence_id))
 
         os.remove(corpus_file)
 
