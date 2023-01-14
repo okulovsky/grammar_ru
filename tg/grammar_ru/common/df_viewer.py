@@ -24,7 +24,6 @@ class Fragment:
                 result+=f'background-color:{self.background_color};'
             if self.foreground_color is not None:
                 result+=f'color:{self.foreground_color};'
-            result+='"'
 
         if self.tooltip is not None:
             result+=f' title="{self.tooltip}"'

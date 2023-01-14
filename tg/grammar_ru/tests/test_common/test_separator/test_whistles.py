@@ -16,7 +16,7 @@ class SeparatorTestCase(TestCase):
         self.assertListEqual([50,50,51,52,52], list(ndf.sentence_id))
         self.assertListEqual([50,50,50,51,51], list(ndf.paragraph_id))
         self.assertListEqual([50,51,52,53,54], list(ndf.index))
-        self.assertEqual(55, Separator.get_max_id(ndf))
+        self.assertEqual(56, Separator.get_max_id(ndf))
         self.assertListEqual(list(df.word_id), list(ndf.original_word_id))
         self.assertListEqual(list(df.sentence_id), list(ndf.original_sentence_id))
         self.assertListEqual(list(df.paragraph_id), list(ndf.original_paragraph_id))
