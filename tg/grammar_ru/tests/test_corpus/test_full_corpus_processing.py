@@ -23,7 +23,7 @@ class CorpusBuilderTestCase(TestCase):
 
         corpus_1 = path/'test_corpus.1.zip'
         builder = CorpusBuilder()
-        builder.convert_interformat_folder_to_corpus(corpus_1, md_folder, 'folder', ['field1', 'field2'])
+        builder.convert_interformat_folder_to_corpus(corpus_1, md_folder, ['field1', 'field2'])
 
 
         rd = CorpusReader(corpus_1)

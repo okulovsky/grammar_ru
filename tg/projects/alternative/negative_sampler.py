@@ -31,6 +31,8 @@ class NegativeSampler(abc.ABC):
             kdf = xdf.copy()
             kdf.is_target = kdf.is_target & (kdf.order==k)
             kdf = kdf.drop('order',axis=1)
+            good_sentences = kdf.loc[kdf.is_target].sentence_id
+            kdf = kdf.loc[kdf.sentence_id.isin(good_sentences)]
             results.append(self.build_negative_sample_from_positive(kdf))
         return results
 

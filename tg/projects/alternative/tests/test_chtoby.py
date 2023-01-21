@@ -6,10 +6,13 @@ import pandas as pd
 import numpy as np
 
 from tg.grammar_ru.common import Separator, DataBundle
-from tg.grammar_ru.ml.tasks.train_index_builder.sentence_filterer import ChtobyFilterer
-from tg.grammar_ru.ml.tasks.train_index_builder.index_builders import ChtobyIndexBuilder
-from tg.grammar_ru.ml.tasks.train_index_builder.negative_sampler import ChtobyNegativeSampler
+from tg.projects.alternative import WordSequenceFilterer, WordPairsNegativeSampler
 
+def ChtobyFilterer():
+    return WordSequenceFilterer([['что', "бы"], ["чтобы"]])
+
+def ChtobyNegativeSampler():
+    return WordPairsNegativeSampler([('чтобы', "что бы"), ('Чтобы', 'Что бы')])
 
 class ChtobyTestCase(TestCase):
     def test_filterer(self):
@@ -42,21 +45,12 @@ class ChtobyTestCase(TestCase):
             Во что бы мне поиграть, чтобы развлечься.'''
         )
         frame = db.data_frames['src']
+        filterer = ChtobyFilterer()
+        filterered_df = filterer.get_filtered_df(frame)
+
         sampler = ChtobyNegativeSampler()
-        correct_word_marker = sampler._correct_word_suffix
-        expected_words = [
-            'Что', 'бы', 'приготовить', 'суп', '.',
-            'Чтобы', 'мне', 'сделать', '.',
-            'Для', 'того', ',', 'что', 'бы', '.',
-            'Во', f'что{correct_word_marker}', f'бы{correct_word_marker}', 'мне', 'поиграть', ',', 'что', 'бы', 'развлечься','.',
-            'Во', 'чтобы', 'мне', 'поиграть', ',', 'что', 'бы', 'развлечься', '.',
-            'Во', 'чтобы', 'мне', 'поиграть', ',', f'чтобы{correct_word_marker}', 'развлечься', '.'
-        ]
+        negative = pd.concat(sampler.build_all_negative_samples_from_positive(filterered_df))
+        expected = '''Что бы приготовить суп . Чтобы мне сделать . Для того , что бы . Во чтобы мне поиграть , чтобы развлечься . Во что бы мне поиграть , что бы развлечься .'''
+        expected_array = expected.split(' ')
+        self.assertListEqual(expected_array, list(negative.word))
 
-
-        negative = sampler.build_negative_sample_from_positive(frame)
-
-        self.assertListEqual(expected_words, list(negative['word']))
-
-    def test_algorithm(self):
-        pass

@@ -22,7 +22,7 @@ class BundleConfig():
 
 
 class BundleBuilder():
-    def __init__(self, config: AlternativeTaskBundleConfig):
+    def __init__(self, config: BundleConfig):
         self.config = config
 
     def get_all_frames(self, with_progress_bar = True):

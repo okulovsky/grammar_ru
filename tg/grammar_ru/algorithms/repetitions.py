@@ -87,15 +87,15 @@ class RepetitionsAlgorithm(NlpAlgorithm):
         err = df.error
         df[NlpAlgorithm.Hint] = ''
         ref_df = df.loc[err].repetition_reference.to_frame().merge(df.set_index('word_id').word, left_on='repetition_reference', right_index=True).word
-
-        df.loc[err, NlpAlgorithm.Hint] = (
-                'On algorithm `'+
-                df.loc[err,'repetition_algorithm']+
-                '` collides with word `'+
-                ref_df+
-                '` located '+
-                (df.loc[err,'word_id'] - df.loc[err,'repetition_reference']).astype(str)
-        )
+        if 'algorithm' in df.columns:
+            df.loc[err, NlpAlgorithm.Hint] = (
+                    'On algorithm `'+
+                    df.loc[err,'algorithm']+
+                     '` collides with word `'+
+                    ref_df+
+                    '` located '+
+                    (df.loc[err,'word_id'] - df.loc[err,'repetition_reference']).astype(str)
+            )
         df[NlpAlgorithm.ErrorType] = NlpAlgorithm.ErrorTypes.Stylistic
         return df
 

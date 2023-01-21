@@ -1,4 +1,4 @@
-from tg.grammar_ru.corpus import InterFormatParser
+from tg.grammar_ru.corpus.formats import InterFormatParser
 from unittest import TestCase
 
 

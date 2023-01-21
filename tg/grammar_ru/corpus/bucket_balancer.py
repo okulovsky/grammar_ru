@@ -24,7 +24,6 @@ class BucketBalancer(ITransfuseSelector):
             sdf = df.groupby(['corpus_id','sentence_id']).size().to_frame('len').reset_index()
             sdf['log_len'] = np.log(sdf.len)/np.log(log_base)
             sdf.log_len = sdf.log_len.astype(int)
-            sdf = sdf.drop('len',axis=1)
             result.append(sdf)
         rdf = pd.concat(result)
         rdf = rdf.reset_index(drop=True)
