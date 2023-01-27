@@ -7,6 +7,7 @@ from ..common import Loc
 from yo_fluq_ds import *
 import urllib.request
 import os
+import numpy as np
 
 #TODO: simplify! use glove_featurizer::download_dependency (and, probably, names like slovnet_navec, etc)
 class SlovnetFiles:
@@ -97,6 +98,7 @@ class SlovnetFeaturizer(SimpleFeaturizer):
         return pdf
 
     def _featurize_inner(self, db: DataBundle):
+        np.long = np.longlong
         chunks = SlovnetFeaturizer.separate_df_to_text(db.src)
         mdf = self._build_morph(chunks)
         pdf = self._build_syntax(chunks)
