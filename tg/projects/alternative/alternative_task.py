@@ -16,15 +16,16 @@ feature_dict = {
 class AlternativeTrainingTask(btf.TorchTrainingTask):
     def __init__(self,
                  dataset: str,
-                 batch_size: int = 20000,
+                 batch_size: int = 100000,
                  epoch_count: int = 100,
                  reduction_type: btc.ReductionType = btc.ReductionType.Dim3Folded,
                  network_type: btc.Dim3NetworkType = btc.Dim3NetworkType.LSTM,
                  hidden_size: int = 50,
                  tail_size: Optional[int] = None,
-                 context_length: int = 10,
+                 context_length: int = 15,
                  context_shift: float = 0.5,
-                 features: Optional[str] = None
+                 features: Optional[str] = None,
+                 learning_rate: float = 0.1
                  ):
         super(AlternativeTrainingTask, self).__init__()
         self.settings.epoch_count = epoch_count
@@ -53,7 +54,10 @@ class AlternativeTrainingTask(btf.TorchTrainingTask):
         self.context.dim_3_network_factory.network_type = network_type
         self.context.hidden_size = hidden_size
         self.optimizer_ctor.type = 'torch.optim:Adam'
+        self.optimizer_ctor.kwargs['lr'] = learning_rate
         self.tail_size = tail_size
+
+
 
 
     def initialize_task(self, idb: bt.IndexedDataBundle):

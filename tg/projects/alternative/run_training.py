@@ -27,8 +27,9 @@ def remote_run(**kwargs):
 
 if __name__ == '__main__':
     pass
-    #debug_run(True)
+    #debug_run(False)
     #remote_run(epoch_count=[3], batch_size=[10000, 20000, 50000, 100000, 200000])
-    remote_run(context_length=[9, 15, 21, 25], batch_size=[100000], epoch_count=[100], features=['p', None])
+    #remote_run(context_length=[9, 15, 21, 25], batch_size=[100000], epoch_count=[100], features=['p', None])
+    remote_run(hidden_size=[10, 20, 50, 100], learning_rate=[0.05, 0.02, 0.01])
 
 
