@@ -27,6 +27,7 @@ class AlternativeTaskTransfuseSelector(ITransfuseSelector):
         dfs = [df] + negatives
         for i, df in enumerate(dfs):
             df['label'] = 0 if i==0 else 1
+            df['original_corpus'] = str(corpus.name)
         return dfs
 
 

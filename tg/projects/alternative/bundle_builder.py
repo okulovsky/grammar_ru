@@ -36,6 +36,12 @@ class BundleBuilder():
         buckets_df = BucketBalancer.collect_buckets(en)
         return buckets_df
 
+    def get_transfused_location(self):
+        return self.config.temp_folder/'transfuzed.zip'
+
+    def get_featurized_location(self):
+        return self.config.temp_folder / 'featurized.zip'
+
     def prepare(self, buckets: pd.DataFrame, words_per_frame = 50000, words_limit=None):
         balancer = BucketBalancer(BucketBalancer.buckets_statistics_to_dict(buckets))
 
@@ -47,7 +53,7 @@ class BundleBuilder():
 
         CorpusBuilder.transfuse_corpus(
             sources=self.config.corpora,
-            destination=self.config.temp_folder/'transfuzed.zip',
+            destination=self.get_transfused_location(),
             selector=selector,
             words_limit=words_limit,
             words_per_frame=words_per_frame,
@@ -56,14 +62,14 @@ class BundleBuilder():
 
     def featurize(self):
         CorpusBuilder.featurize_corpus(
-            self.config.temp_folder/'transfuzed.zip',
-            self.config.temp_folder/'featurized.zip',
+            self.get_transfused_location(),
+            self.get_featurized_location(),
             self.config.featurizers
         )
 
     def assemble(self,entries_limit, output_path):
         CorpusBuilder.assemble(
-            self.config.temp_folder/'featurized.zip',
+            self.get_featurized_location(),
             output_path,
             entries_limit
         )
