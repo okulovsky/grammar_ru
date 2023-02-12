@@ -24,6 +24,7 @@ class Fragment:
                 result+=f'background-color:{self.background_color};'
             if self.foreground_color is not None:
                 result+=f'color:{self.foreground_color};'
+            result+='"'
 
         if self.tooltip is not None:
             result+=f' title="{self.tooltip}"'
@@ -55,7 +56,7 @@ class Highlight:
         self.value_to_color = value_to_color
         self.gradient_between = gradient_between
         if self.gradient_between is not None:
-            self.gradient_from = np.array(matplotlib.colors.to_rgb(self.gradient_between[0]))
+            self.gradient_from = np.array(bin(self.gradient_between[0]))
             self.gradient_to = np.array(matplotlib.colors.to_rgb(self.gradient_between[1]))
 
 
@@ -63,6 +64,18 @@ class Highlight:
         if self.gradient_between is not None:
             self.min_value = df[self.column_name].min()
             self.max_value = df[self.column_name].max()
+        if isinstance(self.value_to_color, str):
+            values = df.groupby(self.column_name).size().sort_values(ascending=False).index
+            dct = {}
+            if self.value_to_color in matplotlib.colormaps:
+                cmap = matplotlib.colormaps[self.value_to_color]
+            else:
+                cmap = matplotlib.colormaps['Set3']
+            for i, v in enumerate(values):
+                ci = i%len(cmap.colors)
+                dct[v] = matplotlib.colors.to_hex(cmap.colors[ci])
+            self.value_to_color = dct
+
 
 
     def _get_color(self, val):
@@ -101,7 +114,7 @@ class DfViewer:
 
     def color(self,
               column_name: str,
-              value_to_color: Optional[Dict[Any, str]] = None,
+              value_to_color: Union[None, str, Dict[Any, str]] = None,
               gradient_between: Optional[Tuple[str, str]] = None) -> 'DfViewer':
         self.highlights.append(Highlight(HighlightType.Foreground, column_name, value_to_color, gradient_between))
         return self
