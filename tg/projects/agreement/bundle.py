@@ -84,7 +84,6 @@ class AdjAgreementTrainIndexBuilder(ITransfuseSelector):
             ].copy()  # TODO delete
         df['is_target'] = False
         df['declension_type'] = -1
-        df.loc[adjectives.index, 'is_target'] = True
 
         adjectives['ending'] = (adjectives.word
                                 .apply(_extract_true_ending))
@@ -93,7 +92,7 @@ class AdjAgreementTrainIndexBuilder(ITransfuseSelector):
         adjectives['norm_ending'] = (morphed_adjectives.normal_form
                                      .apply(_extract_true_ending))
 
-        adjectives['norm_form'] = morphed_adjectives.normal_form
+        # adjectives['norm_form'] = morphed_adjectives.normal_form
 
         with open(Loc.temp_path / "undefined_ending.txt", "a") as myfile:
             for w in adjectives[
@@ -111,6 +110,7 @@ class AdjAgreementTrainIndexBuilder(ITransfuseSelector):
         df['label'] = -1
         df.loc[adjectives.index, 'label'] = adjectives.ending.replace(
             self.endings_nums)
+        df.loc[adjectives.index, 'is_target'] = True
         return [df]
 
     @staticmethod
