@@ -1,6 +1,8 @@
+import numpy as np
+import pandas as pd
+
 from tg.common.ml import batched_training as bt
 from tg.grammar_ru.components import PlainContextBuilder
-import pandas as pd
 
 
 class PunctContextBuilder(PlainContextBuilder):
@@ -13,8 +15,11 @@ class PunctContextBuilder(PlainContextBuilder):
             .loc[context_df.sample_id].is_target
             .values
         )
+
         max_offset = context_df.offset.max()
-        rows_to_drop = (~(word_is_target & (context_df.offset == 1))) & ~(~word_is_target & (context_df.offset == max_offset))
-        context_df = context_df[rows_to_drop]
+        target_and_offset_one = word_is_target & (context_df.offset == 1)
+        not_target_and_max_offset = (~word_is_target & (context_df.offset == max_offset))
+        rows_to_keep = ~target_and_offset_one & ~not_target_and_max_offset
+        context_df = context_df[rows_to_keep]
 
         return context_df.set_index(['sample_id', 'offset'])
