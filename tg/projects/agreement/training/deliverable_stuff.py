@@ -132,9 +132,15 @@ class Network(torch.nn.Module):
         self.head = head
         self.tail = FullyConnectedNetwork(
             sizes=[], input=hidden_size, output=batch.index_frame.label.nunique())
+        self.sm = torch.nn.Softmax(dim=1)
+        # TODO:relu?
 
     def forward(self, batch):
-        return self.tail(self.head(batch))
+        return (
+            self.sm(
+                self.tail(
+                    self.head(batch)))
+                    )
 
 
 class NetworkFactory:
@@ -157,7 +163,7 @@ class TrainingTask(btf.TorchTrainingTask):
         ap = create_assembly_point()
         ap.hidden_size = 50
         ap.dim_3_network_factory.network_type = btc.Dim3NetworkType.LSTM
-        head_factory = ap.create_network_factory()
+        # head_factory = ap.create_network_factory()
         self.setup_batcher(
             idb, [ap.create_extractor(), get_multilabel_extractor()])
         self.setup_model(NetworkFactory(ap), ignore_consistancy_check=True)

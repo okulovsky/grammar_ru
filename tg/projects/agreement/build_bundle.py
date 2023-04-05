@@ -57,11 +57,11 @@ def assemble(name, limit):
 
 
 if __name__ == '__main__':
-    build_index()
-    featurize_index()
+    # build_index()
+    # featurize_index()
     # assemble('toy_mystemless', 5)
     # assemble('mid_mystemless', 20)
     # assemble('mid+_mystemless', 50)
     # assemble('big_mystemless', 100)
-    # assemble('full_mystemless', None)
+    assemble('full_mystemless', None)
     # upload_bundle('big')
