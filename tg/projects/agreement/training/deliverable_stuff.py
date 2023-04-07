@@ -154,15 +154,14 @@ class NetworkFactory:
 
 
 class TrainingTask(btf.TorchTrainingTask):
-class TrainingTask(btf.TorchTrainingTask):
     def __init__(self):
         super(TrainingTask, self).__init__()
         self.metric_pool = bt.MetricPool().add(MulticlassMetrics())
         self.features_ap = create_assembly_point(context_length=7)
 
     def initialize_task(self, idb):
-        # ap = create_assembly_point()
-        ap = self.features_ap
+        ap = create_assembly_point(context_length=7)
+        # ap = self.features_ap
         ap.hidden_size = 50
         ap.dim_3_network_factory.network_type = btc.Dim3NetworkType.LSTM
         # head_factory = ap.create_network_factory()
