@@ -137,10 +137,10 @@ class Network(torch.nn.Module):
 
     def forward(self, batch):
         return (
-            self.sm(
-                self.tail(
-                    self.head(batch)))
-                    )
+            # self.sm(
+            self.tail(
+                self.head(batch)))
+        # )
 
 
 class NetworkFactory:
@@ -161,6 +161,7 @@ class TrainingTask(btf.TorchTrainingTask):
 
     def initialize_task(self, idb):
         ap = create_assembly_point()
+        # ap = self.features_ap
         ap.hidden_size = 50
         ap.dim_3_network_factory.network_type = btc.Dim3NetworkType.LSTM
         # head_factory = ap.create_network_factory()

@@ -18,25 +18,30 @@ from dotenv import load_dotenv
 from tg.projects.agreement.training.deliverable_stuff import TrainingTask
 from tg.grammar_ru.common import Loc
 from tg.projects.agreement.training.delivery_routine import DeliveryRoutine
-
+import torch
 load_dotenv(Loc.root_path / 'environment.env')
 
-EPOCHS = 40
+EPOCHS = 50
 
 project_name = 'agreementproject'
-# dataset_name = 'agreement_adj_toy_1st_declination'
-dataset_name = 'agreement_adj_mid+_mystemless_0_declination'
-# dataset_name = 'agreement_adj_mid_1st_declination'
+dataset_name = 'agreement_adj_mid50_0_declination'
+# dataset_name = 'agreement_adj_tiny_0_declination'
 bucket = 'agreementadjbucket'
-task_name = f"task_{EPOCHS}ep_{dataset_name}"
+task_name = f"task_{EPOCHS}ep_{dataset_name}_CEweighted_Smless"
 
 
 def get_training_job() -> TrainingJob:
     task = TrainingTask()
     task.settings: bt.TrainingSettings
-    task.settings.batch_size = 20_000 
+    task.settings.batch_size = 20_000
     task.settings.epoch_count = EPOCHS
-    task.optimizer_ctor = CtorAdapter('torch.optim:Adam', ('params',), lr = 0.1)
+    task.optimizer_ctor = CtorAdapter('torch.optim:Adam', ('params',), lr=0.1)
+    # weights = [0.9378, 0.9911, 0.8501, 1.4397, 0.4611, 0.1819, 0.7157, 1.5266, 2.0020,
+    #            1.1174, 0.5740, 1.2026]
+    # task.loss_ctor = CtorAdapter(
+    #     "torch.nn:CrossEntropyLoss", weight=torch.FloatTensor(weights))
+    task.loss_ctor = CtorAdapter(
+        "torch.nn:CrossEntropyLoss")
 
     task.info["dataset"] = dataset_name
     task.info["name"] = task_name
