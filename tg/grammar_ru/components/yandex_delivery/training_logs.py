@@ -4,10 +4,12 @@ import hashlib
 from datetime import datetime
 import boto3
 # from .sagemaker_training_routine import download_and_open_sagemaker_result
-from ...ml.components.yandex_delivery.datasphere_tools import download_and_open_datasphere_result
+from ...components.yandex_delivery.datasphere_tools import download_and_open_datasphere_result
 from matplotlib import pyplot as plt
 # from ...datasets.access import CacheMode
 from ....common._common import Loc
+from ....common.datasets.access import CacheMode
+
 
 class S3TrainingLogsLoader:
     def __init__(self,
@@ -57,13 +59,13 @@ class S3TrainingLogsLoader:
             dfs.append(df)
         return pd.concat(dfs)
 
-    def load_and_cache_metrics(self, job_ids, progress_bar=False, ignore_errors=False, cache_mode='default'):
+    def load_and_cache_metrics(self, job_ids, progress_bar=False, ignore_errors=False, cache_mode=CacheMode.Default):
         code = '/'.join([c for job in job_ids for c in job])
         name = hashlib.md5(code.encode('utf-8')).hexdigest()
         cache_name = 'sagemaker-' + name
         return CacheMode.apply_to_file(
             cache_mode,
-            Loc.data_cache_path/cache_name,
+            Loc.data_cache_path / cache_name,
             lambda: self.load_metrics(job_ids, progress_bar, ignore_errors)
         )
 
