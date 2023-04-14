@@ -21,7 +21,7 @@ from ....common.ml.batched_training import context as btc
 from ....grammar_ru.components import CoreExtractor
 
 
-def create_assembly_point(context_length=6):
+def create_assembly_point(context_length=20):
     ap = btc.ContextualAssemblyPoint(
         name='features',
         context_builder=PlainContextBuilder(
@@ -157,14 +157,15 @@ class TrainingTask(btf.TorchTrainingTask):
     def __init__(self):
         super(TrainingTask, self).__init__()
         self.metric_pool = bt.MetricPool().add(MulticlassMetrics())
-        self.features_ap = create_assembly_point(context_length=7)
+        self.features_ap = create_assembly_point()
 
     def initialize_task(self, idb):
-        ap = create_assembly_point(context_length=7)
+        ap = create_assembly_point()
         # ap = self.features_ap
         ap.hidden_size = 50
         ap.dim_3_network_factory.network_type = btc.Dim3NetworkType.LSTM
         # head_factory = ap.create_network_factory()
         self.setup_batcher(
-            idb, [ap.create_extractor(), get_multilabel_extractor()])
+            idb, [ap.create_extractor(), get_multilabel_extractor()],
+            stratify_by_column='label')
         self.setup_model(NetworkFactory(ap), ignore_consistancy_check=True)
