@@ -1,4 +1,3 @@
-# from tg.grammar_ru.ml.corpus import CorpusBuilder
 from tg.grammar_ru.features import PyMorphyFeaturizer, SlovnetFeaturizer, SyntaxTreeFeaturizer, SyntaxStatsFeaturizer
 from tg.grammar_ru.common import Loc
 from yo_fluq_ds import *
@@ -7,8 +6,10 @@ from tg.grammar_ru.corpus import CorpusBuilder
 from tg.projects.agreement.bundle import AdjAgreementTrainIndexBuilder
 
 
-INDEXED_BUNDLE_PATH = Loc.bundles_path / 'agreement/prepare/books&pub_60K_balanced/raw/raw.zip'
-FEATURIZED_BUNDLE_PATH = Loc.bundles_path / 'agreement/prepare/books&pub_60K_balanced/feat/feat.zip'
+INDEXED_BUNDLE_PATH = Loc.bundles_path / \
+    'agreement/prepare/books&pub_60K_balanced/raw/raw.zip'
+FEATURIZED_BUNDLE_PATH = Loc.bundles_path / \
+    'agreement/prepare/books&pub_60K_balanced/feat/feat.zip'
 
 
 def build_index():
@@ -57,12 +58,13 @@ def assemble(name, limit):
 
 
 if __name__ == '__main__':
-    # build_index()
-    # featurize_index()
-    assemble('tiny', 1)
-    # assemble('toy', 5)
-    # assemble('mid20', 20)
-    # assemble('mid50', 50)
-    # assemble('big', 100)
-    # assemble('full', None)
+    build_index()
+    featurize_index()
+    suffix = "_all_decl"
+    assemble('tiny'+suffix, 1)
+    assemble('toy'+suffix, 5)
+    assemble('mid20'+suffix, 20)
+    assemble('mid50'+suffix, 50)
+    assemble('big'+suffix, 100)
+    assemble('full'+suffix, None)
     # upload_bundle('big')

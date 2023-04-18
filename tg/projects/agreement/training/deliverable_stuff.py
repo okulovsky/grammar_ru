@@ -133,14 +133,28 @@ class Network(torch.nn.Module):
         self.tail = FullyConnectedNetwork(
             sizes=[], input=hidden_size, output=batch.index_frame.label.nunique())
         self.sm = torch.nn.Softmax(dim=1)
-        # TODO:relu?
 
     def forward(self, batch):
         return (
-            # self.sm(
             self.tail(
                 self.head(batch)))
-        # )
+
+
+def get_mask(df):
+    mask_cols = [c for c in df.columns if 'mask' in c]
+    if not mask_cols:
+        raise ValueError("Mask is not found in index_frame")
+    return df[mask_cols]
+
+
+class MaskedNetwork(Network):
+    def forward(self, batch):
+        mask = torch.tensor(get_mask(batch.index_frame).values.astype(int))
+        output = super().forward(batch)
+        # output[~mask] = 0
+        return output
+        return torch.masked_tensor(output, mask)
+        return mask * output
 
 
 class NetworkFactory:
@@ -150,7 +164,7 @@ class NetworkFactory:
     def __call__(self, batch):
         head_factory = self.assembly_point.create_network_factory()
         head = head_factory(batch)
-        return Network(head, self.assembly_point.hidden_size,  batch)
+        return MaskedNetwork(head, self.assembly_point.hidden_size,  batch)
 
 
 class TrainingTask(btf.TorchTrainingTask):

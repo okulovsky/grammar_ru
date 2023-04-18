@@ -21,12 +21,13 @@ from tg.projects.agreement.training.delivery_routine import DeliveryRoutine
 import torch
 load_dotenv(Loc.root_path / 'environment.env')
 
-EPOCHS = 15
+EPOCHS = 1#5
 
 project_name = 'agreementproject'
-dataset_name = 'agreement_adj_mid50_0_declination'
+# dataset_name = 'agreement_adj_mid50_0_declination'
 # dataset_name = 'agreement_adj_mid50_1_declination'
 # dataset_name = 'agreement_adj_tiny_0_declination'
+dataset_name = 'agreement_adj_tiny_all_decl_masked'
 bucket = 'agreementadjbucket'
 task_name = f"task_{EPOCHS}ep_{dataset_name}_CE_Smless_Context20_stratified"
 
@@ -37,10 +38,6 @@ def get_training_job() -> TrainingJob:
     task.settings.batch_size = 20_000
     task.settings.epoch_count = EPOCHS
     task.optimizer_ctor = CtorAdapter('torch.optim:Adam', ('params',), lr=0.1)
-    # weights = [0.9378, 0.9911, 0.8501, 1.4397, 0.4611, 0.1819, 0.7157, 1.5266, 2.0020,
-    #            1.1174, 0.5740, 1.2026]
-    # task.loss_ctor = CtorAdapter(
-    #     "torch.nn:CrossEntropyLoss", weight=torch.FloatTensor(weights))
     task.loss_ctor = CtorAdapter(
         "torch.nn:CrossEntropyLoss")
 
@@ -56,8 +53,8 @@ def get_training_job() -> TrainingJob:
 
 
 job = get_training_job()
-# job.run()
-# exit()
+job.run()
+exit()
 
 tag = 'v_' + datetime.datetime.now().time().strftime("%H_%M_%S")
 dockerhub_repo = 'agreement'  # name of your repo
