@@ -21,15 +21,16 @@ from tg.projects.agreement.training.delivery_routine import DeliveryRoutine
 import torch
 load_dotenv(Loc.root_path / 'environment.env')
 
-EPOCHS = 1#5
+EPOCHS = 40
 
 project_name = 'agreementproject'
 # dataset_name = 'agreement_adj_mid50_0_declination'
 # dataset_name = 'agreement_adj_mid50_1_declination'
 # dataset_name = 'agreement_adj_tiny_0_declination'
-dataset_name = 'agreement_adj_tiny_all_decl_masked'
+# dataset_name = 'agreement_adj_tiny_all_decl_masked'
+dataset_name = 'agreement_adj_mid50_all_decl_masked'
 bucket = 'agreementadjbucket'
-task_name = f"task_{EPOCHS}ep_{dataset_name}_CE_Smless_Context20_stratified"
+task_name = f"task_{EPOCHS}ep_{dataset_name}_CE_Smless_Context20_unstratified_masked"
 
 
 def get_training_job() -> TrainingJob:
@@ -53,8 +54,8 @@ def get_training_job() -> TrainingJob:
 
 
 job = get_training_job()
-job.run()
-exit()
+# job.run()
+# exit()
 
 tag = 'v_' + datetime.datetime.now().time().strftime("%H_%M_%S")
 dockerhub_repo = 'agreement'  # name of your repo

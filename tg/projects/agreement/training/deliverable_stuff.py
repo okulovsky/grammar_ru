@@ -181,5 +181,6 @@ class TrainingTask(btf.TorchTrainingTask):
         # head_factory = ap.create_network_factory()
         self.setup_batcher(
             idb, [ap.create_extractor(), get_multilabel_extractor()],
-            stratify_by_column='label')
+            # stratify_by_column='label'
+            )
         self.setup_model(NetworkFactory(ap), ignore_consistancy_check=True)
