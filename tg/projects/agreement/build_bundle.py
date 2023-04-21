@@ -58,8 +58,8 @@ def assemble(name, limit):
 
 
 if __name__ == '__main__':
-    build_index()
-    featurize_index()
+    # build_index()
+    # featurize_index()
     suffix = "_all_decl"
     assemble('tiny'+suffix, 1)
     assemble('toy'+suffix, 5)

@@ -30,7 +30,7 @@ project_name = 'agreementproject'
 # dataset_name = 'agreement_adj_tiny_all_decl_masked'
 dataset_name = 'agreement_adj_mid50_all_decl_masked'
 bucket = 'agreementadjbucket'
-task_name = f"task_{EPOCHS}ep_{dataset_name}_CE_Smless_Context20_unstratified"
+task_name = f"task_{EPOCHS}ep_{dataset_name}_CE_Smless_Context20_unstratified_mask_disabled"
 
 
 def get_training_job() -> TrainingJob:
@@ -38,6 +38,8 @@ def get_training_job() -> TrainingJob:
     task.settings: bt.TrainingSettings
     task.settings.batch_size = 20_000
     task.settings.epoch_count = EPOCHS
+    task.settings.evaluation_batch_limit = 5#TODO delete
+    task.settings.training_batch_limit = 5#TODO delete
     task.optimizer_ctor = CtorAdapter('torch.optim:Adam', ('params',), lr=0.1)
     task.loss_ctor = CtorAdapter(
         "torch.nn:CrossEntropyLoss")

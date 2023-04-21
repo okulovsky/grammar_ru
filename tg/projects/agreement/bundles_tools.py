@@ -9,7 +9,7 @@ from tg.grammar_ru.components.yandex_storage.s3_yandex_helpers import S3YandexHa
 def set_mask(bundle_all_decl_location: Path, masked_bundle_location: Path, masks: pd.DataFrame):
     db = DataBundle.load(bundle_all_decl_location)
     db['index'] = pd.merge(db.index, masks, left_on='declension_type',
-                           right_index=True)
+                           right_index=True).sort_index()
     db = db.copy()
     db.save(masked_bundle_location)
 

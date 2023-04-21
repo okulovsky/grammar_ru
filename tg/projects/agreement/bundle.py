@@ -25,11 +25,11 @@ NEW = {'ая', 'ого', 'ое', 'ой', 'ом', 'ому',
 
 GOOD = {'ая', 'его', 'ее', 'ей', 'ем', 'ему',
         'ие', 'ий', 'им', 'ими', 'их', 'ую', 'яя', 'юю',
-        'ого','ое', 'ой', 'ому', 'ом'} # легкий
+        'ого', 'ое', 'ой', 'ому', 'ом'}  # легкий
 
 BIG = {'ая', 'ие', 'им', 'ими', 'их', 'ого',
        'ое', 'ой', 'ом', 'ому', 'ую',
-       'ые', 'ым', 'ыми', 'ых'} # золотой
+       'ые', 'ым', 'ыми', 'ых'}  # золотой
 # NOTE выкинули 'ою'
 
 NEW_list = sorted(list(NEW))
@@ -57,6 +57,11 @@ def _extract_ending(word: str):
         if word.lower().endswith(possible_ending):
             return possible_ending
     return np.nan
+
+
+def _replace_end_by_num(df, dt, num_by_end):
+    mask = df.declension_type == dt
+    df.loc[mask, 'label'] = df[mask].ending.map(num_by_end)
 
 # declension_type
 # Новый - 0
@@ -101,12 +106,9 @@ class AdjAgreementTrainIndexBuilder(ITransfuseSelector):
         adjectives = adjectives[~undefined_ending_mask]
         adjectives['declension_type'] = adjectives.norm_ending.replace(
             self.norm_endings_nums)
-        adjectives.loc[adjectives[adjectives.declension_type == 0].index, 'label'] = adjectives.ending.map(
-            NEW_num_by_end)
-        adjectives.loc[adjectives[adjectives.declension_type == 1].index, 'label'] = adjectives.ending.map(
-            GOOD_num_by_end)
-        adjectives.loc[adjectives[adjectives.declension_type == 2].index, 'label'] = adjectives.ending.map(
-            BIG_num_by_end)
+        _replace_end_by_num(adjectives, 0, NEW_num_by_end)
+        _replace_end_by_num(adjectives, 1, GOOD_num_by_end)
+        _replace_end_by_num(adjectives, 2, BIG_num_by_end)
         thrown.extend(adjectives[adjectives.label.isnull()].word)
         adjectives = adjectives[~adjectives.label.isnull()]
 
