@@ -164,7 +164,7 @@ class NetworkFactory:
     def __call__(self, batch):
         head_factory = self.assembly_point.create_network_factory()
         head = head_factory(batch)
-        return MaskedNetwork(head, self.assembly_point.hidden_size,  batch)
+        return Network(head, self.assembly_point.hidden_size,  batch)
 
 
 class TrainingTask(btf.TorchTrainingTask):
