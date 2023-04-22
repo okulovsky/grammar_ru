@@ -5,17 +5,17 @@ import tarfile
 import os.path
 import shutil
 from ....common import DataBundle
-from .....common.delivery.training.architecture import FileCacheTrainingEnvironment
+from ....common.ml import batched_training as bt
+from ....common.delivery.sagemaker import SagemakerEnvironment
 from ....common import Logger
-from .....common.delivery.jobs import DeliverableJob
 from ...common.loc import Loc
-from ...components.training_task_factory import TaskFactory
 from ..yandex_storage.s3_yandex_helpers import S3YandexHandler
+from ....common.ml.batched_training import factories as btf#TODO delete
 import sys
+import traceback
 
-
-class TrainingJob(DeliverableJob):
-    def __init__(self, tasks: List[TaskFactory], project_name: str, bucket: str):
+class TrainingJob:
+    def __init__(self, tasks: List[bt.BatchedTrainingTask], project_name: str, bucket: str):
         super().__init__()
         self.tasks = tasks
         self.project_name = project_name
@@ -37,7 +37,7 @@ class TrainingJob(DeliverableJob):
         Logger.info(f"List of tasks uploaded to {tasks_list_s3_path}")
         Logger.info(f"Training job {self.name} is done")
 
-    def _try_run(self, task:TaskFactory, data, env):
+    def _try_run(self, task:bt.BatchedTrainingTask, data, env):
         try:
             Logger.info(f"Running task {task.name} with environment")
             task.run_with_environment(data, env)
@@ -48,9 +48,10 @@ class TrainingJob(DeliverableJob):
                                          content=str(e))
             Logger.info(f'Exception in {task.name} loaded to DataSphere')
             print(f'Exception in {task.name} loaded to DataSphere')
+            Logger.info(traceback.format_exc())
             return False
 
-    def _run_task(self, task: TaskFactory):
+    def _run_task(self, task):
         if 'dataset' not in task.info:
             raise KeyError('task.info must contain dataset')
         if 'name' not in task.info:
@@ -60,8 +61,8 @@ class TrainingJob(DeliverableJob):
         dataset_path = self._download_dataset(task.info['dataset'])
         data = DataBundle.load(dataset_path)
         model_folder = Path.home() / 'models' / f'{task.name}'
-        Logger.info("Creating FileCacheTrainingEnvironment")
-        env = FileCacheTrainingEnvironment(model_folder)
+        Logger.info("Creating SagemakerEnvironment")
+        env = SagemakerEnvironment(model_folder)
         success = self._try_run(task, data, env)
         if not success:
             return

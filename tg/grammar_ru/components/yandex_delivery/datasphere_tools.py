@@ -1,5 +1,5 @@
 from ....common._common import Loc
-from ....common.delivery.training.architecture import ResultPickleReader
+from ....common.delivery.sagemaker.utils import ResultPickleReader
 import os
 import boto3
 import sagemaker
