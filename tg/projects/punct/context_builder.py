@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from tg.common.ml import batched_training as bt
-from tg.grammar_ru.components import PlainContextBuilder
+from ...common.ml import batched_training as bt
+from ...grammar_ru.components import PlainContextBuilder
 
 
 class PunctContextBuilder(PlainContextBuilder):
