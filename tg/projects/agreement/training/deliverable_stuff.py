@@ -151,10 +151,7 @@ class MaskedNetwork(Network):
     def forward(self, batch):
         mask = torch.tensor(get_mask(batch.index_frame).values.astype(int))
         output = super().forward(batch)
-        # output[~mask] = 0
-        return output
-        return torch.masked_tensor(output, mask)
-        return mask * output
+        return output * mask
 
 
 class NetworkFactory:
@@ -164,7 +161,7 @@ class NetworkFactory:
     def __call__(self, batch):
         head_factory = self.assembly_point.create_network_factory()
         head = head_factory(batch)
-        return Network(head, self.assembly_point.hidden_size,  batch)
+        return MaskedNetwork(head, self.assembly_point.hidden_size,  batch)
 
 
 class TrainingTask(btf.TorchTrainingTask):
