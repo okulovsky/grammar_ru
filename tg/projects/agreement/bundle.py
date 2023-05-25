@@ -12,11 +12,7 @@ from tg.grammar_ru.features import PyMorphyFeaturizer
 from tg.grammar_ru.corpus import ITransfuseSelector
 from nltk.stem import SnowballStemmer
 
-
-def _print_thrown(thrown):
-    with open(Loc.temp_path / "undefined_ending.txt", "a") as myfile:
-        for w in thrown:
-            myfile.write(f'{w}\n')
+from tg.projects.agreement.bundles_tools import _print_thrown
 
 
 NEW = {'ая', 'ого', 'ое', 'ой', 'ом', 'ому',
@@ -70,6 +66,67 @@ def _replace_end_by_num(df, dt, num_by_end):
 
 
 class AdjAgreementTrainIndexBuilder(ITransfuseSelector):
+    def __init__(self):
+        self.pmf = PyMorphyFeaturizer()
+        # self.snowball = SnowballStemmer(language="russian")
+        self.norm_endings_nums = {e: i for i,
+                                  e in enumerate(['ый', 'ий', 'ой'])}
+        # self.endings_nums = {e: i for i, e in enumerate(ALL_ENDS_list)}
+
+    def _extract_norm_ending(self, word_in_norm_form: str):
+        for possible_ending in self.norm_endings_nums.keys():
+            if word_in_norm_form.lower().endswith(possible_ending):
+                return possible_ending
+        return np.nan
+
+    def select(self, source, df, toc_row):
+        db = DataBundle(src=df)
+        self.pmf.featurize(db)
+        morphed = db.data_frames['pymorphy']
+        morphed.replace({np.nan: 'nan'}, inplace=True)
+        adjectives = df[(morphed.POS == "ADJF")].copy()  # TODO delete
+        df['is_target'] = False
+        df['declension_type'] = -1
+
+        adjectives['ending'] = (adjectives.word
+                                .apply(_extract_ending))
+
+        morphed_adjectives = morphed.loc[adjectives.index]
+        adjectives['norm_ending'] = (morphed_adjectives.normal_form
+                                     .apply(self._extract_norm_ending))
+
+        undefined_ending_mask = (adjectives.norm_ending.isnull() |
+                                 adjectives.ending.isnull())
+        thrown = list(set(adjectives[undefined_ending_mask].word))
+
+        adjectives = adjectives[~undefined_ending_mask]
+        adjectives['declension_type'] = adjectives.norm_ending.replace(
+            self.norm_endings_nums)
+        _replace_end_by_num(adjectives, 0, NEW_num_by_end)
+        _replace_end_by_num(adjectives, 1, GOOD_num_by_end)
+        _replace_end_by_num(adjectives, 2, BIG_num_by_end)
+        thrown.extend(adjectives[adjectives.label.isnull()].word)
+        adjectives = adjectives[~adjectives.label.isnull()]
+
+        df.loc[adjectives.index, 'declension_type'] = adjectives['declension_type']
+        df.declension_type = df.declension_type.astype(int)
+        df['label'] = -1
+        df.loc[adjectives.index, 'label'] = adjectives.label
+        df.loc[adjectives.index, 'is_target'] = True
+        _print_thrown(thrown, Loc.temp_path / "undefined_ending.txt")
+        return [df]
+
+    @staticmethod
+    def build_index_from_src(src_df):
+        df = src_df.loc[src_df.is_target][[
+            'word_id', 'sentence_id', 'declension_type', 'label']].copy()
+        df = df.reset_index(drop=True)
+        df.index.name = 'sample_id'
+        df['split'] = train_display_test_split(df)
+        return df
+
+
+class NounAgreementTrainIndexBuilder(ITransfuseSelector):
     def __init__(self):
         self.pmf = PyMorphyFeaturizer()
         # self.snowball = SnowballStemmer(language="russian")
