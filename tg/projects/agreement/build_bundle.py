@@ -3,17 +3,17 @@ from tg.grammar_ru.common import Loc
 from yo_fluq_ds import *
 
 from tg.grammar_ru.corpus import CorpusBuilder
-from tg.projects.agreement.bundle import AdjAgreementTrainIndexBuilder
+from tg.projects.agreement.bundle import AdjAgreementTrainIndexBuilder, NounAgreementTrainIndexBuilder
 
 
 INDEXED_BUNDLE_PATH = Loc.bundles_path / \
-    'agreement/prepare/books&pub_60K_balanced/raw/raw.zip'
+    'agreement/prepare/noun_books&pub_60K_balanced/raw/raw.zip'
 FEATURIZED_BUNDLE_PATH = Loc.bundles_path / \
-    'agreement/prepare/books&pub_60K_balanced/feat/feat.zip'
+    'agreement/prepare/noun_books&pub_60K_balanced/feat/feat.zip'
 
 
 def build_index():
-    index_builder = AdjAgreementTrainIndexBuilder()
+    index_builder = NounAgreementTrainIndexBuilder()
     CorpusBuilder.transfuse_corpus(
         [Loc.corpus_path / 'prepare/balanced/books&pub_60K_balanced_feat.zip'],
         INDEXED_BUNDLE_PATH,
@@ -60,11 +60,14 @@ def assemble(name, limit):
 if __name__ == '__main__':
     # build_index()
     # featurize_index()
-    suffix = "_all_decl"
-    assemble('tiny'+suffix, 1)
-    assemble('toy'+suffix, 5)
-    assemble('mid20'+suffix, 20)
-    assemble('mid50'+suffix, 50)
-    assemble('big'+suffix, 100)
-    assemble('full'+suffix, None)
-    # upload_bundle('big')
+    # suffix = "_all_decl"
+    prefix = 'noun_'
+    assemble(prefix+'tiny', 1)
+    assemble(prefix+'toy', 5)
+    assemble(prefix+'mid50', 50)
+    # assemble('toy'+suffix, 5)
+    # assemble('mid20'+suffix, 20)
+    # assemble('mid50'+suffix, 50)
+    # assemble('big'+suffix, 100)
+    # assemble('full'+suffix, None)
+    # # upload_bundle('big')
