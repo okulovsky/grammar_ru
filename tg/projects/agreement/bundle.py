@@ -126,12 +126,42 @@ class AdjAgreementTrainIndexBuilder(ITransfuseSelector):
         return df
 
 
+# first_declension_ends = set("а я ы и е у ю ой ёй ей ".split())
+# # дядей, землёй Note в печатных текстах, наверное, ё заменяют на е
+# # second_declension_ends = set("а я ы и е у ю ой ёй ей ою ".split())
+# POSSIBLE_ENDINGS = first_declension_ends
+
+# ends_list = sorted(list(first_declension_ends))
+# num_by_end = {e: n for n, e in enumerate(ends_list)}
+
+
+# def _extract_ending(word: str):
+#     for possible_ending in POSSIBLE_ENDINGS:
+#         if word.lower().endswith(possible_ending):
+#             return possible_ending
+#     return np.nan
+
+
 class NounAgreementTrainIndexBuilder(ITransfuseSelector):
+    first_declension_ends = set("а я ы и е у ю ой ёй ей ".split())
+    # дядей, землёй Note в печатных текстах, наверное, ё заменяют на е
+
+    POSSIBLE_ENDINGS = first_declension_ends
+    ends_list = sorted(list(first_declension_ends))
+    num_by_end = {e: n for n, e in enumerate(ends_list)}
+    end_by_num = {n: e for (e, n) in num_by_end.items()}
+
+    def _extract_ending(self, word: str):
+        for possible_ending in self.POSSIBLE_ENDINGS:
+            if word.lower().endswith(possible_ending):
+                return possible_ending
+        return np.nan
+
     def __init__(self):
         self.pmf = PyMorphyFeaturizer()
         # self.snowball = SnowballStemmer(language="russian")
         self.norm_endings_nums = {e: i for i,
-                                  e in enumerate(['ый', 'ий', 'ой'])}
+                                  e in enumerate(['я', 'а'])}
         # self.endings_nums = {e: i for i, e in enumerate(ALL_ENDS_list)}
 
     def _extract_norm_ending(self, word_in_norm_form: str):
@@ -145,36 +175,36 @@ class NounAgreementTrainIndexBuilder(ITransfuseSelector):
         self.pmf.featurize(db)
         morphed = db.data_frames['pymorphy']
         morphed.replace({np.nan: 'nan'}, inplace=True)
-        adjectives = df[(morphed.POS == "ADJF")].copy()  # TODO delete
+        nouns = df[(morphed.POS == "NOUN")].copy()  # TODO delete
+        # return morphed[(morphed.POS == "NOUN")]
         df['is_target'] = False
         df['declension_type'] = -1
 
-        adjectives['ending'] = (adjectives.word
-                                .apply(_extract_ending))
+        nouns['ending'] = (nouns.word
+                           .apply(self._extract_ending))
 
-        morphed_adjectives = morphed.loc[adjectives.index]
-        adjectives['norm_ending'] = (morphed_adjectives.normal_form
-                                     .apply(self._extract_norm_ending))
+        morphed_nouns = morphed.loc[nouns.index]
+        nouns['norm_ending'] = (morphed_nouns.normal_form
+                                .apply(self._extract_norm_ending))
 
-        undefined_ending_mask = (adjectives.norm_ending.isnull() |
-                                 adjectives.ending.isnull())
-        thrown = list(set(adjectives[undefined_ending_mask].word))
+        undefined_ending_mask = (nouns.norm_ending.isnull() |
+                                 nouns.ending.isnull())
+        thrown = list(set(nouns[undefined_ending_mask].word))
 
-        adjectives = adjectives[~undefined_ending_mask]
-        adjectives['declension_type'] = adjectives.norm_ending.replace(
-            self.norm_endings_nums)
-        _replace_end_by_num(adjectives, 0, NEW_num_by_end)
-        _replace_end_by_num(adjectives, 1, GOOD_num_by_end)
-        _replace_end_by_num(adjectives, 2, BIG_num_by_end)
-        thrown.extend(adjectives[adjectives.label.isnull()].word)
-        adjectives = adjectives[~adjectives.label.isnull()]
+        nouns = nouns[~undefined_ending_mask]
+        nouns['declension_type'] = 1
+        # adjectives.norm_ending.replace(            self.norm_endings_nums)
 
-        df.loc[adjectives.index, 'declension_type'] = adjectives['declension_type']
+        nouns['label'] = nouns.ending.map(self.num_by_end)
+        thrown.extend(nouns[nouns.label.isnull()].word)
+        nouns = nouns[~nouns.label.isnull()]
+
+        df.loc[nouns.index, 'declension_type'] = nouns['declension_type']
         df.declension_type = df.declension_type.astype(int)
         df['label'] = -1
-        df.loc[adjectives.index, 'label'] = adjectives.label
-        df.loc[adjectives.index, 'is_target'] = True
-        _print_thrown(thrown)
+        df.loc[nouns.index, 'label'] = nouns.label
+        df.loc[nouns.index, 'is_target'] = True
+        _print_thrown(thrown, Loc.temp_path / "noun_undefined_ending.txt")
         return [df]
 
     @staticmethod
