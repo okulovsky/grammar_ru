@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -31,3 +32,11 @@ def plot_bar_jac_cos_metric(jac, cos):
     axis[1].bar(range(len(cos)), cos)
     axis[1].set_title('Косинусное расстояние')
     plt.subplots_adjust(left=0, right=1, wspace=0, hspace=0.5)
+
+
+def show_statistics_and_bar(jaccard_sim, cos_sim):
+    plot_bar_jac_cos_metric(jaccard_sim, cos_sim)
+    for name, val in zip(['Индекс Жаккара', 'Косинусное расстояние'], [jaccard_sim, cos_sim]):
+        for func_name, func in zip(['median', 'max', 'min'], [np.median, np.max, np.min]):
+            print(f"{func_name} {name}: {round(func(val), 3)}")
+        print('------------------------------------')
