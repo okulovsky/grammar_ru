@@ -26,11 +26,11 @@ EPOCHS = 20
 project_name = 'agreementproject'
 # dataset_name = 'agreement_adj_mid50_0_declination'
 # dataset_name = 'agreement_adj_mid50_1_declination'
-# dataset_name = 'agreement_adj_tiny_0_declination'
-# dataset_name = 'agreement_adj_tiny_all_decl_masked'
-dataset_name = 'agreement_adj_mid50_all_decl_masked'
+# dataset_name = 'agreement_noun_tiny'
+# dataset_name = 'agreement_noun_mid50'
+dataset_name = 'agreement_noun_norm_e_mid50'
 bucket = 'agreementadjbucket'
-task_name = f"task_{EPOCHS}ep_{dataset_name}_CE_Smless_Context20_unstratified"
+task_name = f"task_{EPOCHS}ep_{dataset_name}_stratified"
 
 
 def get_training_job() -> TrainingJob:

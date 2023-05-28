@@ -58,10 +58,10 @@ def assemble(name, limit):
 
 
 if __name__ == '__main__':
-    # build_index()
-    # featurize_index()
+    build_index()
+    featurize_index()
     # suffix = "_all_decl"
-    prefix = 'noun_'
+    prefix = 'noun_norm_e_'
     assemble(prefix+'tiny', 1)
     assemble(prefix+'toy', 5)
     assemble(prefix+'mid50', 50)

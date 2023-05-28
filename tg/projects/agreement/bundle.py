@@ -200,6 +200,8 @@ class NounAgreementTrainIndexBuilder(ITransfuseSelector):
         nouns = nouns[~nouns.label.isnull()]
 
         df.loc[nouns.index, 'declension_type'] = nouns['declension_type']
+        df.loc[nouns.index, 'norm_ending'] = nouns['norm_ending'].map(
+            self.norm_endings_nums)
         df.declension_type = df.declension_type.astype(int)
         df['label'] = -1
         df.loc[nouns.index, 'label'] = nouns.label
