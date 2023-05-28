@@ -11,6 +11,7 @@ from tg.grammar_ru.features import PyMorphyFeaturizer
 
 from tg.grammar_ru.corpus import ITransfuseSelector
 from nltk.stem import SnowballStemmer
+from tg.projects.agreement.adjectiveless_pymorphy_featurizer import AdjectivelessPyMorphyFeaturizer
 
 from tg.projects.agreement.bundles_tools import _print_thrown
 
@@ -158,7 +159,7 @@ class NounAgreementTrainIndexBuilder(ITransfuseSelector):
         return np.nan
 
     def __init__(self):
-        self.pmf = PyMorphyFeaturizer()
+        self.pmf = AdjectivelessPyMorphyFeaturizer()
         # self.snowball = SnowballStemmer(language="russian")
         self.norm_endings_nums = {e: i for i,
                                   e in enumerate(['я', 'а'])}

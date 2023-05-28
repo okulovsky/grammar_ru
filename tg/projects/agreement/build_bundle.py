@@ -3,6 +3,7 @@ from tg.grammar_ru.common import Loc
 from yo_fluq_ds import *
 
 from tg.grammar_ru.corpus import CorpusBuilder
+from tg.projects.agreement.adjectiveless_pymorphy_featurizer import AdjectivelessPyMorphyFeaturizer
 from tg.projects.agreement.bundle import AdjAgreementTrainIndexBuilder, NounAgreementTrainIndexBuilder
 
 
@@ -26,7 +27,7 @@ def featurize_index():
         INDEXED_BUNDLE_PATH,
         FEATURIZED_BUNDLE_PATH,
         [
-            PyMorphyFeaturizer(),
+            AdjectivelessPyMorphyFeaturizer(),#PyMorphyFeaturizer(),
             # SlovnetFeaturizer(),
             # SyntaxTreeFeaturizer(),
             # SyntaxStatsFeaturizer()
@@ -61,10 +62,10 @@ if __name__ == '__main__':
     build_index()
     featurize_index()
     # suffix = "_all_decl"
-    prefix = 'noun_norm_e_'
-    assemble(prefix+'tiny', 1)
-    assemble(prefix+'toy', 5)
-    assemble(prefix+'mid50', 50)
+    prefix = ""#'noun_norm_e_'
+    # assemble(prefix+'tiny', 1)
+    # assemble(prefix+'toy', 5)
+    # assemble(prefix+'mid50', 50)
     # assemble('toy'+suffix, 5)
     # assemble('mid20'+suffix, 20)
     # assemble('mid50'+suffix, 50)
