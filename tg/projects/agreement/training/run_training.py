@@ -21,16 +21,16 @@ from tg.projects.agreement.training.delivery_routine import DeliveryRoutine
 import torch
 load_dotenv(Loc.root_path / 'environment.env')
 
-EPOCHS = 20
+EPOCHS = 40
 
 project_name = 'agreementproject'
 # dataset_name = 'agreement_adj_mid50_0_declination'
 # dataset_name = 'agreement_adj_mid50_1_declination'
 # dataset_name = 'agreement_noun_tiny'
 # dataset_name = 'agreement_noun_mid50'
-dataset_name = 'agreement_noun_norm_e_mid50'
+dataset_name = 'agreement_noun_mid50'
 bucket = 'agreementadjbucket'
-task_name = f"task_{EPOCHS}ep_{dataset_name}_stratified"
+task_name = f"task_{EPOCHS}ep_{dataset_name}"
 
 
 def get_training_job() -> TrainingJob:

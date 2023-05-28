@@ -144,7 +144,7 @@ class AdjAgreementTrainIndexBuilder(ITransfuseSelector):
 
 
 class NounAgreementTrainIndexBuilder(ITransfuseSelector):
-    first_declension_ends = set("а я ы и е у ю ой ёй ей ".split())
+    first_declension_ends = set("а ы е у ой".split())
     # дядей, землёй Note в печатных текстах, наверное, ё заменяют на е
 
     POSSIBLE_ENDINGS = first_declension_ends
@@ -162,7 +162,7 @@ class NounAgreementTrainIndexBuilder(ITransfuseSelector):
         self.pmf = AdjectivelessPyMorphyFeaturizer()
         # self.snowball = SnowballStemmer(language="russian")
         self.norm_endings_nums = {e: i for i,
-                                  e in enumerate(['я', 'а'])}
+                                  e in enumerate(['а'])}
         # self.endings_nums = {e: i for i, e in enumerate(ALL_ENDS_list)}
 
     def _extract_norm_ending(self, word_in_norm_form: str):
