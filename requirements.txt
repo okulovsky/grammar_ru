@@ -5,3 +5,4 @@ nerus
 corus
 deprecated
 Flask==2.1.0
+browser-cookie3
