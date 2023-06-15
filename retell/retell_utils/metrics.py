@@ -1,7 +1,9 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from tg.common.analysis import Bootstrap, Aggregators, grbar_plot
 
 
 def get_cosine_sim(*strs):
@@ -40,3 +42,31 @@ def show_statistics_and_bar(jaccard_sim, cos_sim):
         for func_name, func in zip(['median', 'max', 'min'], [np.median, np.max, np.min]):
             print(f"{func_name} {name}: {round(func(val), 3)}")
         print('------------------------------------')
+
+
+def compute(df):
+    return df.groupby('metric_names').metric_values.mean().to_frame().transpose()
+
+
+def plot_confint(jaccard_sim, cos_sim, orient='v', ax=None, i=None):
+    metrics_names = ["jaccard_sim" for _ in range(len(jaccard_sim))] + ["cos_sim" for _ in range(len(cos_sim))]
+    df = pd.DataFrame(data=zip(np.concatenate([jaccard_sim, cos_sim]), metrics_names),
+                      columns=['metric_values', 'metric_names'])
+    rdf = Bootstrap(df=df, method=compute).run(N=1000)
+    rdf_i = rdf[['jaccard_sim', 'cos_sim']].unstack().to_frame().reset_index()
+    rdf_i.columns = ['metric_names', 'iteration', 'metric']
+    grbar_plot(
+        rdf_i.groupby('metric_names').metric.feed(Aggregators.normal_confint()).reset_index(),
+        value_column='metric_value',
+        error_column='metric_error',
+        color_column='metric_names',
+        orient=orient,
+        ax=None if ax is None else ax[i]
+    )
+
+
+def plot_mutiple_confints(jaccard_sims, cos_sims, orients, figsize=(18, 18)):
+    subplot_size = len(jaccard_sims)
+    fig, axis = plt.subplots(subplot_size, 1, figsize=figsize)
+    for i in range(subplot_size):
+        plot_confint(jaccard_sims[i], cos_sims[i], orients[i], ax=axis, i=i)
