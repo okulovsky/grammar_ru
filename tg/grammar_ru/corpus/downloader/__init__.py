@@ -6,13 +6,14 @@ import browser_cookie3
 from pathlib import Path
 import numpy as np
 
+
 class DownloadEngine:
     def get(self, url):
         raise NotImplementedError()
 
 
 class RequestsEngine(DownloadEngine):
-    def __init__(self, cookies_for_domain = None):
+    def __init__(self, cookies_for_domain=None):
         self.cookies_for_domain = cookies_for_domain
 
     def get(self, url):
@@ -29,10 +30,8 @@ class RequestsEngine(DownloadEngine):
         return response.text, err
 
 
-
-
 class Downloader:
-    def __init__(self, engine):
+    def __init__(self, engine: Optional[RequestsEngine]):
         self.engine = RequestsEngine() if engine is None else engine
 
     def download(
@@ -40,20 +39,20 @@ class Downloader:
             url_pattern: str,
             folder: Path,
             values: List[str],
-            pause_time: Union[float, Tuple[float,float]] = 1,
+            pause_time: Union[float, Tuple[float, float]] = 1,
             dont_redownload: bool = True,
             with_progress_bar: bool = True,
             continue_if_not_found: bool = True,
-            extension = '.html',
-            stop_if_filter = None
+            extension='.html',
+            stop_if_filter=None
     ):
         vs = Query.en(values).select(str)
         if with_progress_bar:
             vs = vs.feed(fluq.with_progress_bar())
         first_time = True
         for value in vs:
-            fvalue = value.replace('/','___')
-            path = folder/(fvalue+extension)
+            fvalue = value.replace('/', '___')
+            path = folder / (fvalue + extension)
             os.makedirs(path.parent, exist_ok=True)
             if path.is_file():
                 if dont_redownload:
@@ -79,4 +78,3 @@ class Downloader:
                 if stop_if_filter(text):
                     break
             FileIO.write_text(text, path)
-

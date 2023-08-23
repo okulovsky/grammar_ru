@@ -1,14 +1,14 @@
 from dataclasses import dataclass
-
+from typing import List, Optional
 
 @dataclass
 class ChapterInfo:
     name: str
     retell: str
-    summary: str
+    summary: Optional[str] = ''
 
 
 @dataclass
 class BookInfo:
     name: str
-    chapters: list[ChapterInfo]
+    chapters: List[ChapterInfo]

@@ -1,11 +1,15 @@
-import requests
+import requests, re, os
 from bs4 import BeautifulSoup
-from books_dataclasses import BookInfo, ChapterInfo
-from html_book_tags import Garry_Potter_retell_tag, Checkov_retell_tag, Chekov_book_tag, witcher_retell_tag
+from pathlib import Path
+
+from retell.book_url_parser.book_to_md_files.data_utils.books_dataclasses import BookInfo, ChapterInfo
+from filter_html_tags import Garry_Potter_retell_tag, Checkov_retell_tag, Chekov_book_tag, witcher_retell_tag
+from typing import List
+from itertools import takewhile
 
 
-def get_parsed_retell_g_p(url: str) -> list[str]:
-    collected_data: list[BookInfo] = []
+def get_parsed_retell_g_p(url: str) -> List[str]:
+    collected_data: List[BookInfo] = []
     with requests.get(url) as response:
         soup = BeautifulSoup(response.text)
     books = soup.findAll('table')
@@ -28,8 +32,8 @@ def get_parsed_retell_g_p(url: str) -> list[str]:
     return collected_data
 
 
-def get_parsed_retell_witch(url: str) -> list[str]:
-    collected_data: list[BookInfo] = []
+def get_parsed_retell_witch(url: str) -> List[str]:
+    collected_data: List[BookInfo] = []
     with requests.get(url) as response:
         soup = BeautifulSoup(response.text)
     books_names = [tag.contents[2].attrs['title'].replace(' ', '_') for tag in
@@ -48,7 +52,7 @@ def get_parsed_retell_witch(url: str) -> list[str]:
 
 
 def get_parsed_retell_Checov(url):
-    collected_data: list[BookInfo] = []
+    collected_data: List[BookInfo] = []
     with requests.get(url) as response:
         soup = BeautifulSoup(response.text)
     books_names = [tag.contents[0].replace(' ', '_') for tag in soup.findAll(Chekov_book_tag)]
@@ -66,7 +70,7 @@ def get_parsed_retell_Checov(url):
 
 
 def get_parsed_retell_game_o_t(url):
-    collected_data: list[BookInfo] = []
+    collected_data: List[BookInfo] = []
     with requests.get(url) as response:
         soup = BeautifulSoup(response.text)
     books_names = [tag.contents[0].attrs['title'].replace(' ', '_') for tag in soup.findAll('b')[:5]]
@@ -95,4 +99,43 @@ def get_parsed_retell_game_o_t(url):
             chapter_info = ChapterInfo(chapter_name, ''.join(retell), summary)
             book_info.chapters.append(chapter_info)
         collected_data.append(book_info)
+    return collected_data
+
+
+def __get_sorted_chapters(book_name, chapter_list, first_chapter=None, last_chapter=None):
+    chapters = [chapter_name
+                for chapter_name in chapter_list
+                if chapter_name.startswith(book_name)
+                and 'Appendix' not in chapter_name
+                and chapter_name != book_name + '.html' and '.html' in chapter_name]
+
+    find_nums = lambda chapter: 0 if first_chapter in chapter else (
+        len(chapters) - 1 if last_chapter in chapter
+        else int(re.findall(r'\d+', chapter)[0]))
+
+    for i in range(len(chapters)):
+        chapters[i] = (find_nums(chapters[i]), chapters[i])
+    chapters = list(map(lambda ch: ch[1], sorted(chapters)))
+    return chapters
+
+
+def eng_get_parsed_retell_game_o_t(url):
+    summary_path = Path("/home/mixailkys/websites/ONLY CHAPTERS/awoiaf.westeros.org/index.php")
+    book_names = ['A_Game_of_Thrones', 'A_Clash_of_Kings', 'A_Storm_of_Swords', 'A_Feast_for_Crows',
+                  'A_Dance_with_Dragons']
+    htmls = os.listdir(summary_path)
+    book_chapters = {book_name: __get_sorted_chapters(book_name, htmls, 'Prologue', 'Epilogue')
+                     for book_name in book_names}
+    collected_data: List[BookInfo] = []
+    for book_name, chapter_names in book_chapters.items():
+        book = BookInfo(book_name, [])
+        for i, chapter_number in enumerate(chapter_names):
+            with open(summary_path / chapter_number, 'r') as chapter:
+                soup = BeautifulSoup(chapter)
+            info_tag = soup.find('span', {'id': "Synopsis"})
+            summary = ''.join([tag.text for tag in takewhile(lambda _tag: _tag.name != 'h2', info_tag.next_elements)
+                               if tag.name == 'p'])
+            chapter_name = str(soup.find('th', {'colspan': "2"}).contents[0]).replace(' ', '_')
+            book.chapters.append(ChapterInfo(chapter_name + '-' + f"Chapter_{i}", summary))
+        collected_data.append(book)
     return collected_data
