@@ -10,9 +10,10 @@ def __get_sorted_sentences_importance(importances, sentences, retell_detail, sen
     return top_sentences
 
 
-def get_extract_retell_by_common_word(texts, sentences_and_norm_form_extractor, retell_detail = 5, ban_words=string.punctuation):
+def get_extract_retell_by_common_word(texts, sentences_and_norm_form_extractor, retell_detail=5,
+                                      ban_words=string.punctuation):
     extract_retell = []
-    for text in texts[:1]:
+    for text in texts:
         for chapter in tqdm(text.index):
             sentences, norm_form_sentences = sentences_and_norm_form_extractor(chapter)
             sentence_score = []

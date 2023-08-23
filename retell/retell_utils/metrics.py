@@ -7,23 +7,23 @@ from tg.common.analysis import Bootstrap, Aggregators, grbar_plot
 
 
 def get_cosine_sim(*strs):
-    vectors = [t for t in get_vectors(*strs)]
+    vectors = [t for t in _get_vectors(*strs)]
     return cosine_similarity(vectors)[0][1]
 
 
-def get_vectors(*strs):
+def _get_vectors(*strs):
     text = [t for t in strs]
     vectorizer = CountVectorizer()
     vectorizer.fit(text)
     return vectorizer.transform(text).toarray()
 
 
-def jaccard_text(doc1, doc2):
+def get_jaccard_index(doc1, doc2):
     words_doc_1 = set(doc1.lower().split())
     words_doc_2 = set(doc2.lower().split())
     intersection = words_doc_1.intersection(words_doc_2)
     union = words_doc_1.union(words_doc_2)
-    J = float(len(intersection)) / len(union)
+    J = float(len(intersection)) / len(union) if len(union) != 0 else 0
     return J
 
 
