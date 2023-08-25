@@ -21,3 +21,8 @@ def upload_bundle(bundle_location, dataset_name, bucket, project_name):
     # except:
     #     pass
     S3YandexHandler.upload_folder(bucket, s3path, bundle_location)
+
+def _print_thrown(thrown, file):
+    with open(file, "a") as myfile:
+        for w in thrown:
+            myfile.write(f'{w}\n')

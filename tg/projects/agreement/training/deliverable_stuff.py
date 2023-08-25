@@ -141,7 +141,10 @@ class Network(torch.nn.Module):
 
 
 def get_mask(df):
-    mask_cols = [c for c in df.columns if 'mask' in c]
+    four_labels = {0,5, 18, 19}
+    # presented_labels = set(str(x) for x in set(df.label.unique()))
+    mask_cols = [c for c in df.columns if ('mask' in c) ]
+    mask_cols = [col for col in mask_cols if int(col[4:]) in four_labels]
     if not mask_cols:
         raise ValueError("Mask is not found in index_frame")
     return df[mask_cols]
@@ -151,10 +154,7 @@ class MaskedNetwork(Network):
     def forward(self, batch):
         mask = torch.tensor(get_mask(batch.index_frame).values.astype(int))
         output = super().forward(batch)
-        # output[~mask] = 0
-        return output
-        return torch.masked_tensor(output, mask)
-        return mask * output
+        return output * mask
 
 
 class NetworkFactory:
@@ -164,6 +164,7 @@ class NetworkFactory:
     def __call__(self, batch):
         head_factory = self.assembly_point.create_network_factory()
         head = head_factory(batch)
+        # return Network(head, self.assembly_point.hidden_size,  batch)
         return Network(head, self.assembly_point.hidden_size,  batch)
 
 
@@ -181,6 +182,6 @@ class TrainingTask(btf.TorchTrainingTask):
         # head_factory = ap.create_network_factory()
         self.setup_batcher(
             idb, [ap.create_extractor(), get_multilabel_extractor()],
-            # stratify_by_column='label'
+            stratify_by_column='label'
             )
         self.setup_model(NetworkFactory(ap), ignore_consistancy_check=True)

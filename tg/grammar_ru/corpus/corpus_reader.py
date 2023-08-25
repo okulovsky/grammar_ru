@@ -65,6 +65,11 @@ class CorpusReader(ISrcReader):
     def read_frames(self, uids=None, frame_type=None):
         return self.get_frames(uids, frame_type)
 
+    def read_mapping_data(self):
+        archive = zipfile.ZipFile(self.location)
+        for file in archive.namelist():
+            if file.startswith('mapping'):
+                return pd.read_parquet(archive.extract(file))
 
     def _get_fearurizers_name(self, file):
         return Query.en(file.namelist()).where(lambda z: '/' in z and z.endswith('.parquet')).select(lambda z: z.split('/')[0]).distinct().where(lambda z: z!='src').to_list()

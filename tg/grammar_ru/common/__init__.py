@@ -1,5 +1,5 @@
 from .loc import Loc
-from .separator import Separator, Symbols
+from .separator import *
 from .df_viewer import DfViewer
 from .data_bundle import DataBundle
 from .misc import sample_table
