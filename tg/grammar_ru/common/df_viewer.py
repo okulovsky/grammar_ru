@@ -29,7 +29,7 @@ class Fragment:
         if self.tooltip is not None:
             result+=f' title="{self.tooltip}"'
 
-        result+='">'
+        result+='>'
         return result
 
 

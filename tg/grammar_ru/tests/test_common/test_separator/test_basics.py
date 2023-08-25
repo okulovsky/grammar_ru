@@ -1,9 +1,19 @@
 from unittest import TestCase
 from tg.grammar_ru.common.separator import Separator, SeparatorEn, _generate_offsets
 import pandas as pd
+import nltk.tokenize
 
 
 class SeparatorTestCase(TestCase):
+    def test_nltk(self):
+        try:
+            nltk.tokenize.sent_tokenize('Hey hey')
+        except LookupError:
+            nltk.download('punkt')
+            self.fail('Needed to download nltk data. Rerun the test')
+
+
+
     def test_generate_offsets(self):
         text = '  A BCD   EFG  H '
         tails, length = _generate_offsets(text, ['A', 'BCD', 'EFG'])

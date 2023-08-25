@@ -7,6 +7,18 @@ text = "John walks his old dog and goes shopping in the mall.\n It was quickly."
 
 
 class SnowBallFeaturizersTestCase(TestCase):
+    def test_nltk(self):
+        try:
+            db = SeparatorEn.build_bundle(text)
+            analyzer = SnowballFeaturizer(language='eng')
+            analyzer.featurize(db)
+        except LookupError:
+            import nltk
+            nltk.download('averaged_perceptron_tagger')
+            nltk.download('universal_tagset')
+            self.fail('Needed to download nltk data. Rerun the test')
+
+
     def test_morph_and_syntax_general(self):
         db = SeparatorEn.build_bundle(text)
         for c in ['word_id', 'sentence_id', 'paragraph_id']:
