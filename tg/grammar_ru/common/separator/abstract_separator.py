@@ -4,8 +4,8 @@ from typing import *
 import pandas as pd
 
 from .offsets import _generate_offsets
-from ..data_bundle import DataBundle
-from ..df_viewer import DfViewer
+from .data_bundle import DataBundle
+from .df_viewer import DfViewer
 
 
 class AbstractSeparator(ABC):
