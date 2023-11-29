@@ -8,6 +8,7 @@ import os
 from uuid import uuid4
 from ..common import DataBundle, Separator
 from yo_fluq_ds import Query, FileIO
+from .corpus_reader import CorpusReader
 import time
 
 
@@ -39,7 +40,11 @@ class CorpusWriter:
         os.makedirs(filename.parent, exist_ok=True)
         self.filename = filename
         self.file = zipfile.ZipFile(filename, mode, zipfile.ZIP_DEFLATED)
-        self.toc = []
+        if append:
+            reader = CorpusReader(filename)
+            self.toc = reader.get_toc().reset_index().to_dict('records')
+        else:
+            self.toc = []
         self.indices = {}
         self.ordinal = 0
         self.recompute_ids_with_span = recompute_ids_with_span
@@ -57,14 +62,26 @@ class CorpusWriter:
             df = Separator.reset_indices(df, delta)
         return df
 
+    def _replace_toc(self,new_toc):
+        zin = self.file
+        zout = zipfile.ZipFile('temp.zip', 'w')
+        for item in zin.infolist():
+            buffer = zin.read(item.filename)
+            if (item.filename != 'toc.parquet'):
+                zout.writestr(item, buffer)
+        zin.close()
+        self.file = zout
+        os.remove(self.filename)
+        os.rename('temp.zip', self.filename)
+        self._write_parquet('toc.parquet', new_toc)
+
     def add_relation(self, df: pd.DataFrame):
         required_columns = ('file_1', 'file_2', 'relation_name')
         if not all(required_column in df.columns for required_column in required_columns):
             raise ValueError(f"{required_columns} must be in df columns")
 
-        with self.file:
-            file_name = f"relation/{str(uuid4())}"
-            self._write_parquet(file_name,df)
+        file_name = f"relation/{str(uuid4())}"
+        self._write_parquet(file_name,df)
 
     def add_fragment(self, fragment: Union[CorpusFragment, pd.DataFrame], file_name=None):
         if isinstance(fragment, pd.DataFrame):
@@ -109,7 +126,10 @@ class CorpusWriter:
                 toc = toc.set_index('file_id')
             else:
                 toc = custom_toc
-            self._write_parquet('toc.parquet', toc)
+            if 'toc.parquet' in self.file.namelist():
+                self._replace_toc(toc)
+            else:
+                self._write_parquet('toc.parquet', toc)
         except:
             has_error = True
 

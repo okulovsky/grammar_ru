@@ -1,7 +1,7 @@
 from pathlib import Path
 import zipfile
 from io import BytesIO
-
+import numpy as np
 import pandas as pd
 from yo_fluq_ds import *
 from ..common import DataBundle, Separator
@@ -25,6 +25,15 @@ class CorpusReader(ISrcReader):
         df = pd.read_parquet(buffer)
         return df
 
+    def _get_filtered_uids(self,uids):
+        uids = np.array(uids)
+        toc = self.get_toc()
+        matched_uids = np.where(np.isin(uids, toc.index))[0]
+        uids = uids[matched_uids]
+        if len(uids) == 0:
+            raise ValueError("No uids were found. If you use Parallel Coprus - make sure that uids connected to subcoprus type.")
+        return uids
+
     def get_toc(self):
         with zipfile.ZipFile(self.location, 'r') as file:
             return self._read_frame(file, 'toc.parquet')
@@ -34,10 +43,11 @@ class CorpusReader(ISrcReader):
         with zipfile.ZipFile(self.location) as file:
             for relation in [filename for filename in file.namelist() if filename.startswith('relation')]:
                 relations.append(self._read_frame(file, relation))
-        relations:pd.DataFrame = pd.concat(relations)
+        relations: pd.DataFrame = pd.concat(relations)
         return relations
 
     def get_src(self, uids: ParrallelUids):
+        uids = self._get_filtered_uids(uids)
         uid = next(iter(uids))
         is_list, is_dict = isinstance(uid, list), isinstance(uid, dict)
         if not is_list and not is_dict:
@@ -97,6 +107,7 @@ class CorpusReader(ISrcReader):
     def get_frames(self, uids=None, frame_type=None):
         if uids is None:
             uids = self.get_toc().index
+        uids = self._get_filtered_uids(uids)
         if frame_type is None:
             return Queryable(self._get_frames_iter(uids), len(uids))
         else:
@@ -143,6 +154,7 @@ class CorpusReader(ISrcReader):
         toc = self.get_toc()
         if uids is None:
             uids = toc.index
+        uids = self._get_filtered_uids(uids)
         return Queryable(self._get_bundles_iter(uids, toc), len(uids))
 
     def read_bundles(self, uids=None):

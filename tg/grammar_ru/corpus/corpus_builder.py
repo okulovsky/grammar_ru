@@ -235,4 +235,4 @@ class CorpusBuilder:
                                       additional_columns={relation_column_name: relation_name})
             writer.add_fragment(fragment, file_name)
         writer.add_relation(relation)
-        #writer.close()
+        writer.finalize()
