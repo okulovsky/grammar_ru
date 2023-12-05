@@ -1,3 +1,4 @@
+from os.path import isfile
 from typing import *
 import pandas as pd
 from pathlib import Path
@@ -40,7 +41,8 @@ class CorpusWriter:
         os.makedirs(filename.parent, exist_ok=True)
         self.filename = filename
         self.file = zipfile.ZipFile(filename, mode, zipfile.ZIP_DEFLATED)
-        if append:
+        have_toc = 'toc.parquet' in self.file.namelist()
+        if append and have_toc:
             reader = CorpusReader(filename)
             self.toc = reader.get_toc().reset_index().to_dict('records')
         else:

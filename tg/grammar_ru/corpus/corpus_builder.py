@@ -228,8 +228,10 @@ class CorpusBuilder:
     @staticmethod
     def update_parallel_data(parallel_corpus_path: Path, dfs: Dict[str, pd.DataFrame],
                              relation: pd.DataFrame,
-                             relation_column_name: str = "subcorpus_name", relation_name='None') -> None:
+                             relation_column_name: str = "subcorpus_name", relation_name=None) -> None:
         writer = CorpusWriter(parallel_corpus_path, append=True)
+        if relation_name is None:
+            relation_name = relation.relation_name.iloc[0]
         for file_name, df in dfs.items():
             fragment = CorpusFragment(filename=file_name, part_index=0, df=df,
                                       additional_columns={relation_column_name: relation_name})
