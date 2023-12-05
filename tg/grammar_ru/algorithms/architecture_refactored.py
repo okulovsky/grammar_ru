@@ -1,5 +1,5 @@
 from typing import List, Optional
-from models import TokenData, DataBundle
+from .models import TokenData, DataBundle
 
 class NlpAlgorithmRefactored:
     """Represents a base class for NLP algorithms that process text using dataclasses instead of DataFrames."""
