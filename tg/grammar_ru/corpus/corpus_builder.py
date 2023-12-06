@@ -226,15 +226,19 @@ class CorpusBuilder:
         writer.close()
 
     @staticmethod
-    def update_parallel_data(parallel_corpus_path: Path, dfs: Dict[str, pd.DataFrame],
+    def update_parallel_data(parallel_corpus_path: Path, dfs: Dict[str, Tuple[str, pd.DataFrame]],
                              relation: pd.DataFrame,
-                             relation_column_name: str = "subcorpus_name", relation_name=None) -> None:
+                             subcorpus_column_name: str = "subcorpus_name") -> None:
+        """
+    :param parallel_corpus_path: path to your corpus file.
+    :param dfs: dict.Items looks like:  'file_id' : ('sub_corpus_type', pd.DataFrame)
+    :param subcorpus_column_name: this str will be used as column name in toc file to access your subcorpus.
+    :return: describe what it returns
+        """
         writer = CorpusWriter(parallel_corpus_path, append=True)
-        if relation_name is None:
-            relation_name = relation.relation_name.iloc[0]
-        for file_name, df in dfs.items():
+        for file_name, (sub_corpus_type, df) in dfs.items():
             fragment = CorpusFragment(filename=file_name, part_index=0, df=df,
-                                      additional_columns={relation_column_name: relation_name})
+                                      additional_columns={subcorpus_column_name: sub_corpus_type})
             writer.add_fragment(fragment, file_name)
         writer.add_relation(relation)
         writer.finalize()

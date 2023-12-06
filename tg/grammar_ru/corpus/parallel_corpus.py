@@ -16,15 +16,20 @@ class ParallelCorpus:
     def get_mapped_data(self, uids: List[str], sub_corpus_types: Union[str, List[str]] = 'all') -> List[
         Dict[str, pd.DataFrame]]:
         relation_info = self.reader.read_relations()
-        if sub_corpus_types == 'all':
+        if isinstance(sub_corpus_types,str) and sub_corpus_types == 'all':
             sub_corpus_types = self.reader.get_toc()[f'{self.subcorpus_name_column}'].unique()
-        sub_corpuses_relations = [relation_info.loc[relation_info[self.subcorpus_name_column] == sub_name]
+        sub_corpuses_relations = [relation_info.loc[relation_info.relation_name == sub_name]
                                   for sub_name in sub_corpus_types]
         parallel_request = list()
         for uid in uids:
             relation_uid: Dict[str, str] = dict()
             for name, sub_corpus_relation in zip(sub_corpus_types, sub_corpuses_relations):
-                relation_uid[name] = sub_corpus_relation.loc[sub_corpus_relation.file_1 == uid, 'file_2'].iloc[0]
+                finded_file_2 = sub_corpus_relation.loc[sub_corpus_relation.file_1 == uid, 'file_2']
+                try:
+                    finded_file_2 = finded_file_2.iloc[0]
+                except IndexError:
+                    raise IndexError("Cannot find uids in corpus.Check the correctness of the data")
+                relation_uid[name] = finded_file_2
             parallel_request.append(relation_uid)
 
         parallel_response: List[Dict[str, pd.DataFrame]] = self.reader.read_src(parallel_request)

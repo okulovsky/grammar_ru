@@ -47,10 +47,13 @@ class CorpusReader(ISrcReader):
         return relations
 
     def get_src(self, uids: ParrallelUids):
-        uids = self._get_filtered_uids(uids)
         uid = next(iter(uids))
         is_list, is_dict = isinstance(uid, list), isinstance(uid, dict)
-        if not is_list and not is_dict:
+        if is_list:
+            uids = [self._get_filtered_uids(sub_uids) for sub_uids in uids]
+        elif is_dict:
+            uids = [dict(zip(sub_uids.keys(),self._get_filtered_uids(list(sub_uids.values())))) for sub_uids in uids]
+        else:
             raise TypeError("Uids must be list[list[str]]] or list[dict[str,str]]")
 
         with zipfile.ZipFile(self.location, 'r') as file:
