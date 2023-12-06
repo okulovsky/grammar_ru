@@ -2,8 +2,6 @@ from typing import List
 import enchant
 from .architecture_refactored import NlpAlgorithmRefactored, DataBundle, TokenData
 
-d = enchant.Dict('ru_RU')
-print(d.check('квота'))
 
 class SpellcheckAlgorithmRefactored(NlpAlgorithmRefactored):
     def __init__(self):
