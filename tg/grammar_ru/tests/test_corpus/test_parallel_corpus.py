@@ -1,9 +1,11 @@
-from tg.grammar_ru.corpus import CorpusWriter, CorpusReader, CorpusBuilder, ParallelCorpus
+from pandas import DataFrame
+
+from tg.grammar_ru.corpus import CorpusReader, CorpusBuilder, ParallelCorpus
 from tg.grammar_ru.corpus.formats import InterFormatParser
 from uuid import uuid4
 import pandas as pd
 import numpy as np
-from typing import Dict, Optional, List, Union, Tuple, Collection, Any
+from typing import Dict, List, Tuple
 from unittest import TestCase
 from pathlib import Path
 import os
@@ -11,7 +13,7 @@ import os
 global_sub_names = ['a', 'b', 'c']
 
 
-def get_dfs_and_relations_and_uids() -> Tuple[Dict[str, Tuple[str, pd.DataFrame]], pd.DataFrame, List[List[str]]]:
+def get_dfs_and_relations_and_uids() -> Tuple[List[Dict[str, pd.DataFrame]], DataFrame, List[List[str]]]:
     sub_corpuses = [[i for i in InterFormatParser(Path('/test'), Path(f'/test/{letter}'), ['folder', 'name'],
                                                   mock=text).parse().to_list()]
                     for text, letter in zip([text_1, text_2, text_3], ['a/b.md', 'b/c.md', 'd/e.md'])]
@@ -25,8 +27,8 @@ def get_dfs_and_relations_and_uids() -> Tuple[Dict[str, Tuple[str, pd.DataFrame]
             relations.append(pd.DataFrame(
                 {'file_1': sub_uids_1, 'file_2': sub_uids_2, 'relation_name': f'{sub_name_1}-{sub_name_2}'}))
     relations = pd.concat(relations)
-    dfs = [{k: (sub_name, v.df) for k, v in zip(sub_uids, sub_corpus)} for sub_uids, sub_corpus, sub_name in
-           zip(sub_uids, sub_corpuses, sub_names)]
+    dfs = [{k: v.df for k, v in zip(sub_uids, sub_corpus)} for sub_uids, sub_corpus in
+           zip(sub_uids, sub_corpuses)]
     return dfs, relations, sub_uids
 
 
@@ -38,10 +40,11 @@ def write_data_to_coprus(dfs, relations, corpus_file):
     added_relations = relations.loc[~relations.relation_name.isin(['a-b', 'b-a'])]
     builder = CorpusBuilder()
 
-    builder.update_parallel_data(corpus_file, dict(list(dfs[0].items()) + list(dfs[1].items())), f_s_relations,
-                                 subcorpus_column_name=subcorpus_col_name)
+    builder.update_parallel_data(corpus_file, dfs[0], global_sub_names[0], None, subcorpus_col_name)
 
-    builder.update_parallel_data(corpus_file, dfs[-1], added_relations, subcorpus_column_name=subcorpus_col_name)
+    builder.update_parallel_data(corpus_file, dfs[1], global_sub_names[1], f_s_relations, subcorpus_col_name)
+
+    builder.update_parallel_data(corpus_file, dfs[2], global_sub_names[2], added_relations, subcorpus_col_name)
 
 
 class ParallelCorpusTestCase(TestCase):
@@ -60,6 +63,15 @@ class ParallelCorpusTestCase(TestCase):
         except Exception:
             raise Exception("Incorrect update_parallel_data work. Other tests may not work properly.")
         os.remove(self.corpus_file)
+
+    def test_unique_word_ids(self):
+        dfs, relations, uids, corpus_file = self.dfs, self.relations, self.uids, self.corpus_file
+        write_data_to_coprus(dfs, relations, corpus_file)
+        reader = CorpusReader(corpus_file)
+        all_frames = pd.concat(list(reader.get_frames()))
+        assert (all_frames.word_id.unique() == all_frames.word_id.values).all()
+        # нет теста на уникальность предложений между файлами, т.к. файл может быть слишком большой - разбился на два файла, но номер предложения один и тот же. Это не проверить.
+        os.remove(corpus_file)
 
     def test_get_relation(self):
         dfs, relations, uids, corpus_file = self.dfs, self.relations, self.uids, self.corpus_file

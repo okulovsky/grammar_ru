@@ -226,8 +226,8 @@ class CorpusBuilder:
         writer.close()
 
     @staticmethod
-    def update_parallel_data(parallel_corpus_path: Path, dfs: Dict[str, Tuple[str, pd.DataFrame]],
-                             relation: pd.DataFrame,
+    def update_parallel_data(parallel_corpus_path: Path, dfs: Dict[str, pd.DataFrame], sub_corpus_type,
+                             relation: pd.DataFrame = None,
                              subcorpus_column_name: str = "subcorpus_name") -> None:
         """
     :param parallel_corpus_path: path to your corpus file.
@@ -236,9 +236,10 @@ class CorpusBuilder:
     :return: describe what it returns
         """
         writer = CorpusWriter(parallel_corpus_path, append=True)
-        for file_name, (sub_corpus_type, df) in dfs.items():
+        for file_name, df in dfs.items():
             fragment = CorpusFragment(filename=file_name, part_index=0, df=df,
                                       additional_columns={subcorpus_column_name: sub_corpus_type})
             writer.add_fragment(fragment, file_name)
-        writer.add_relation(relation)
+        if relation is not None:
+            writer.add_relation(relation)
         writer.finalize()
