@@ -1,2 +1,2 @@
 from .corpus import CorpusReader
-from .common import Loc, Separator, DataBundle
+from .common import Loc, Separator,SeparatorEn,SeparatorRu, DataBundle
