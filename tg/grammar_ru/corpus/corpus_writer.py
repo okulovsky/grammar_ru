@@ -74,8 +74,9 @@ class CorpusWriter:
         zin.close()
         self.file = zout
         os.remove(self.filename)
-        os.rename('temp.zip', self.filename)
         self._write_parquet('toc.parquet', new_toc)
+        zout.close()
+        os.rename('temp.zip', self.filename)
 
     def add_relation(self, df: pd.DataFrame):
         required_columns = ('file_1', 'file_2', 'relation_name')
@@ -132,10 +133,10 @@ class CorpusWriter:
                 self._replace_toc(toc)
             else:
                 self._write_parquet('toc.parquet', toc)
+                self.file.close()
         except:
             has_error = True
 
-        self.file.close()
         if has_error:
             FileIO.write_pickle(self.toc, self.filename.parent / 'debug_toc_array.pickle')
             FileIO.write_pickle(toc, self.filename.parent / 'debug_toc_df.pickle')
