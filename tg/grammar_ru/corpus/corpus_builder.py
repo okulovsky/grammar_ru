@@ -231,7 +231,7 @@ class CorpusBuilder:
                              subcorpus_column_name: str = "subcorpus_name") -> None:
         """
     :param parallel_corpus_path: path to your corpus file.
-    :param dfs: dict.Items looks like:  'file_id' : ('sub_corpus_type', pd.DataFrame)
+    :param dfs: dict.Items looks like:  'file_id' : pd.DataFrame
     :param subcorpus_column_name: this str will be used as column name in toc file to access your subcorpus.
     :return: describe what it returns
         """
