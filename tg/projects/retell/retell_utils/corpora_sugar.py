@@ -62,7 +62,7 @@ class CorpusSugar:
             self.retell_books if corpus_type == 'retell' else self.summar_books)
         text = [book for book in texts if book_name.lower() in book.header_0.str.lower().values[0]] \
             if 'book_name' not in texts[0].columns \
-            else [book for book in texts if book_name in book.book_name.values]
+            else [book for book in texts if book_name.lower() in book.book_name.values[0].lower()]
         return text[0]
 
     def get_sentences(self, chapter, corpus_type="book") -> List[Any]:

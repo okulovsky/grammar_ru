@@ -2,7 +2,7 @@ import requests, re, os
 from bs4 import BeautifulSoup
 from pathlib import Path
 
-from retell.book_url_parser.book_to_md_files.data_utils.books_dataclasses import BookInfo, ChapterInfo
+from tg.projects.retell.md_book_from_url.data_utils.books_dataclasses import BookInfo, ChapterInfo
 from filter_html_tags import Garry_Potter_retell_tag, Checkov_retell_tag, Chekov_book_tag, witcher_retell_tag
 from typing import List
 from itertools import takewhile
