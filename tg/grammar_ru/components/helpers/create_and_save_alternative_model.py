@@ -21,10 +21,8 @@ def main():
     task.assembly_point.network_factory.network_type = btc.Dim3NetworkType.AlonAttention
     result = task.run(tsa_bundle)
     model = result['output']['model']
-    torch.save(model, Loc.model_path)
+    torch.save(model, Loc.model_path / 'alternative_model.zip')
     print('ok')
-
-
 
 if __name__ == '__main__':
     main()
