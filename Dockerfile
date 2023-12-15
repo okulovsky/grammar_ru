@@ -1,14 +1,15 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9
+FROM python:3.9
 
-WORKDIR /app
+WORKDIR /
 
-COPY requirements.txt .
-RUN pip install -r ./requirements.txt
+RUN apt-get update -y
+RUN apt-get install -y enchant-2
+RUN apt-get install -y graphviz
+RUN apt install -y hunspell-ru
 
-RUN pip3 install pip
-RUN poetry config virtualenvs.create false
-RUN poetry install --no-dev
+COPY merged_requirements.txt .
+RUN pip install --default-timeout=100 -r ./merged_requirements.txt
 
-COPY src /app/src/
+COPY . /src/
 
-CMD ["gunicorn", "src.core.main:app", "--bind", "0.0.0.0:8080", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker"]
+CMD ["gunicorn", "src.tg.grammar_ru.components.api.spelcheck_handler:app", "--bind", "0.0.0.0:8080", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker"]
