@@ -1,0 +1,6 @@
+services:
+  grammar_ru:
+    build: .
+    container_name: grammar_ru
+    ports:
+      - "8080:8080"
