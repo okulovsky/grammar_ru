@@ -7,6 +7,7 @@ from tg.grammar_ru.features import SnowballFeaturizer
 from tg.common.ml.batched_training import context as btc
 from tg.common.ml import batched_training as bt
 from tg.common.ml.batched_training import sandbox as bts
+import pickle
 
 
 
@@ -20,8 +21,10 @@ def main():
     task.optimizer_ctor.type = 'torch.optim:Adam'
     task.assembly_point.network_factory.network_type = btc.Dim3NetworkType.AlonAttention
     result = task.run(tsa_bundle)
-    model = result['output']['model']
-    torch.save(model, Loc.model_path / 'alternative_model.zip')
+    model = result['output']['training_task']
+    with open (Loc.model_path / 'alternative_task.pickle', 'wb') as handle:
+        pickle.dump(model, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     print('ok')
 
 if __name__ == '__main__':
