@@ -22,39 +22,25 @@ class AlternativeAlgorithm(NlpAlgorithm):
     def __init__(self):
         super().__init__()
 
-
-    def process_text(self, text):
-        df = Separator.separate_string(text)
-        good_words = set(FileIO.read_json('files/tsa-dict.json'))
-        tsa_filter = DictionaryFilterer(good_words)
-        new_df = tsa_filter.filter(df)
-
+    def create_db(self, text: str):
         text_db = Separator.build_bundle(text, [SnowballFeaturizer()])
-        # tsa_sampler = EndingNegativeSampler('тся', 'ться')
-        # tsa_sampler.build_negative_sample_from_positive(df)
+        return text_db
 
-
-
-
-    def _create_index_db(self, db: DataBundle):
-        index_frame = db.src.copy()
-        index_frame = index_frame.loc[index_frame.is_target][['word_id', 'sentence_id', 'label']].reset_index(drop=True)
-        index_frame.index.name = 'sample_id'
-
-        idb = bt.IndexedDataBundle (
-            index_frame=index_frame,
-            bundle=db
-        )
-
-        return idb
-
-
-
+    def create_index(self, db: DataBundle, text: str):
+        index = Separator.separate_string(text)
+        good_words = set(FileIO.read_json(Loc.files_path / 'tsa-dict.json'))
+        tsa_filter = DictionaryFilterer(good_words)
+        index = tsa_filter.filter(index).index
+        return index
 
     def _run_inner(self, db: DataBundle, index: pd.Index) -> Optional[pd.DataFrame]:
+        idb = bt.IndexedDataBundle(
+            index_frame=index.to_frame(),
+            bundle=db
+        )
         model_path = Loc.model_path / 'alternative_task.pickle'
-        with open(model_path, 'wb') as handle:
+        with open(model_path, 'rb') as handle:
             model = pickle.load(handle)
 
-        return model.predict(db)
+        return model.predict(idb)
 

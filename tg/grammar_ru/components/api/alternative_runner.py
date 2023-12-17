@@ -11,18 +11,13 @@ from tg.common.ml.batched_training import sandbox as bts
 
 
 def main():
-    tsa_bundle_path = Loc.temp_path / 'demos/bundle/bundle'
-    tsa_bundle = DataBundle.load(tsa_bundle_path)
-    task = bts.AlternativeTrainingTask2()
-    task.settings.epoch_count = 1
-    task.settings.batch_size = 20000
-    task.settings.mini_epoch_count = 5
-    task.optimizer_ctor.type = 'torch.optim:Adam'
-    task.assembly_point.network_factory.network_type = btc.Dim3NetworkType.AlonAttention
-    result = task.run(tsa_bundle)
-    model = result['output']['model']
-    torch.save(model, Loc.model_path)
-    print('ok')
+    alternative_algorithm = alternative.AlternativeAlgorithm()
+    text = 'Никуда не годится если нет воды напится'
+    db = alternative_algorithm.create_db(text)
+    index = alternative_algorithm.create_index(db, text)
+    result = alternative_algorithm.run(db, index)
+    print(result)
+
 
 
 
