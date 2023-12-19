@@ -32,12 +32,12 @@ def get_dfs_and_relations_and_uids() -> Tuple[List[Dict[str, pd.DataFrame]], Dat
     return dfs, relations, sub_uids
 
 
-def write_data_to_coprus(dfs, relations, corpus_file):
+def write_data_to_coprus(dfs, relations, corpus_file, none_relation_mode=False):
     if os.path.exists(corpus_file):
         os.remove(corpus_file)
     subcorpus_col_name = "relation_name"
-    f_s_relations = relations.loc[relations.relation_name.isin(['a-b', 'b-a'])]
-    added_relations = relations.loc[~relations.relation_name.isin(['a-b', 'b-a'])]
+    f_s_relations = relations.loc[relations.relation_name.isin(['a-b', 'b-a'])] if not none_relation_mode else None
+    added_relations = relations.loc[~relations.relation_name.isin(['a-b', 'b-a'])] if not none_relation_mode else None
     builder = CorpusBuilder()
 
     builder.update_parallel_data(corpus_file, dfs[0], global_sub_names[0], None, subcorpus_col_name)
@@ -74,12 +74,22 @@ class ParallelCorpusTestCase(TestCase):
         os.remove(corpus_file)
 
     def test_get_relation(self):
+        required_columns = ('file_1', 'file_2', 'relation_name')
         dfs, relations, uids, corpus_file = self.dfs, self.relations, self.uids, self.corpus_file
         write_data_to_coprus(dfs, relations, corpus_file)
         reader = CorpusReader(corpus_file)
         relation = reader.get_relations()
+        assert all(required_column in relation.columns for required_column in required_columns)
         assert len(relation) == len(uids) * len(uids[0]) * 2
         os.remove(corpus_file)
+
+        write_data_to_coprus(dfs, None, corpus_file, none_relation_mode=True)
+        try:
+            relation = CorpusReader(corpus_file).get_relations()
+            assert len(relation) == 0
+            assert all(required_column in relation.columns for required_column in required_columns)
+        except:
+            raise Exception('Zero size or None relation doesnt work correctly')
 
     def test_get_src(self):
         dfs, relations, uids, corpus_file = self.dfs, self.relations, self.uids, self.corpus_file

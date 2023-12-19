@@ -25,13 +25,14 @@ class CorpusReader(ISrcReader):
         df = pd.read_parquet(buffer)
         return df
 
-    def _get_filtered_uids(self,uids):
+    def _get_filtered_uids(self, uids):
         uids = np.array(uids)
         toc = self.get_toc()
         matched_uids = np.where(np.isin(uids, toc.index))[0]
         uids = uids[matched_uids]
         if len(uids) == 0:
-            raise ValueError("No uids were found. If you use Parallel Coprus - make sure that uids connected to subcoprus type.")
+            raise ValueError(
+                "No uids were found. If you use Parallel Coprus - make sure that uids connected to subcoprus type.")
         return uids
 
     def get_toc(self):
@@ -43,8 +44,10 @@ class CorpusReader(ISrcReader):
         with zipfile.ZipFile(self.location) as file:
             for relation in [filename for filename in file.namelist() if filename.startswith('relation')]:
                 relations.append(self._read_frame(file, relation))
-        relations: pd.DataFrame = pd.concat(relations)
-        return relations
+        if len(relations) > 0:
+            return pd.concat(relations)
+        else:
+            return pd.DataFrame([], columns=['file_1', 'file_2', 'relation_name'])
 
     def get_src(self, uids: ParrallelUids):
         uid = next(iter(uids))
@@ -52,7 +55,7 @@ class CorpusReader(ISrcReader):
         if is_list:
             uids = [self._get_filtered_uids(sub_uids) for sub_uids in uids]
         elif is_dict:
-            uids = [dict(zip(sub_uids.keys(),self._get_filtered_uids(list(sub_uids.values())))) for sub_uids in uids]
+            uids = [dict(zip(sub_uids.keys(), self._get_filtered_uids(list(sub_uids.values())))) for sub_uids in uids]
         else:
             raise TypeError("Uids must be list[list[str]]] or list[dict[str,str]]")
 
