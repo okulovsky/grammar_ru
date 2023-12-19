@@ -45,7 +45,7 @@ class AlternativeAlgorithm(NlpAlgorithm):
         return index_frame
 
     def _run_inner(self, db: DataBundle, index: pd.Index) -> Optional[pd.DataFrame]:
-        model_path = Loc.model_path / 'alternative_task.pickle'
+        model_path = Loc.root_path / 'model/alternative_task.pickle'
         idb = IndexedDataBundle(
             index_frame=index,
             bundle=db

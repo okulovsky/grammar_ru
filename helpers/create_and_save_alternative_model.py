@@ -22,7 +22,7 @@ def main():
     task.assembly_point.network_factory.network_type = btc.Dim3NetworkType.AlonAttention
     result = task.run(tsa_bundle)
     model = result['output']['training_task']
-    with open (Loc.model_path / 'alternative_task.pickle', 'wb') as handle:
+    with open (Loc.root_path / 'model/alternative_task.pickle', 'wb') as handle:
         pickle.dump(model, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     print('ok')
