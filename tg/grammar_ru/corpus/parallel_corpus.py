@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, Optional, List, Union, Tuple, Collection, Any
+from typing import Dict, Optional, List, Union, Tuple, Collection, Container
 
 import pandas as pd
 
@@ -13,11 +13,11 @@ class ParallelCorpus:
         self.subcorpus_name_column = subcorpus_name
         self.reader = CorpusReader(corpus_path)
 
-    def get_mapped_data(self, uids: List[str], sub_corpus_types: Union[str, List[str]] = 'all') -> List[
+    def get_mapped_data(self, uids: List[str], sub_corpus_types: List[str]) -> List[
         Dict[str, pd.DataFrame]]:
+        if not isinstance(sub_corpus_types, Collection) or isinstance(sub_corpus_types,str):
+            raise TypeError("sub_corpus_types must be a list of str")
         relation_info = self.reader.read_relations()
-        if isinstance(sub_corpus_types,str) and sub_corpus_types == 'all':
-            sub_corpus_types = self.reader.get_toc()[f'{self.subcorpus_name_column}'].unique()
         sub_corpuses_relations = [relation_info.loc[relation_info.relation_name == sub_name]
                                   for sub_name in sub_corpus_types]
         parallel_request = list()

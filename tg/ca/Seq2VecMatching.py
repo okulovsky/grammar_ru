@@ -12,23 +12,20 @@ class Seq2VecMatcher:
         self._current_group_flag = 1
         self._next_group_flag = 2
 
-    def get_matches(self, df_1: pd.DataFrame, df_2: pd.DataFrame, need_matching_dict=False):
+    def get_matches(self, df_1: pd.DataFrame, df_2: pd.DataFrame, need_matching_df=False):
         text_1, text_2 = [self.viewer.to_sentences_strings(df).values for df in [df_1, df_2]]
         encoded_text_1, encoded_text_2 = [self.model.encode(text, convert_to_numpy=True) for text in [text_1, text_2]]
         cos_sim = util.cos_sim(encoded_text_1, encoded_text_2)
         action_matrix = self._get_action_matrix(cos_sim)
         monotone_matching = self._get_monotone_matching(action_matrix)
-        matched_sent = {text_1[t_1_id]: text_2[t_2_id] for t_1_id, t_2_id in monotone_matching.items()}
-        return matched_sent if not need_matching_dict else (monotone_matching, matched_sent)
-
-    def get_df_matching(self, df_1: pd.DataFrame, df_2: pd.DataFrame):
-        text_1, text_2 = [self.viewer.to_sentences_strings(df).values for df in [df_1, df_2]]
-        encoded_text_1, encoded_text_2 = [self.model.encode(text, convert_to_numpy=True) for text in [text_1, text_2]]
-        cos_sim = util.cos_sim(encoded_text_1, encoded_text_2)
-        action_matrix = self._get_action_matrix(cos_sim)
-        monotone_matching = self._get_monotone_matching(action_matrix)
-        df_1['MatchedWith'] = [0] * len(df_1)
-        df_2['MatchedWith'] = [0] * len(df_2)
+        matched_sent = pd.Series({text_1[t_1_id]: text_2[t_2_id] for t_1_id, t_2_id in monotone_matching.items()},
+                                 name='matched_sentence')
+        if not need_matching_df:
+            return matched_sent
+        s_ids_1, s_ids_2 = [sorted(df['sentence_id'].unique()) for df in [df_1, df_2]]
+        mapped_ids = {s_ids_1[t_1_id]: s_ids_2[t_2_id] for t_1_id, t_2_id in monotone_matching.items()}
+        restore_monotone_matching = pd.DataFrame(data=mapped_ids.items(), columns=['sentence_id', 'MatchedWith'])
+        return restore_monotone_matching, matched_sent
 
     def _get_action_matrix(self, cos_sim):
         n, m = cos_sim.shape[0] + 1, cos_sim.shape[1] + 1

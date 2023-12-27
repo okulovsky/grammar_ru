@@ -58,14 +58,16 @@ class CorpusReader(ISrcReader):
             uids = [dict(zip(sub_uids.keys(), self._get_filtered_uids(list(sub_uids.values())))) for sub_uids in uids]
         else:
             raise TypeError("Uids must be list[list[str]]] or list[dict[str,str]]")
+        return Queryable(self._get_src(uids, is_dict, is_list), len(uids))
 
+    def _get_src(self, uids: ParrallelUids, is_dict, is_list):
         with zipfile.ZipFile(self.location, 'r') as file:
             if is_dict:
                 for uid_dict in uids:
-                    yield self._get_uids_iter(uid_dict.values(), file, uid_dict.keys())
+                    yield self._get_uids_src(uid_dict.values(), file, uid_dict.keys())
             elif is_list:
                 for uid_list in uids:
-                    yield self._get_uids_iter(uid_list, file, None)
+                    yield self._get_uids_src(uid_list, file, None)
 
     def read_toc(self):
         return self.get_toc()
@@ -87,7 +89,7 @@ class CorpusReader(ISrcReader):
         Separator.validate(df)
         return df
 
-    def _get_uids_iter(self, uids: List[str], file, sub_corpus_names: Optional[Iterable[str]] = None) -> Union[
+    def _get_uids_src(self, uids: List[str], file, sub_corpus_names: Optional[Iterable[str]] = None) -> Union[
         List[str], Dict[str, str]]:
         dfs = list()
         for uid in uids:
