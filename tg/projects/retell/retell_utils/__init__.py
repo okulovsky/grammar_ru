@@ -4,5 +4,3 @@ from .metrics import *
 from .statistical import *
 from .word2vec import *
 from .books_dataclasses import BookInfo, ChapterInfo
-from .Embeders import Embeder, SpacyEmbeder
-from .LevenshainAlg import *

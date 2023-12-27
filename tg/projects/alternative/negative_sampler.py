@@ -166,4 +166,9 @@ class ChtobyNegativeSampler(RegexNegativeSampler):
         return alternatives
 
 
+class EmptyNegativeSampler(NegativeSampler):
+    def build_all_negative_samples_from_positive(self, positive_sample: pd.DataFrame) -> tp.List[pd.DataFrame]:
+        return []
 
+    def build_negative_sample_from_positive(self, positive_sample: pd.DataFrame) -> pd.DataFrame:
+        return None
