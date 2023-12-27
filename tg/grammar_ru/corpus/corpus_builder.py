@@ -160,12 +160,13 @@ class CorpusBuilder:
             selector: Optional[ITransfuseSelector] = None,
             overwrite=False
     ):
+        '''
         if destination.is_file():
             if overwrite:
                 os.remove(destination)
             else:
                 raise ValueError(f'File {destination} already exists. ')
-
+        '''
         if isinstance(sources, Path):
             sources = [sources]
         elif isinstance(sources, list):

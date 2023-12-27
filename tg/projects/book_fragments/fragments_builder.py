@@ -6,7 +6,7 @@ import uuid
 from typing import List, Tuple
 from tg.grammar_ru import CorpusReader
 from pathlib import Path
-
+from tg.projects.book_fragments.eng_localizator import EnglishLocalizator
 
 class FragmentsBuilder:
     def __init__(
@@ -15,11 +15,13 @@ class FragmentsBuilder:
         words_limit=500,
         output_path="./fragments",
         file_name="fragments",
+        localizator=EnglishLocalizator(),
         prompt="retell this text in simple sentences and simple words, divide every complex sentence into simple sentences, replace artistic words with simple ones, remove homogeneous parts: {}"
     ) -> None:
         self.corpus_reader = CorpusReader(corpus)
         self.words_limit = words_limit
         self.output_path = f'{output_path}/{file_name}.json'
+        self.localizator = localizator
         self.prompt = prompt
 
         self.narrative_parts, self.dialog_parts = [], []
@@ -40,7 +42,7 @@ class FragmentsBuilder:
 
     def construct_fragments_json(self) -> None:
         self._create_file()
-        for frame in self.corpus_reader.read_frames().take(1):
+        for frame in self.corpus_reader.read_frames():
             self.cur_frame_num += 1
             print(
                 "Processing frame with id: "
@@ -53,7 +55,8 @@ class FragmentsBuilder:
         self._write_file_json()
 
     def _construct_paragraph(self, frame: pd.DataFrame) -> None:
-        prev_paragraph = frame[frame['paragraph_id'] == 0]
+        prev_paragraph_id = frame['paragraph_id'].values[0]
+        prev_paragraph = frame[frame['paragraph_id'] == prev_paragraph_id]
         for paragraph_id in frame['paragraph_id'].unique().tolist():
             cur_paragraph = frame[frame['paragraph_id'] == paragraph_id]
             paragraph_length = cur_paragraph.count().values[1]
@@ -65,6 +68,7 @@ class FragmentsBuilder:
 
             if (self.narrative_parts_len + narrative_parts_len > self.words_limit):
                 self.end_word_id = prev_paragraph['word_id'].values[-1]
+
                 self._write_fragment_to_data_json(
                     frame, "narrative", self.narrative_parts)
                 self.start_word_id = self.end_word_id
@@ -94,6 +98,7 @@ class FragmentsBuilder:
                 self.dialog_parts.append('\n')
 
             prev_paragraph = cur_paragraph
+        
 
     def _construct_sentences(
         self,
@@ -120,24 +125,13 @@ class FragmentsBuilder:
         return (' '.join(narrative_parts), narrative_parts_len), (' '.join(dialog_parts), dialog_parts_len)
 
     def _construct_sentence(self, frame: pd.DataFrame, sentence_id: int) -> List[str]:
-        cur_sentence = []
-
-        for word_id in frame[frame['sentence_id'] == sentence_id]['word_id'].unique().tolist():
-            word = frame[frame['word_id'] == word_id]['word'].values[0]
-
-            if word == '\u00A0':
-                word = '\u0020'
-
-            cur_sentence.append(
-                word + ' ' * frame[frame['word_id']
-                                   == word_id]['word_tail'].values[0]
-            )
-
-            if frame[frame['word_id'] == word_id]['word'].values[0] == '\u201c':
-                self.dialog_sentence = True
-            if frame[frame['word_id'] == word_id]['word'].values[0] == '\u201d':
-                self.dialog_sentence_closed = True
-
+        self.localizator.dialog_sentence = self.dialog_sentence
+        self.localizator.dialog_sentence_closed = self.dialog_sentence_closed
+        
+        cur_sentence = self.localizator.construct_sentence(frame, sentence_id)
+        self.dialog_sentence = self.localizator.dialog_sentence
+        self.dialog_sentence_closed = self.localizator.dialog_sentence_closed
+        
         return cur_sentence
 
     def _write_fragment_to_data_json(self, frame: pd.DataFrame, text_type: str, text: List[str]) -> None:
