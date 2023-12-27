@@ -4,18 +4,10 @@ import matplotlib.pyplot as plt
 import re
 from pathlib import Path
 from tg.grammar_ru.corpus import ParallelCorpus
-from yo_fluq_ds import FileIO
 from tg.grammar_ru.corpus import CorpusBuilder
 import os
 from tg.grammar_ru.corpus import CorpusReader
 import shutil
-
-
-
-
-
-
-
 
 
 def get_array_chapters(ru_retell_corpus):
