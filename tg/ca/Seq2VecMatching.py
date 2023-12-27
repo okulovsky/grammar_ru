@@ -1,13 +1,11 @@
-from typing import Dict
 from sentence_transformers import SentenceTransformer, util
 import pandas as pd
 import numpy as np
 from tg.grammar_ru import SeparatorRu
-from tg.grammar_ru.common.separator import AbstractSeparator
 from collections import defaultdict
 
 
-class Seq2VecConverter:
+class Seq2VecMatcher:
     def __init__(self, model_name='distiluse-base-multilingual-cased', separator=SeparatorRu):
         self.model = SentenceTransformer(model_name)
         self.viewer = separator.Viewer()
@@ -22,6 +20,15 @@ class Seq2VecConverter:
         monotone_matching = self._get_monotone_matching(action_matrix)
         matched_sent = {text_1[t_1_id]: text_2[t_2_id] for t_1_id, t_2_id in monotone_matching.items()}
         return matched_sent if not need_matching_dict else (monotone_matching, matched_sent)
+
+    def get_df_matching(self, df_1: pd.DataFrame, df_2: pd.DataFrame):
+        text_1, text_2 = [self.viewer.to_sentences_strings(df).values for df in [df_1, df_2]]
+        encoded_text_1, encoded_text_2 = [self.model.encode(text, convert_to_numpy=True) for text in [text_1, text_2]]
+        cos_sim = util.cos_sim(encoded_text_1, encoded_text_2)
+        action_matrix = self._get_action_matrix(cos_sim)
+        monotone_matching = self._get_monotone_matching(action_matrix)
+        df_1['MatchedWith'] = [0] * len(df_1)
+        df_2['MatchedWith'] = [0] * len(df_2)
 
     def _get_action_matrix(self, cos_sim):
         n, m = cos_sim.shape[0] + 1, cos_sim.shape[1] + 1

@@ -1,14 +1,14 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 from unittest import TestCase
-from tg.projects.retell.retell_utils.Seq2VecMatching import Seq2VecConverter
+from tg.ca.Seq2VecMatching import Seq2VecMatcher
 
 
 class Seq2VecTestCase(TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         pad_by_ones = lambda arr: np.pad(arr, ((1, 0), (1, 0)), 'constant')
-        self.converter = Seq2VecConverter()
+        self.converter = Seq2VecMatcher()
         up, diag = self.converter._current_group_flag, self.converter._next_group_flag
         self.correct_actions_5x3 = pad_by_ones(np.array([
             [0, 0, 0],
