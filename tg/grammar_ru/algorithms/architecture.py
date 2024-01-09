@@ -1,7 +1,16 @@
+from dataclasses import dataclass
 from typing import *
 import pandas as pd
 from ..common import Separator, DataBundle
 import numpy as np
+
+@dataclass
+class NlpErrorInfo:
+    error: Optional[bool]
+    suggest: Optional[str]
+    algorithm: Optional[str]
+    hint: Optional[str]
+    error_type: Optional[str]
 
 class NlpAlgorithm:
     Error = 'error'
@@ -52,11 +61,27 @@ class NlpAlgorithm:
             raise ValueError(f"{type(self)} must set {NlpAlgorithm.Error} column")
         return NlpAlgorithm._post_check(db.src, rdf, type(self).__name__)
 
-
     def run_on_string(self, s, index = None):
         db = Separator.build_bundle(s)
         return self.run(db, db.src.index if index is None else db.src.loc[db.src.index.isin(index)].index)
 
+    def new_run(self, db: DataBundle, index: Optional[pd.Index] = None) -> List[NlpErrorInfo]:
+        old_run_df = self.run(db, index)
+
+        # List to store NlpErrorInfo objects
+        error_info_list = []
+
+        for _, row in old_run_df.iterrows():
+            error_info = NlpErrorInfo(
+                error=row.get(NlpAlgorithm.Error, None),
+                suggest=row.get(NlpAlgorithm.Suggest, None),
+                algorithm=row.get(NlpAlgorithm.Algorithm, None),
+                hint=row.get(NlpAlgorithm.Hint, None),
+                error_type=row.get(NlpAlgorithm.ErrorType, None)
+            )
+            error_info_list.append(error_info)
+
+        return error_info_list
 
     @staticmethod
     def combine(src: pd.DataFrame, check_dfs: List[pd.DataFrame]):
@@ -82,8 +107,14 @@ class NlpAlgorithm:
         rdf = rdf.drop('active', axis=1)
         return NlpAlgorithm._post_check(src, rdf, None)
 
+    @staticmethod
+    def new_combine_algorithms(db: DataBundle, index: pd.Index, *algorithms):
+        dfs = [a.new_run(db,index) for a in algorithms]
+        return dfs
 
     @staticmethod
     def combine_algorithms(db: DataBundle, index: pd.Index, *algorithms):
         dfs = [a.run(db,index) for a in algorithms]
         return NlpAlgorithm.combine(db.src, dfs)
+
+
