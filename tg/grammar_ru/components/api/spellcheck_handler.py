@@ -1,6 +1,8 @@
 import uvicorn
+import pandas as pd
 
-from tg.grammar_ru.algorithms import spellcheck_refactored
+from .....tg.grammar_ru.algorithms import spellcheck
+from .....tg.grammar_ru.components.entities.processed_word import ProcessedWord
 from fastapi import FastAPI, status
 from pydantic import BaseModel
 
@@ -20,9 +22,23 @@ class Request(BaseModel):
 def _handle(request: Request):
     text: str = request.text
 
-    spell_checker = spellcheck_refactored.SpellcheckAlgorithmRefactored()
+    spell_checker = spellcheck.SpellcheckAlgorithm()
 
-    response = spell_checker.run_on_string(text)
+    result: pd.DataFrame = spell_checker.run_on_string(text)
+    transpose_res = result.transpose().to_dict()
+
+    response = [
+        ProcessedWord(
+            index=int(word),
+            error=transpose_res[word]['error'],
+            error_type=transpose_res[word]['error_type'],
+            suggest=transpose_res[word]['suggest'],
+            algorithm=transpose_res[word]['algorithm'],
+            hint=transpose_res[word]['hint'],
+        )
+        for word in transpose_res
+    ]
+
     return response
 
 

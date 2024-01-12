@@ -12,4 +12,4 @@ RUN pip install --default-timeout=100 -r ./merged_requirements.txt
 
 COPY . /src/
 
-CMD ["gunicorn", "src.tg.grammar_ru.components.api.spelcheck_handler:app", "--bind", "0.0.0.0:8080", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker"]
+CMD ["gunicorn", "src.tg.grammar_ru.components.api.spellcheck_handler:app", "--bind", "0.0.0.0:8080", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker"]
