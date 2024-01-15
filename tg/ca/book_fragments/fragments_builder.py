@@ -6,7 +6,7 @@ import uuid
 from typing import List, Tuple
 from tg.grammar_ru import CorpusReader
 from pathlib import Path
-from tg.projects.book_fragments.eng_localizator import EnglishLocalizator
+from tg.ca.book_fragments.localizators.eng_localizator import EnglishLocalizator
 
 class FragmentsBuilder:
     def __init__(
@@ -16,7 +16,7 @@ class FragmentsBuilder:
         output_path="./fragments",
         file_name="fragments",
         localizator=EnglishLocalizator(),
-        prompt="retell this text in simple sentences and simple words, divide every complex sentence into simple sentences, replace artistic words with simple ones, remove homogeneous parts: {}"
+        prompt="\"{}\"\nWrite 10 bullet points that summarize this text. Use the simple words and simple sentences. Do not add anything that is not in the text. Do not add recommendations. Do not change the sequence of original text."
     ) -> None:
         self.corpus_reader = CorpusReader(corpus)
         self.words_limit = words_limit
@@ -42,7 +42,9 @@ class FragmentsBuilder:
 
     def construct_fragments_json(self) -> None:
         self._create_file()
+        self.cur_frame = None
         for frame in self.corpus_reader.read_frames():
+            self.cur_frame = frame
             self.cur_frame_num += 1
             print(
                 "Processing frame with id: "
@@ -51,6 +53,16 @@ class FragmentsBuilder:
                 end="\r"
             )
             self._construct_paragraph(frame)
+        
+        if self.narrative_parts_len > 0:
+            self._write_fragment_to_data_json(
+                 self.cur_frame, "narrative", self.narrative_parts
+            )
+        
+        if self.dialog_parts_len > 0:
+            self._write_fragment_to_data_json(
+                self.cur_frame, "dialog", self.dialog_parts
+            )
 
         self._write_file_json()
 
