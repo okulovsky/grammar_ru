@@ -1,19 +1,6 @@
 import numpy as np
 
-NEW = {
-    "ая",
-    "ого",
-    "ое",
-    "ой",
-    "ом",
-    "ому",
-    "ую",
-    "ые",
-    "ый",
-    "ым",
-    "ыми",
-    "ых"
-}
+NEW = {"ая", "ого", "ое", "ой", "ом", "ому", "ую", "ые", "ый", "ым", "ыми", "ых"}
 
 GOOD = {
     "ая",
@@ -70,9 +57,9 @@ BIG_num_by_end = {
 }
 
 nums_by_decl_and_end = (
-        {("new", e): n for e, n in NEW_num_by_end.items()}
-        | {("good", e): n for e, n in GOOD_num_by_end.items()}
-        | {("big", e): n for e, n in BIG_num_by_end.items()}
+    {("new", e): n for e, n in NEW_num_by_end.items()}
+    | {("good", e): n for e, n in GOOD_num_by_end.items()}
+    | {("big", e): n for e, n in BIG_num_by_end.items()}
 )
 
 

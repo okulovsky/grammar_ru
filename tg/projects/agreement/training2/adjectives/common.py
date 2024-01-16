@@ -18,7 +18,7 @@ class MulticlassPredictionInterpreter:
 
 
 def read_train_bundle(bundle_path: Path) -> IndexedDataBundle:
-    index_path = bundle_path / 'index.parquet'
+    index_path = bundle_path / "index.parquet"
     index = pd.read_parquet(index_path)
     db = DataBundle.load(bundle_path)
 
