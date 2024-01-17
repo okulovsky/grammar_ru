@@ -7,16 +7,16 @@ from tg.common.ml import batched_training as bt
 
 
 def plot_confusion_matrix(df, *, labels: list[str]):
-    prefix = 'predicted_label_'
+    prefix = "predicted_label_"
     start_idx = df.label.min()
     target = (df.label - start_idx).tolist()
     probas = np.zeros(shape=[len(df), len(labels)])
     for i, (_, row) in enumerate(df.iterrows()):
         for j in range(probas.shape[1]):
-            probas[i][j] = row[f'{prefix}{start_idx + j}']
+            probas[i][j] = row[f"{prefix}{start_idx + j}"]
 
     preds = np.argmax(probas, axis=1).tolist()
-    cm = confusion_matrix(target, preds, normalize='true').round(2)
+    cm = confusion_matrix(target, preds, normalize="true").round(2)
     fig, ax = plt.subplots(figsize=(10, 10))
     ConfusionMatrixDisplay(cm, display_labels=labels).plot(ax=ax)
 
@@ -27,23 +27,23 @@ class AlternativeTaskMulticlassMetrics(bt.Metric):
         self.label_count = label_count
 
     def get_names(self):
-        return ['roc_auc', 'f1_weighted']
+        return ["roc_auc", "f1_weighted"]
 
     def measure(self, df, _):
-        prefix = 'predicted_label_'
+        prefix = "predicted_label_"
         start_idx = df.label.min()
         target = (df.label - start_idx).tolist()
         probas = np.zeros(shape=[len(df), self.label_count])
 
         for i, (_, row) in enumerate(df.iterrows()):
             for j in range(probas.shape[1]):
-                probas[i][j] = row[f'{prefix}{start_idx + j}']
+                probas[i][j] = row[f"{prefix}{start_idx + j}"]
 
         preds = np.argmax(probas, axis=1).tolist()
 
         result = [
-            roc_auc_score(target, probas, multi_class='ovo'),
-            f1_score(target, preds, average='weighted')
+            roc_auc_score(target, probas, multi_class="ovo"),
+            f1_score(target, preds, average="weighted"),
         ]
 
         return result

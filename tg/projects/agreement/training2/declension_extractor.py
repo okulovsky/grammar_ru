@@ -1,7 +1,11 @@
 import numpy as np
 
-from tg.projects.agreement.training2.adjectives.endings import extract_ending, NEW_num_by_end, GOOD_num_by_end, \
-    BIG_num_by_end
+from tg.projects.agreement.training2.adjectives.endings import (
+    extract_ending,
+    NEW_num_by_end,
+    GOOD_num_by_end,
+    BIG_num_by_end,
+)
 
 
 def _replace_end_by_num(df, dt, num_by_end):
@@ -15,7 +19,7 @@ def _replace_end_by_num(df, dt, num_by_end):
 # Большой - 2
 
 
-class AdjAgreementIndexBuilder:
+class AdjectivesAgreementIndexBuilder:
     def __init__(self):
         self.norm_endings_nums = {e: i for i, e in enumerate(["ый", "ий", "ой"])}
 
@@ -25,7 +29,7 @@ class AdjAgreementIndexBuilder:
                 return possible_ending
         return np.nan
 
-    def build_index(self, db, decl_type):
+    def build_index(self, declension_type: int, db):
         morphed = db.data_frames["pymorphy"]
         morphed = morphed.replace({np.nan: "nan"})
         adjectives = db.src[(morphed.POS == "ADJF")].copy()
@@ -44,7 +48,7 @@ class AdjAgreementIndexBuilder:
         )
 
         undefined_ending_mask = (
-                adjectives.norm_ending.isnull() | adjectives.ending.isnull()
+            adjectives.norm_ending.isnull() | adjectives.ending.isnull()
         )
 
         adjectives = adjectives[~undefined_ending_mask]
@@ -52,10 +56,12 @@ class AdjAgreementIndexBuilder:
             self.norm_endings_nums
         )
 
-        index_df.loc[adjectives.index, "declension_type"] = adjectives["declension_type"].astype(int)
-        return index_df[index_df.declension_type == decl_type]
+        index_df.loc[adjectives.index, "declension_type"] = adjectives[
+            "declension_type"
+        ].astype(int)
+        return index_df[index_df.declension_type == declension_type]
 
-    def get_ending_from_index(self, decl_type: int, index: int) -> str:
-        num_by_end = [NEW_num_by_end, GOOD_num_by_end, BIG_num_by_end][decl_type]
+    def get_ending_from_index(self, declension_type: int, index: int) -> str:
+        num_by_end = [NEW_num_by_end, GOOD_num_by_end, BIG_num_by_end][declension_type]
         end_by_num = {n: e for e, n in num_by_end.items()}
         return end_by_num[index]
