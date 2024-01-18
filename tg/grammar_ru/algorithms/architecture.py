@@ -6,6 +6,8 @@ import numpy as np
 
 @dataclass
 class NlpErrorInfo:
+    index: Optional[int]
+    word: Optional[str]
     error: Optional[bool]
     suggest: Optional[str]
     algorithm: Optional[str]
@@ -72,15 +74,31 @@ class NlpAlgorithm:
         error_info_list = []
 
         for _, row in old_run_df.iterrows():
+            word = db.src.loc[row.name, 'word']
+            index = db.src.loc[row.name, 'word_id']
             error_info = NlpErrorInfo(
+                index=int(index),
+                word=word,
                 error=row.get(NlpAlgorithm.Error, None),
                 suggest=row.get(NlpAlgorithm.Suggest, None),
                 algorithm=row.get(NlpAlgorithm.Algorithm, None),
                 hint=row.get(NlpAlgorithm.Hint, None),
                 error_type=row.get(NlpAlgorithm.ErrorType, None)
             )
-            error_info_list.append(error_info)
+            if error_info.error:
+                error_info_list.append(error_info)
 
+        return error_info_list
+
+    def new_run_on_string(self, s, index = None):
+        db = Separator.build_bundle(s)
+        return self.new_run(db, db.src.index if index is None else db.src.loc[db.src.index.isin(index)].index)
+
+    def new_run_on_string_multiple_algorithms(self, s, algorithms: List):
+        error_info_list = []
+        for algorithm in algorithms:
+            error_info_list.extend(algorithm.new_run_on_string(s))
+        error_info_list = sorted(error_info_list, key=lambda x: x.index)
         return error_info_list
 
     @staticmethod
