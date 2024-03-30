@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer, util
 import pandas as pd
 import numpy as np
-from tg.grammar_ru import SeparatorRu
+from grammar_ru import SeparatorRu
 from collections import defaultdict
 
 

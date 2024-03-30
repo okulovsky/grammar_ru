@@ -3,10 +3,10 @@ from googletrans import Translator
 import matplotlib.pyplot as plt
 import re
 from pathlib import Path
-from tg.grammar_ru.corpus import ParallelCorpus
-from tg.grammar_ru.corpus import CorpusBuilder
+from grammar_ru.corpus import ParallelCorpus
+from grammar_ru.corpus import CorpusBuilder
 import os
-from tg.grammar_ru.corpus import CorpusReader
+from grammar_ru.corpus import CorpusReader
 import shutil
 
 
