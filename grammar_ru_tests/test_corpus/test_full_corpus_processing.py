@@ -32,8 +32,8 @@ class CorpusBuilderTestCase(TestCase):
         toc = rd.get_toc()
         print(toc)
 
-        self.assertListEqual([0,1,2,3,0,1,2], list(toc.part_index))
-        self.assertListEqual(['test_turing']*4+['singularity']*3, list(toc.field2))
+        self.assertListEqual([0,1,2,0,1,2,3], list(toc.part_index))
+        self.assertListEqual(['singularity']*3+['test_turing']*4, list(toc.field2))
 
         steps = [
             filter,

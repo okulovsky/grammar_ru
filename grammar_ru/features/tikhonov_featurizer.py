@@ -9,7 +9,7 @@ class TikhonovDict:
         return (Query
                 .en(['test_Tikhonov.txt', 'train_Tikhonov.txt'])
                 .select(lambda z: Path(__file__).parent/z)
-                .select_many(Query.file.text)
+                .select_many(lambda z: Query.file.text(z,encoding='utf-8'))
                 .select(lambda z: z.split('\t'))
                 .select(lambda z: KeyValuePair(z[0], z[1]))
                 .distinct(lambda z: z.key)

@@ -21,10 +21,10 @@ class LocHolder(LocationsClass):
 
         self.models_path = self.root_path/'models'
 
-        self.grammar_ru_folder = self.root_path/'tg/grammar_ru'
-        self.test_corpus_basic = self.grammar_ru_folder/'tests/samples/basic.zip'
-        self.test_corpus_enriched = self.grammar_ru_folder/'tests/samples/enriched.zip'
-        self.test_bundle = self.grammar_ru_folder/'tests/samples/bundle/'
+        self.grammar_ru_folder = self.root_path/'grammar_ru'
+        self.test_corpus_basic = self.root_path/'grammar_ru_tests/samples/basic.zip'
+        self.test_corpus_enriched = self.root_path/'grammar_ru_tests/samples/enriched.zip'
+        self.test_bundle = self.root_path/'grammar_ru_tests/samples/bundle/'
 
 
 
