@@ -63,23 +63,25 @@ def translate_subcorpus(parallel_corpus_path: Path, name_subcorpus: str):
 
         result += text
 
-    os.makedirs('translate')
+    os.makedirs('translate', exist_ok=True)
 
-    with open(os.path.join('translate', 'translate.md'), 'w') as file:
+    with open(os.path.join('translate', 'translate.md'), 'w', encoding='utf-8') as file:
         file.write(result)
 
     CorpusBuilder.convert_interformat_folder_to_corpus(
-    Path('./files/translate.base.zip'),
-    Path('./translate'),
-    ['book'])
+        Path('./files/translate.base.zip'),
+        Path('./translate'),
+        ['book']
+    )
 
     reader = CorpusReader(Path('./files/translate.base.zip'))
 
     CorpusBuilder.update_parallel_data(
-    parallel_corpus_path,
-    add_dfs(reader),
-    "ru_translate",
-    None)
+        parallel_corpus_path,
+        add_dfs(reader),
+        "ru_translate",
+        None
+    )
     shutil.rmtree("./translate")
 
 
