@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from tg.grammar_ru import CorpusReader
+from grammar_ru import CorpusReader
 
 def print_fragments(path: str):
     file = open(path)
@@ -12,7 +12,7 @@ def print_fragments(path: str):
         print(fragment['text'])
 
 def print_frames(path: str):
-    eng_corpus = path
+    eng_corpus = Path(path)
     eng_corpus_reader = CorpusReader(eng_corpus)
 
     for frame in eng_corpus_reader.get_frames():

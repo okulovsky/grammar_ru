@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
-from tg.grammar_ru.common import Separator
-from tg.grammar_ru.corpus.corpus_writer import CorpusWriter
+from grammar_ru.common import Separator
+from grammar_ru.corpus.corpus_writer import CorpusWriter
 
 
 def parse_retells_to_corpus(

@@ -36,6 +36,9 @@ class ParallelCorpus:
 
         return parallel_response
 
+    def get_toc(self):
+        return self.reader.get_toc()
+
     def __getattr__(self, item) -> CorpusReader:
         all_subcorpus_types = self.reader.get_toc()[f"{self.subcorpus_name_column}"].unique()
         if item not in all_subcorpus_types:

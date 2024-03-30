@@ -4,21 +4,21 @@ import os
 import uuid
 
 from typing import List, Tuple
-from tg.grammar_ru import CorpusReader
+from grammar_ru import CorpusReader
 from pathlib import Path
-from tg.ca.book_fragments.localizators.eng_localizator import EnglishLocalizator
+from ca.book_fragments.localizators.eng_localizator import EnglishLocalizator
 
 class FragmentsBuilder:
     def __init__(
         self,
-        corpus: Path,
+        corpus_reader: CorpusReader,
         words_limit=500,
         output_path="./fragments",
         file_name="fragments",
         localizator=EnglishLocalizator(),
         prompt="\"{}\"\nWrite 10 bullet points that summarize this text. Use the simple words and simple sentences. Do not add anything that is not in the text. Do not add recommendations. Do not change the sequence of original text."
     ) -> None:
-        self.corpus_reader = CorpusReader(corpus)
+        self.corpus_reader = corpus_reader
         self.words_limit = words_limit
         self.output_path = f'{output_path}/{file_name}.json'
         self.localizator = localizator
