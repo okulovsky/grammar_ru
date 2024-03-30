@@ -1,6 +1,6 @@
 from unittest import TestCase
-from tg.grammar_ru.features import DialogMarkupFeaturizer
-from tg.grammar_ru.common import Separator, DataBundle
+from grammar_ru.features import DialogMarkupFeaturizer
+from grammar_ru.common import Separator, DataBundle
 
 
 def _build_summary(df, markup):

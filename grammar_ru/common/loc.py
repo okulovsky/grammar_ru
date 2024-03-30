@@ -1,6 +1,6 @@
 from pathlib import Path
 import os
-from ...common._common.locations import LocationsClass
+from tg.common._common.locations import LocationsClass
 
 
 class LocHolder(LocationsClass):

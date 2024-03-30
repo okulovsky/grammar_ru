@@ -1,1 +1,1 @@
-from ....common import DataBundle
+from tg.common import DataBundle

@@ -8,9 +8,9 @@ import numpy as np
 
 from tg.common import DataBundle
 from tg.common.ml import batched_training as bt
-from tg.grammar_ru.corpus import CorpusBuilder, CorpusReader
-from tg.grammar_ru.common import Loc, Separator
-from tg.grammar_ru.features import PyMorphyFeaturizer, SlovnetFeaturizer
+from grammar_ru.corpus import CorpusBuilder, CorpusReader
+from grammar_ru.common import Loc, Separator
+from grammar_ru.features import PyMorphyFeaturizer, SlovnetFeaturizer
 from tg.projects.punct.context_builder import PunctContextBuilder
 
 

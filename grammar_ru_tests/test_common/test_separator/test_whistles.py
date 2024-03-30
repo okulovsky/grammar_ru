@@ -1,5 +1,5 @@
 from unittest import TestCase
-from tg.grammar_ru.common.separator import Separator, _generate_offsets
+from grammar_ru.common.separator import Separator, _generate_offsets
 import pandas as pd
 
 pd.options.display.width=None

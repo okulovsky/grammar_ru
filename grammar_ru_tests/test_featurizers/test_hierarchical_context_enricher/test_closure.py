@@ -1,7 +1,7 @@
-from tg.grammar_ru.features.hierarchical_context_featurizer import build_closure
+from grammar_ru.features.hierarchical_context_featurizer import build_closure
 from unittest import TestCase
-from tg.grammar_ru.common import Separator
-from tg.grammar_ru.features import SlovnetFeaturizer
+from grammar_ru.common import Separator
+from grammar_ru.features import SlovnetFeaturizer
 
 class ClosureTestCase(TestCase):
     def test_simple(self):

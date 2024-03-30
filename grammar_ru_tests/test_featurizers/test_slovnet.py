@@ -1,5 +1,5 @@
-from tg.grammar_ru.common import Separator
-from tg.grammar_ru.features import SlovnetFeaturizer
+from grammar_ru.common import Separator
+from grammar_ru.features import SlovnetFeaturizer
 from unittest import TestCase
 
 text = 'Он подошел к двери. За ней никого не было.'

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from tg.grammar_ru.common import SeparatorEn
-from tg.grammar_ru.features import SnowballFeaturizer
+from grammar_ru.common import SeparatorEn
+from grammar_ru.features import SnowballFeaturizer
 
 text = "John walks his old dog and goes shopping in the mall.\n It was quickly."
 

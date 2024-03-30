@@ -3,7 +3,7 @@ from ..common import Separator, Loc
 from .corpus_writer import CorpusWriter
 import pandas as pd
 from pathlib import Path
-from ...common._common import Logger
+from tg.common._common import Logger
 
 class CorpusBufferedWriter:
     def __init__(self,

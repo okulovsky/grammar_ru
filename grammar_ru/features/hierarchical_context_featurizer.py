@@ -1,7 +1,7 @@
 from typing import *
 from .architecture import *
 import pandas as pd
-from ...common import DataBundle
+from tg.common import DataBundle
 from yo_fluq_ds import Query, fluq
 
 

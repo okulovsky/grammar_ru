@@ -1,11 +1,11 @@
-from tg.grammar_ru.corpus import CorpusBuilder, CorpusReader
-from tg.grammar_ru.common import *
+from grammar_ru.corpus import CorpusBuilder, CorpusReader
+from grammar_ru.common import *
 from unittest import TestCase
 import shutil
 import os
 from pathlib import Path
 import pandas as pd
-from tg.grammar_ru.features import PyMorphyFeaturizer, SlovnetFeaturizer
+from grammar_ru.features import PyMorphyFeaturizer, SlovnetFeaturizer
 
 MAKE_COPY = True
 

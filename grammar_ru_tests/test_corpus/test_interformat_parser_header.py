@@ -1,5 +1,5 @@
 from typing import *
-from tg.grammar_ru.corpus.formats.interformat_parser import HeaderParser, HeaderParseResponse
+from grammar_ru.corpus.formats.interformat_parser import HeaderParser, HeaderParseResponse
 from unittest import TestCase
 
 

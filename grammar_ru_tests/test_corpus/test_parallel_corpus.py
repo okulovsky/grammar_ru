@@ -1,7 +1,7 @@
 from pandas import DataFrame
 
-from tg.grammar_ru.corpus import CorpusReader, CorpusBuilder, ParallelCorpus
-from tg.grammar_ru.corpus.formats import InterFormatParser
+from grammar_ru.corpus import CorpusReader, CorpusBuilder, ParallelCorpus
+from grammar_ru.corpus.formats import InterFormatParser
 from uuid import uuid4
 import pandas as pd
 import numpy as np

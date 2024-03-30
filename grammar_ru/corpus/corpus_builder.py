@@ -12,7 +12,7 @@ from yo_fluq_ds import *
 import traceback
 from pathlib import Path
 import datetime
-from ...common._common import Logger
+from tg.common._common import Logger
 from .transfuse_selector import ITransfuseSelector
 
 

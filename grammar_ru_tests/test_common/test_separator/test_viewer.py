@@ -1,4 +1,4 @@
-from tg.grammar_ru.common import Separator
+from grammar_ru.common import Separator
 from unittest import TestCase
 
 df = Separator.separate_string('Казнить нельзя, помиловать.\nМама мыла раму.')

@@ -1,5 +1,5 @@
 from unittest import TestCase
-from tg.grammar_ru.common.separator import Separator, SeparatorEn, _generate_offsets
+from grammar_ru.common.separator import Separator, SeparatorEn, _generate_offsets
 import pandas as pd
 import nltk.tokenize
 

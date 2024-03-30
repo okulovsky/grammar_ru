@@ -1,5 +1,5 @@
-from tg.grammar_ru.corpus import CorpusWriter, CorpusReader
-from tg.grammar_ru.corpus.formats import InterFormatParser
+from grammar_ru.corpus import CorpusWriter, CorpusReader
+from grammar_ru.corpus.formats import InterFormatParser
 from unittest import TestCase
 from pathlib import Path
 import os

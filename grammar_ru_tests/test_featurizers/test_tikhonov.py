@@ -1,5 +1,5 @@
-from tg.grammar_ru.common import Separator
-from tg.grammar_ru.features import MorphemeTikhonovFeaturizer, PyMorphyFeaturizer
+from grammar_ru.common import Separator
+from grammar_ru.features import MorphemeTikhonovFeaturizer, PyMorphyFeaturizer
 from unittest import TestCase
 
 class TikhonovTextCase(TestCase):

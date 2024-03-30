@@ -1,5 +1,5 @@
-from tg.grammar_ru.corpus import CorpusWriter, BucketBalancer, CorpusReader
-from tg.grammar_ru.common import Loc, Separator
+from grammar_ru.corpus import CorpusWriter, BucketBalancer, CorpusReader
+from grammar_ru.common import Loc, Separator
 from unittest import TestCase
 from yo_fluq_ds import *
 
