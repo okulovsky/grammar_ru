@@ -1,9 +1,12 @@
 from typing import *
-from ...common.ml import batched_training as bt
-from ...common.ml.batched_training import factories as btf
-from ...common.ml.batched_training import context as btc
-from ...grammar_ru import components as cmp
+from tg.common.ml import batched_training as bt
+from tg.common.ml.batched_training import torch as btt
+from tg.common.ml.batched_training import context as btc
+from tg.common.ml.batched_training import gorynych as btg
+from grammar_ru import components as cmp
 from sklearn.metrics import roc_auc_score
+import torch
+
 
 feature_dict = {
     'p': 'pymorphy',
@@ -13,13 +16,26 @@ feature_dict = {
     't': 'syntax_stats'
 }
 
-class AlternativeTrainingTask(btf.TorchTrainingTask):
+class AlternativeNetwork(torch.nn.Module):
+    def __init__(self, sample, head: torch.nn.Module):
+        super().__init__()
+        self.head = head
+        tensor = self.head(sample)
+        self.linear = torch.nn.Linear(tensor.shape[1], 1)
+
+    def forward(self, x):
+        x = self.head(x)
+        x = self.linear(x)
+        x = torch.sigmoid(x)
+        return x
+
+
+class AlternativeTrainingTask(btt.TorchTrainingTask):
     def __init__(self,
                  dataset: str,
                  batch_size: int = 100000,
                  epoch_count: int = 100,
-                 reduction_type: btc.ReductionType = btc.ReductionType.Dim3Folded,
-                 network_type: btc.Dim3NetworkType = btc.Dim3NetworkType.LSTM,
+                 network_type: btg.Dim3NetworkType = btg.Dim3NetworkType.LSTM,
                  hidden_size: int = 50,
                  tail_size: Optional[int] = None,
                  context_length: int = 15,
@@ -39,49 +55,41 @@ class AlternativeTrainingTask(btf.TorchTrainingTask):
         if features is not None:
             features = [feature_dict[c] for c in features]
 
+        self.features = features
+        self.factory = btg.Gorynych()
+
+
+
         core_extractor = cmp.CoreExtractor(join_column='another_word_id', allow_list=features)
-
-        self.context = btc.ContextualAssemblyPoint(
-            'features',
-            cmp.PlainContextBuilder(
-                include_zero_offset=True,
-                left_to_right_contexts_proportion=context_shift
-            ),
-            core_extractor,
-            context_length = context_length
-        )
-        self.context.reduction_type = reduction_type
-        self.context.dim_3_network_factory.network_type = network_type
-        self.context.hidden_size = hidden_size
-        self.optimizer_ctor.type = 'torch.optim:Adam'
-        self.optimizer_ctor.kwargs['lr'] = learning_rate
-        self.tail_size = tail_size
-
-
 
 
     def initialize_task(self, idb: bt.IndexedDataBundle):
         label_extractor = (
             bt.PlainExtractor
-            .build(btf.Conventions.LabelFrame)
+            .build(btt.Conventions.LabelFrame)
             .index()
             .apply(
                 take_columns='label',
                 transformer=None
             )
         )
-        extractors = [
-            self.context.create_extractor(),
-            label_extractor
-        ]
+
+        core_extractor = cmp.CoreExtractor(join_column='another_word_id', allow_list=self.features)
+        context_builder = cmp.PlainContextBuilder(include_zero_offset=True, left_to_right_contexts_proportion=0.5)
+
+        self.context_extractor = self.factory.create_context_extractor_from_inner_extractors(
+            'context_features',
+            [core_extractor],
+            context_builder
+        )
+
+        extractors = [self.context_extractor, label_extractor]
 
         self.setup_batcher(idb, extractors)
+        self.setup_model(self.create_network, True)
 
-        head_factory = self.context.create_network_factory()
-        factory = btf.FeedForwardNetwork.Factory(
-            head_factory,
-            btf.Factories.Factory(btf.Perceptron, output_size=self.tail_size),
-            btf.Factories.Factory(btf.Perceptron, output_size=1)
-        )
-        self.setup_model(factory, True)
+
+    def create_network(self, batch):
+        head = self.factory.create_context_head(batch, self.context_extractor)
+        return AlternativeNetwork(batch, head)
 

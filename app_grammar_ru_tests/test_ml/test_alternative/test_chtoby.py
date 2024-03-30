@@ -5,8 +5,8 @@ from unittest import TestCase
 import pandas as pd
 import numpy as np
 
-from tg.grammar_ru.common import Separator, DataBundle
-from tg.projects.alternative import WordSequenceFilterer, WordPairsNegativeSampler
+from grammar_ru.common import Separator, DataBundle
+from app_grammar_ru.ml.alternative import WordSequenceFilterer, WordPairsNegativeSampler
 
 def ChtobyFilterer():
     return WordSequenceFilterer([['что', "бы"], ["чтобы"]])

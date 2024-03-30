@@ -1,5 +1,5 @@
-from ...common.ml.batched_training import context as btc
-from ...common.ml import batched_training as bt
+from tg.common.ml.batched_training import context as btc
+from tg.common.ml import batched_training as bt
 import pandas as pd
 import numpy as np
 

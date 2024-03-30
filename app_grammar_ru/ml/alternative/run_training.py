@@ -1,10 +1,11 @@
-from tg.projects.create_sagemaker_routine import SagemakerRoutine
-from tg.projects.alternative.alternative_task import AlternativeTrainingTask
+from app_grammar_ru.common.create_sagemaker_routine import SagemakerRoutine
+from app_grammar_ru.ml.alternative.alternative_task import AlternativeTrainingTask
 from tg.common.delivery.sagemaker import Autonamer, download_and_open_sagemaker_result
-from tg.common.ml.batched_training import context as btc
+from tg.common.ml.batched_training import gorynych as btg
+
 
 def debug_run(in_docker = False):
-    task = AlternativeTrainingTask('tsa-mini', network_type=btc.Dim3NetworkType.AlonAttention)
+    task = AlternativeTrainingTask('tsa-mini', network_type=btg.Dim3NetworkType.AlonAttention)
     task.settings.training_batch_limit = 1
     task.settings.evaluation_batch_limit = 1
     task.settings.epoch_count = 5
@@ -38,6 +39,6 @@ if __name__ == '__main__':
     # remote_run({}, hidden_size=[100], learning_rate=[0.01], context_length=[5, 9, 15, 21], features=['p', None], batch_size=50000)
     cond = dict(hidden_size=100, learning_rate=0.01, context_length=15, epoch_count=30, features='p')
     #remote_run(cond,reduction_type = [btc.ReductionType.Pivot], batch_size=50000)
-    remote_run(cond, reduction_type = [btc.ReductionType.Dim3, btc.ReductionType.Dim3Folded], network_type = [btc.Dim3NetworkType.AlonAttention, btc.Dim3NetworkType.AlonAttentionWithoutFullyConnected, btc.Dim3NetworkType.LSTM, btc.Dim3NetworkType.SelfAttentionAndLSTM])
+    remote_run(cond, network_type = [btg.Dim3NetworkType.AlonAttention, btg.Dim3NetworkType.AlonAttentionWithoutFullyConnected, btg.Dim3NetworkType.LSTM, btg.Dim3NetworkType.SelfAttentionAndLSTM])
 
 

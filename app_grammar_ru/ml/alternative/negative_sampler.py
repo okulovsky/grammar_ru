@@ -7,7 +7,7 @@ import typing as tp
 import pandas as pd
 import numpy as np
 
-from ...grammar_ru.common import Separator
+from grammar_ru.common import Separator
 from yo_fluq_ds import fluq
 
 class NegativeSampler(abc.ABC):
