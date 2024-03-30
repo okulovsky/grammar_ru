@@ -1,5 +1,5 @@
-from tg.grammar_ru.algorithms import RepetitionsAlgorithm
-from tg.grammar_ru.common import Separator, DataBundle
+from app_grammar_ru.common.algorithms import RepetitionsAlgorithm
+from grammar_ru.common import Separator, DataBundle
 from unittest import TestCase
 import pandas as pd
 

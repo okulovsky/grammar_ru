@@ -1,6 +1,6 @@
 from .architecture import NlpAlgorithm
-from ..features import PyMorphyFeaturizer, MorphemeTikhonovFeaturizer
-from ..common import DataBundle
+from grammar_ru.features import PyMorphyFeaturizer, MorphemeTikhonovFeaturizer
+from grammar_ru.common import DataBundle
 from yo_fluq_ds import *
 
 

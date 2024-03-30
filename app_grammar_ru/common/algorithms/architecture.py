@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import *
 import pandas as pd
-from ..common import Separator, DataBundle
+from grammar_ru.common import Separator, DataBundle
 import numpy as np
 
 @dataclass

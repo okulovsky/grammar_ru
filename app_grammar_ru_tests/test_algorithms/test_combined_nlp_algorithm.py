@@ -1,6 +1,6 @@
 from unittest import TestCase
-from tg.grammar_ru.algorithms import NlpAlgorithm
-from tg.grammar_ru.common import Separator
+from app_grammar_ru.common.algorithms import NlpAlgorithm
+from grammar_ru.common import Separator
 import pandas as pd
 
 class FakeNlpAlgorithm(NlpAlgorithm):
