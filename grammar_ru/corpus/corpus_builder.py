@@ -14,7 +14,7 @@ from pathlib import Path
 import datetime
 from tg.common._common import Logger
 from .transfuse_selector import ITransfuseSelector
-
+from uuid import uuid4
 
 class _ParallelParser:
     def __init__(self, SRC, naming):
@@ -59,7 +59,8 @@ class CorpusBuilder:
             corpus_path: Path,
             md_folder: Path,
             naming,
-            take_files_count=None
+            take_files_count=None,
+            custom_guid_factory: Optional[Callable[[int], str]] = None
     ):
         subfolder = md_folder
         writer = CorpusWriter(corpus_path, True)
@@ -70,11 +71,16 @@ class CorpusBuilder:
         if take_files_count is not None:
             query = query.take(take_files_count)
 
+        absolute_index = -1
         for index, file in enumerate(query.feed(fluq.with_progress_bar(total=len(files)))):
             parsed = parser(file)
             for part_index, part in enumerate(parsed):
+                absolute_index+=1
+                filename = str(uuid4())
+                if custom_guid_factory is not None:
+                    filename = custom_guid_factory(absolute_index)
                 try:
-                    writer.add_fragment(part)
+                    writer.add_fragment(part, filename)
                 except Exception as ex:
                     raise ValueError(f'Error when parsing file #{index}, {file} at part {part_index}') from ex
         writer.finalize()
