@@ -1,6 +1,6 @@
 from pandas import DataFrame
 
-from grammar_ru.corpus import CorpusReader, CorpusBuilder, ParallelCorpus
+from grammar_ru.corpus import CorpusReader, CorpusBuilder, ParallelCorpus, CorpusWriter
 from grammar_ru.corpus.formats import InterFormatParser
 from uuid import uuid4
 import pandas as pd
@@ -9,6 +9,7 @@ from typing import Dict, List, Tuple
 from unittest import TestCase
 from pathlib import Path
 import os
+from grammar_ru.common import Loc
 
 global_sub_names = ['a', 'b', 'c']
 
@@ -38,13 +39,24 @@ def write_data_to_coprus(dfs, relations, corpus_file, none_relation_mode=False):
     subcorpus_col_name = "relation_name"
     f_s_relations = relations.loc[relations.relation_name.isin(['a-b', 'b-a'])] if not none_relation_mode else None
     added_relations = relations.loc[~relations.relation_name.isin(['a-b', 'b-a'])] if not none_relation_mode else None
+
+    readers = []
+    for i in range(len(dfs)):
+        path = Loc.temp_path / f'tests/temp_corpus_with_dfs_{i}'
+        writer = CorpusWriter(path, True)
+        for file_id, df in dfs[i].items():
+            writer.add_fragment(df, file_id)
+        writer.finalize()
+        readers.append(CorpusReader(path))
+
+
     builder = CorpusBuilder()
 
-    builder.update_parallel_data(corpus_file, dfs[0], global_sub_names[0], None, subcorpus_col_name)
+    builder.update_parallel_data(corpus_file, readers[0], global_sub_names[0], None, subcorpus_col_name)
 
-    builder.update_parallel_data(corpus_file, dfs[1], global_sub_names[1], f_s_relations, subcorpus_col_name)
+    builder.update_parallel_data(corpus_file, readers[1], global_sub_names[1], f_s_relations, subcorpus_col_name)
 
-    builder.update_parallel_data(corpus_file, dfs[2], global_sub_names[2], added_relations, subcorpus_col_name)
+    builder.update_parallel_data(corpus_file, readers[2], global_sub_names[2], added_relations, subcorpus_col_name)
 
 
 class ParallelCorpusTestCase(TestCase):
@@ -54,7 +66,7 @@ class ParallelCorpusTestCase(TestCase):
         self.dfs = dfs
         self.relations = relations
         self.uids = uids
-        self.corpus_file = Path(__file__).parent / 'temp_corpus.zip'
+        self.corpus_file = Loc.temp_path/ 'tests' / 'temp_corpus.zip'
 
     def test_buider_update_parallel_data(self):
         dfs, relations = self.dfs, self.relations

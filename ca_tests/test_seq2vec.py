@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 from unittest import TestCase
-from tg.ca.Seq2VecMatching import Seq2VecMatcher
+from ca.Seq2VecMatching import Seq2VecMatcher
 
 
 class Seq2VecTestCase(TestCase):
