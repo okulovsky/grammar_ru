@@ -233,7 +233,9 @@ class CorpusBuilder:
         writer.close()
 
     @staticmethod
-    def update_parallel_data(parallel_corpus_path: Path, dfs: Dict[str, pd.DataFrame], sub_corpus_type,
+    def update_parallel_data(parallel_corpus_path: Path,
+                             reader_for_corpus_being_added: CorpusReader,
+                             sub_corpus_type: str,
                              relation: pd.DataFrame = None,
                              subcorpus_column_name: str = "subcorpus_name") -> None:
         """
@@ -243,10 +245,19 @@ class CorpusBuilder:
     :return: describe what it returns
         """
         writer = CorpusWriter(parallel_corpus_path, append=True)
-        for file_name, df in dfs.items():
-            fragment = CorpusFragment(filename=file_name, part_index=0, df=df,
-                                      additional_columns={subcorpus_column_name: sub_corpus_type})
-            writer.add_fragment(fragment, file_name)
+        toc = reader_for_corpus_being_added.get_toc()
+        metadata = Query.df(toc.reset_index()).to_dictionary(lambda z: z['file_id'], lambda z: z)
+        for frame in reader_for_corpus_being_added.get_frames():
+            file_id = frame.file_id.iloc[0]
+            meta = metadata[file_id]
+            meta[subcorpus_column_name] = sub_corpus_type
+            fragment = CorpusFragment(
+                filename=meta['filename'],
+                part_index=meta.get('part_index', -1),
+                df = frame,
+                additional_columns = meta
+            )
+            writer.add_fragment(fragment, file_id)
         if relation is not None:
             writer.add_relation(relation)
         writer.finalize()
