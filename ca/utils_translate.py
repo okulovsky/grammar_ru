@@ -1,4 +1,5 @@
-import numpy as np 
+from typing import *
+import numpy as np
 from googletrans import Translator
 import matplotlib.pyplot as plt
 import re
@@ -8,6 +9,8 @@ from grammar_ru.corpus import CorpusBuilder
 import os
 from grammar_ru.corpus import CorpusReader
 import shutil
+from grammar_ru.common import Loc
+import pandas as pd
 
 
 def get_array_chapters(ru_retell_corpus):
@@ -51,9 +54,20 @@ def add_dfs(name):
     return dfs
 
 
-def translate_subcorpus(parallel_corpus_path: Path, name_subcorpus: str):
+def add_relation(df_1,df_2,name_1,name_2):
+    rel_1 = pd.DataFrame({'file_1':df_1, 'file_2':df_2,'relation_name':f"{name_1}_{name_2}"})
+    rel_2 = pd.DataFrame({'file_1':df_2, 'file_2':df_1,'relation_name':f"{name_2}_{name_1}"})
+    rel = pd.concat([rel_1,rel_2])
+    return rel
+
+def translate_subcorpus(
+        parallel_corpus_path: Path,
+        subcorpus_to_translate_name: str,
+        translated_subcorpus_name: str,
+        custom_guid_factory: Optional[Callable[[int], str]] = None
+):
     parallel_corpus = ParallelCorpus(parallel_corpus_path)
-    subcorpus = getattr(parallel_corpus, name_subcorpus)
+    subcorpus: CorpusReader = getattr(parallel_corpus, subcorpus_to_translate_name)
     text_subcorpus = get_array_chapters(subcorpus)
     trans = translate(text_subcorpus)
     result = ''
@@ -63,26 +77,28 @@ def translate_subcorpus(parallel_corpus_path: Path, name_subcorpus: str):
 
         result += text
 
-    os.makedirs('translate', exist_ok=True)
+    FOLDER = Loc.temp_path/'translate'
+    shutil.rmtree(FOLDER, ignore_errors=True)
+    os.makedirs(FOLDER, exist_ok=True)
 
-    with open(os.path.join('translate', 'translate.md'), 'w', encoding='utf-8') as file:
+    with open(FOLDER/'translate.md', 'w', encoding='utf-8') as file:
         file.write(result)
 
     CorpusBuilder.convert_interformat_folder_to_corpus(
-        Path('./files/translate.base.zip'),
-        Path('./translate'),
-        ['book']
+        Loc.temp_path/'translate.base.zip',
+        FOLDER,
+        ['book'],
+        custom_guid_factory=custom_guid_factory
     )
 
-    reader = CorpusReader(Path('./files/translate.base.zip'))
+    reader = CorpusReader(Loc.temp_path/'translate.base.zip')
 
     CorpusBuilder.update_parallel_data(
         parallel_corpus_path,
-        add_dfs(reader),
-        "ru_translate",
-        None
+        reader,
+        translated_subcorpus_name,
+        add_relation(subcorpus.get_toc().index, reader.get_toc().index, subcorpus_to_translate_name, translated_subcorpus_name)
     )
-    shutil.rmtree("./translate")
 
 
 

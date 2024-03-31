@@ -98,6 +98,8 @@ class CorpusWriter:
         else:
             self.indices[fragment.filename] += 1
 
+
+
         file_id = file_name if file_name is not None else str(uuid4())
         row = {}
         row['filename'] = str(fragment.filename)
@@ -110,7 +112,8 @@ class CorpusWriter:
         self.ordinal += 1
 
         for key, value in fragment.additional_columns.items():
-            row[key] = value
+            if key not in row:
+                row[key] = value
 
         fragment.df = self._update_indices(fragment.df)
         row['max_id'] = Separator.get_max_id(fragment.df)

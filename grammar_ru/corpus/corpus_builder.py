@@ -14,7 +14,7 @@ from pathlib import Path
 import datetime
 from tg.common._common import Logger
 from .transfuse_selector import ITransfuseSelector
-
+from uuid import uuid4
 
 class _ParallelParser:
     def __init__(self, SRC, naming):
@@ -59,7 +59,8 @@ class CorpusBuilder:
             corpus_path: Path,
             md_folder: Path,
             naming,
-            take_files_count=None
+            take_files_count=None,
+            custom_guid_factory: Optional[Callable[[int], str]] = None
     ):
         subfolder = md_folder
         writer = CorpusWriter(corpus_path, True)
@@ -70,11 +71,16 @@ class CorpusBuilder:
         if take_files_count is not None:
             query = query.take(take_files_count)
 
+        absolute_index = -1
         for index, file in enumerate(query.feed(fluq.with_progress_bar(total=len(files)))):
             parsed = parser(file)
             for part_index, part in enumerate(parsed):
+                absolute_index+=1
+                filename = str(uuid4())
+                if custom_guid_factory is not None:
+                    filename = custom_guid_factory(absolute_index)
                 try:
-                    writer.add_fragment(part)
+                    writer.add_fragment(part, filename)
                 except Exception as ex:
                     raise ValueError(f'Error when parsing file #{index}, {file} at part {part_index}') from ex
         writer.finalize()
@@ -227,7 +233,9 @@ class CorpusBuilder:
         writer.close()
 
     @staticmethod
-    def update_parallel_data(parallel_corpus_path: Path, dfs: Dict[str, pd.DataFrame], sub_corpus_type,
+    def update_parallel_data(parallel_corpus_path: Path,
+                             reader_for_corpus_being_added: CorpusReader,
+                             sub_corpus_type: str,
                              relation: pd.DataFrame = None,
                              subcorpus_column_name: str = "subcorpus_name") -> None:
         """
@@ -237,10 +245,19 @@ class CorpusBuilder:
     :return: describe what it returns
         """
         writer = CorpusWriter(parallel_corpus_path, append=True)
-        for file_name, df in dfs.items():
-            fragment = CorpusFragment(filename=file_name, part_index=0, df=df,
-                                      additional_columns={subcorpus_column_name: sub_corpus_type})
-            writer.add_fragment(fragment, file_name)
+        toc = reader_for_corpus_being_added.get_toc()
+        metadata = Query.df(toc.reset_index()).to_dictionary(lambda z: z['file_id'], lambda z: z)
+        for frame in reader_for_corpus_being_added.get_frames():
+            file_id = frame.file_id.iloc[0]
+            meta = metadata[file_id]
+            meta[subcorpus_column_name] = sub_corpus_type
+            fragment = CorpusFragment(
+                filename=meta['filename'],
+                part_index=meta.get('part_index', -1),
+                df = frame,
+                additional_columns = meta
+            )
+            writer.add_fragment(fragment, file_id)
         if relation is not None:
             writer.add_relation(relation)
         writer.finalize()
