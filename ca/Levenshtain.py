@@ -4,7 +4,7 @@ from typing import Optional, Tuple, List, Any
 from grammar_ru.common.separator.df_viewer import DfViewer
 from torch.nn.functional import cosine_similarity
 from grammar_ru import SeparatorEn, SeparatorRu, Separator
-#from tg.projects.retell.retell_utils.Embeders import AbstractEmbedder -- can't find in in Retell archive!
+from tg.projects.retell.retell_utils.Embeders import AbstractEmbedder
 from tqdm.auto import tqdm
 
 
