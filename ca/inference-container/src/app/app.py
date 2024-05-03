@@ -1,24 +1,32 @@
 from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
 from ..services.response_constructor import ResponseConstructor
-from ..services.model_messenger import ModelMessenger
 from ..services.prompt_processor import PromptProcessor
 from ..data_structures.api_data import RequestBody, ResponseBody
+from ..services.model import Model
 
-app = FastAPI()
 
+models = {}
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    models["rugpt3small_based_on_gpt2"] = Model()
+    yield
+    models.clear()
+
+app = FastAPI(lifespan=lifespan)
 
 @app.post(
     "/finalize-paragraph",
     response_model=ResponseBody,
-    description="Finalize single paragraph chosen by user."
+    description="Finalize single paragraph chosen by user.",
 )
 async def finalize_paragraph(finalize_request: RequestBody):
     prompt_processor = PromptProcessor()
-    model_messenger = ModelMessenger()
     response_constructor = ResponseConstructor()
 
     prompt = prompt_processor.construct_prompt(finalize_request.paragraphs)
-    finalized_paragraph = model_messenger.get_finalized_text(prompt)
+    finalized_paragraph = models["rugpt3small_based_on_gpt2"].generate_text(prompt)
 
     return response_constructor.construct_response(finalize_request.paragraphs, finalized_paragraph)
