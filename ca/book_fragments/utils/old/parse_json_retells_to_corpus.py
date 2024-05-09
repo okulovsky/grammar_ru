@@ -2,9 +2,10 @@ import json
 from pathlib import Path
 from grammar_ru.common import Separator
 from grammar_ru.corpus.corpus_writer import CorpusWriter
+from prettify_fragment import prettify_fragment
 
 
-def parse_retells_to_corpus(
+def parse_json_retells_to_corpus(
     fragments_path: Path,
     retells_path: Path,
     corpus_path: Path,
@@ -36,7 +37,7 @@ def parse_retells_to_corpus(
             cur_file_id = fragment["file_id"]
 
         fragment = retells_data[fragment_id]["choices"][0]["message"]["content"]
-        cur_fragment_retells.append(_prettify_fragment(fragment))
+        cur_fragment_retells.append(prettify_fragment(fragment))
     
     if len(cur_fragment_retells) != 0:
         corpus_writer.add_fragment(
@@ -48,16 +49,3 @@ def parse_retells_to_corpus(
         cur_fragment_retells = []
     
     corpus_writer.finalize()
-        
-
-def _prettify_fragment(fragment: str):
-    fragment_points = fragment.split('\n')
-
-    result_points = []
-    for fragment_point in fragment_points:
-        fragment_point = fragment_point[3:]
-        if len(fragment_point) > 0 and fragment_point[-1] != '.':
-            fragment_point += '.'
-        result_points.append(fragment_point)
-
-    return ' '.join(result_points)
