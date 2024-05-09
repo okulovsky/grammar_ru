@@ -1,11 +1,9 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig
 import os
 
-from tg.common._common import Loc
-
 
 class Model:
-    def __init__(self, path=f"{Loc.data_cache_path}/models/rugpt3small_based_on_gpt2") -> None:
+    def __init__(self, path='/models/rugpt3small_based_on_gpt2') -> None:
         print(path)
         self.tokenizer = AutoTokenizer.from_pretrained(path)
         self.model = AutoModelForCausalLM.from_pretrained(path)
