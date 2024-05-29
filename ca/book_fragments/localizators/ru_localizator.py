@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 class RussianLocalizator:
     def __init__(self) -> None:
@@ -8,8 +9,8 @@ class RussianLocalizator:
     def construct_sentence(self, frame: pd.DataFrame, sentence_id: int):
         cur_sentence = []
 
-        for word_id in frame[frame['sentence_id'] == sentence_id]['word_id'].unique().tolist():
-            word = frame[frame['word_id'] == word_id]['word'].values[0]
+        for word_id in frame.iloc[np.where(frame.sentence_id.isin([sentence_id]))]['word_id'].unique():
+            word = frame.iloc[np.where(frame.word_id.isin([word_id]))]['word'].values[0]
 
             if word == '\u00A0':
                 word = '\u0020'
@@ -19,11 +20,11 @@ class RussianLocalizator:
                                    == word_id]['word_tail'].values[0]
             )
 
-            if frame[frame['word_id'] == word_id]['word'].values[0] == '\u2014':
+            if word == '\u2014':
                 self.dialog_sentence = True
-        
-        paragraph_id = frame[frame['sentence_id'] == sentence_id]['paragraph_id'].unique()[0]
-        last_paragraph_sentence_id = frame[frame['paragraph_id'] == paragraph_id]['sentence_id'].unique()[0]   
+
+        paragraph_id = frame.iloc[np.where(frame.sentence_id.isin([sentence_id]))]['paragraph_id'].unique()[0] 
+        last_paragraph_sentence_id = frame.iloc[np.where(frame.paragraph_id.isin([paragraph_id]))]['sentence_id'].unique()[0] 
 
         if last_paragraph_sentence_id == sentence_id:
             self.dialog_sentence_closed = True

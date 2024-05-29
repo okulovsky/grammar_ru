@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 class EnglishLocalizator:
     def __init__(self) -> None:
@@ -8,8 +9,8 @@ class EnglishLocalizator:
     def construct_sentence(self, frame: pd.DataFrame, sentence_id: int):
         cur_sentence = []
 
-        for word_id in frame[frame['sentence_id'] == sentence_id]['word_id'].unique().tolist():
-            word = frame[frame['word_id'] == word_id]['word'].values[0]
+        for word_id in frame.iloc[np.where(frame.sentence_id.isin([sentence_id]))]['word_id'].unique():
+            word = frame.iloc[np.where(frame.word_id.isin([word_id]))]['word'].values[0]
 
             if word == '\u00A0':
                 word = '\u0020'
@@ -19,9 +20,9 @@ class EnglishLocalizator:
                                    == word_id]['word_tail'].values[0]
             )
 
-            if frame[frame['word_id'] == word_id]['word'].values[0] == '\u201c':
+            if word == '\u201c':
                 self.dialog_sentence = True
-            if frame[frame['word_id'] == word_id]['word'].values[0] == '\u201d':
+            if word == '\u201d':
                 self.dialog_sentence_closed = True
 
         return cur_sentence
