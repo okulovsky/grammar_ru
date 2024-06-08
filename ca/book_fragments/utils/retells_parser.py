@@ -2,7 +2,7 @@ from typing import Iterable, List
 import pandas as pd
 import itertools
 from pathlib import Path
-from retell_types import RetellFragment
+from utils.retell_types import RetellFragment
 from grammar_ru.common import Separator
 from grammar_ru.corpus.corpus_writer import CorpusWriter
 
